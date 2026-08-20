@@ -85,8 +85,6 @@ For the button's colors, labels, shapes, and sizes — and the Pay Later / PayPa
 
 Call this in the button's `onClick`, before or alongside order creation. It returns immediately and prepares the session in the background. Pass `TokenType.ORDER_ID` for One-Time Checkout and Vault with Purchase — both are approved against an order ID (see [Vault without Purchase](#vault-without-purchase) below for the vault-only case).
 
-> **Note:** `TokenType` is currently marked internal-only in the SDK (`@RestrictTo(LIBRARY_GROUP)`). This is the call shape `createPayPalSession()` expects today; confirm with the SDK team that `TokenType` is public before shipping code that imports it directly.
-
 ```kotlin
 import com.paypal.android.corepayments.model.TokenType
 

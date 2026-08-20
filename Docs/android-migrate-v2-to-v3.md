@@ -88,8 +88,6 @@ Use this diff to guide the change:
 
 ## Server-side change
 
-> **Note:** `TokenType` is currently marked internal-only in the SDK (`@RestrictTo(LIBRARY_GROUP)`). This guide shows the call shape `createPayPalSession()` expects; confirm with the SDK team that `TokenType` is public before shipping code that imports it directly.
-
 In V2 you set `experienceContext.returnUrl` / `cancelUrl` when creating the order. In V3 those move to the SDK via `ReturnToAppUrlConfig` — **remove them from your Orders v2 create call** for the session-based flow. Your manifest App Link and custom-scheme fallback stay as they were (see [Install & Setup (Android)](getting-started/android-install-and-setup.md)).
 
 ## Pay Later / PayPal Credit

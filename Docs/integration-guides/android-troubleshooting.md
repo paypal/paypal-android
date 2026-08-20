@@ -22,7 +22,7 @@ Common problems integrating the PayPal Mobile SDK V3.0.0 on Android, organized b
 `PayPalEvent.SESSION_NOT_STARTED` reported, and the `start()`/`vault()` callback receives a `PayPalError.sessionNotCreatedError` failure
 
 * Likely cause: `createPayPalSession()` was not called first.
-* Fix: call `createPayPalSession(tokenType, userIdentity, urlConfig, userAction)` in your button's `onClick`, before or alongside order creation. See [PayPal Checkout](android-paypal-checkout.md). (`TokenType` is currently internal-only in the SDK — confirm it's public before external builds depend on it.)
+* Fix: call `createPayPalSession(tokenType, userIdentity, urlConfig, userAction)` in your button's `onClick`, before or alongside order creation. See [PayPal Checkout](android-paypal-checkout.md).
 
 **Auth or configuration errors right after** `start()`
 
