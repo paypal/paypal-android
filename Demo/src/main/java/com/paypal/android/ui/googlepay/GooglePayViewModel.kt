@@ -27,7 +27,7 @@ class GooglePayViewModel @Inject constructor(
     val completeOrderUseCase: CompleteOrderUseCase
 ) : ViewModel() {
 
-    private val config = CoreConfig(SDKSampleServerAPI.clientId)
+    private val config = CoreConfig(SDKSampleServerAPI.clientId, SDKSampleServerAPI.merchantId)
     private val googlePayClient = GooglePayClient(applicationContext, config)
 
     private val _uiState = MutableStateFlow(GooglePayUiState())
@@ -64,11 +64,7 @@ class GooglePayViewModel @Inject constructor(
         viewModelScope.launch {
             createOrderState = ActionState.Loading
             val orderRequest = _uiState.value.run {
-                OrderRequest(
-                    intent = intentOption,
-                    shouldVaultOnSuccess = false,
-                    appSwitchWhenEligible = false
-                )
+                OrderRequest(intent = intentOption, shouldVaultOnSuccess = false)
             }
             createOrderState = createOrderUseCase(orderRequest).mapToActionState()
         }
