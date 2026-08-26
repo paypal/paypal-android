@@ -5,7 +5,7 @@ import android.util.Log
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.paypal.android.corepayments.CoreConfig
-import com.paypal.android.corepayments.Environment
+import com.paypal.android.corepayments.CoreEnvironment
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.TrackingEventsAPI
 import kotlinx.coroutines.CoroutineDispatcher
@@ -19,7 +19,7 @@ import kotlinx.coroutines.launch
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class AnalyticsService internal constructor(
     private val deviceInspector: DeviceInspector,
-    private val environment: Environment,
+    private val coreEnvironment: CoreEnvironment,
     private val trackingEventsAPI: TrackingEventsAPI,
     private val scope: CoroutineScope
 ) {
@@ -35,7 +35,7 @@ class AnalyticsService internal constructor(
     ) :
             this(
                 DeviceInspector(context),
-                coreConfig.environment,
+                coreConfig.coreEnvironment,
                 TrackingEventsAPI(coreConfig),
                 CoroutineScope(dispatcher)
             )
@@ -54,7 +54,7 @@ class AnalyticsService internal constructor(
             try {
                 val deviceData = deviceInspector.inspect()
                 val fullEventData = eventData.copy(
-                    environment = environment.name.lowercase(),
+                    environment = coreEnvironment.name.lowercase(),
                     eventName = name,
                     timestamp = timestamp,
                 )

@@ -1,11 +1,13 @@
 # PayPal Android SDK Release Notes
 
-## Unreleased
+## 3.0.0 (2026-08-18)
 
 * CardPayments
   * Removed deprecated `CardClient.finishApproveOrder(intent, authState)` — use `CardClient.finishApproveOrder(intent)` instead
   * Removed deprecated `CardClient.finishVault(intent, authState)` — use `CardClient.finishVault(intent)` instead
   * Removed `authState` from public API of `CardPresentAuthChallengeResult.Success`
+* CorePayments
+  * Renamed `Environment` to `CoreEnvironment` and `CoreConfig.environment` to `CoreConfig.coreEnvironment`
 * PayPalPayments
   * Renamed the `PayPalWebPayments` module to `PayPalPayments` (Maven artifact `com.paypal.android:paypal-payments`, package `com.paypal.android.paypalpayments`)
   * Renamed `PayPalWebCheckoutClient` to `PayPalClient`, `PayPalWebLauncher` to `PayPalLauncher`, `PayPalWebCheckoutError(Code)` to `PayPalError(Code)`, `PayPalWebCheckoutSessionStore` to `PayPalSessionStore`, `PayPalWebCheckoutFinishStartResult` to `PayPalFinishStartResult`, `PayPalWebCheckoutFinishVaultResult` to `PayPalFinishVaultResult`, and `PayPalWebCheckoutFundingSource` to `PayPalCheckoutFundingSource`
@@ -204,6 +206,17 @@
     * Update Kotlin version to `1.9.24`
     * Update Android Gradle Plugin (AGP) to version `8.7.1`
     * Explicitly declare Java 17 version as the target JVM toolchain
+
+## 1.8.0 (2026-05-13)
+* Gradle
+  * Update Kotlin version to `1.9.24`
+  * Update Android Gradle Plugin (AGP) to version `8.7.1`
+  * Explicitly declare Java 17 version as the target JVM toolchain
+* CardPayments
+  * Skip deep link URL parsing in `CardClient` for `approveOrder()` and `vault()` 3DS authentication flows
+* PayPalWebPayments
+  * Fix issue with `PayPalWebCheckoutClient.start()` that caused explicit user cancelation to return a `Failure` event, instead of `Canceled`
+  * Fix issue with `PayPalWebCheckoutClient.vault()` that caused explicit user cancelation ro return a `Success` event, instead of `Canceled`
 
 ## 1.7.1 (2024-10-29)
 * Gradle

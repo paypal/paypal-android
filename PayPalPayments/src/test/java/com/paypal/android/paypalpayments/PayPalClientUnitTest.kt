@@ -4,7 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.fragment.app.FragmentActivity
 import com.paypal.android.corepayments.CoreConfig
-import com.paypal.android.corepayments.Environment
+import com.paypal.android.corepayments.CoreEnvironment
 import com.paypal.android.corepayments.HttpRoundTripTiming
 import com.paypal.android.corepayments.LinkType
 import com.paypal.android.corepayments.PayPalSDKError
@@ -76,7 +76,7 @@ class PayPalClientUnitTest {
 
     @MockK
     private val deviceInspector: DeviceInspector = mockk(relaxed = true)
-    private val coreConfig = CoreConfig("fake-client-id", "fake-merchant-id", Environment.SANDBOX)
+    private val coreConfig = CoreConfig("fake-client-id", "fake-merchant-id", CoreEnvironment.SANDBOX)
 
     private val intent = Intent()
 
