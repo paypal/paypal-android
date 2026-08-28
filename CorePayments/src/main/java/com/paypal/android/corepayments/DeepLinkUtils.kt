@@ -3,7 +3,9 @@ package com.paypal.android.corepayments
 import android.content.Intent
 import android.net.Uri
 import androidx.annotation.RestrictTo
+import androidx.browser.auth.AuthTabIntent
 import androidx.core.net.toUri
+import com.paypal.android.corepayments.browserswitch.AuthTabActivity
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchOptions
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchPendingState
 
@@ -17,6 +19,9 @@ sealed class CaptureDeepLinkResult {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Failure(val reason: PayPalSDKError) : CaptureDeepLinkResult()
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data class Canceled(val originalOptions: BrowserSwitchOptions) : CaptureDeepLinkResult()
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Ignore(val debugMessage: String) : CaptureDeepLinkResult()
@@ -44,6 +49,26 @@ fun captureDeepLink(
         return CaptureDeepLinkResult.Ignore("Request code does not match.")
     }
 
+    if (intent.hasExtra(AuthTabActivity.EXTRA_AUTH_TAB_RESULT_CODE)) {
+        return when (val resultCode = intent.getIntExtra(
+            AuthTabActivity.EXTRA_AUTH_TAB_RESULT_CODE,
+            AuthTabIntent.RESULT_UNKNOWN_CODE,
+        )) {
+            AuthTabIntent.RESULT_CANCELED -> CaptureDeepLinkResult.Canceled(options)
+            AuthTabIntent.RESULT_OK -> captureDeepLinkUri(intent, options)
+            else -> CaptureDeepLinkResult.Failure(
+                PayPalSDKError(0, "Auth Tab failed with result code $resultCode.")
+            )
+        }
+    }
+
+    return captureDeepLinkUri(intent, options)
+}
+
+private fun captureDeepLinkUri(
+    intent: Intent,
+    options: BrowserSwitchOptions,
+): CaptureDeepLinkResult {
     val deepLinkUri = intent.data
     if (deepLinkUri == null) {
         return CaptureDeepLinkResult.Ignore("Intent data is null.")
@@ -52,7 +77,7 @@ fun captureDeepLink(
     val isMatchingDeepLink =
         isCustomSchemeMatch(deepLinkUri, options) || isAppLinkMatch(deepLinkUri, options)
     return if (isMatchingDeepLink) {
-        val deepLink = DeepLink(deepLinkUri, pendingState.originalOptions)
+        val deepLink = DeepLink(deepLinkUri, options)
         CaptureDeepLinkResult.Success(deepLink)
     } else {
         val message = "Deep link custom scheme or host is not associated with the original request."

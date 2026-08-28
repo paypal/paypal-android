@@ -1,4 +1,4 @@
-This guide shows you how to accept a **PayPal payment** in your Android app with PayPal Mobile SDK V3.0.0 — One-Time Checkout, Vault (with or without a purchase), and Pay Later / PayPal Credit. The **PayPal button** is the highlighted way to start checkout: when the buyer taps it, checkout happens in the PayPal app if they are eligible and have it installed — approving with biometrics or a passkey — then returns to your app through your Android App Link. If the PayPal app is not installed or the buyer is not eligible, checkout continues in a Chrome Custom Tab automatically.
+This guide shows you how to accept a **PayPal payment** in your Android app with PayPal Mobile SDK V3.0.0 — One-Time Checkout, Vault (with or without a purchase), and Pay Later / PayPal Credit. The **PayPal button** is the highlighted way to start checkout: when the buyer taps it, checkout happens in the PayPal app if they are eligible and have it installed — approving with biometrics or a passkey — then returns to your app through your Android App Link. If the PayPal app is not installed or the buyer is not eligible, checkout continues in an Auth Tab automatically.
 
 > **Before you start:** complete [Install & Setup (Android)](../getting-started/android-install-and-setup.md). It covers the SDK dependency, `CoreConfig`, and return-link registration shared by every payment method.
 
@@ -10,7 +10,7 @@ When the buyer taps your PayPal button, you call `createPayPalSession()` (with a
 
 **Create the session when the buyer shows intent.** Call `createPayPalSession()` from your PayPal button's `onClick` handler, ideally at the same time as you create the order, so its network latency overlaps order creation and it is ready by the time you call `start()`.
 
-`start()` itself only confirms whether the auth challenge (app switch or Custom Tab) launched — the buyer's actual approval, cancellation, or failure is delivered later, when you forward the return intent to `finishStart()`.
+`start()` itself only confirms whether the auth challenge (app switch or Auth Tab) launched — the buyer's actual approval, cancellation, or failure is delivered later, when you forward the return intent to `finishStart()`.
 
 ```mermaid
 sequenceDiagram
@@ -31,7 +31,7 @@ sequenceDiagram
         SDK->>PayPal: Open the PayPal app via your App Link
         Note over PayPal: Buyer approves with biometrics or a passkey
     else App not installed or buyer not eligible
-        SDK->>PayPal: Open checkout in a Chrome Custom Tab
+        SDK->>PayPal: Open checkout in an Auth Tab
         Note over PayPal: Buyer logs in and approves
     end
     SDK->>App: PayPalPresentAuthChallengeResult (challenge presented)
@@ -253,7 +253,7 @@ Dedicated buttons exist — `PayLaterButton` and `PayPalCreditButton` (`payment-
 
 ## Result handling
 
-`start()` and `vault()` deliver a `PayPalPresentAuthChallengeResult` that only confirms whether the auth challenge (app switch or Custom Tab) launched. The buyer's actual outcome arrives later, when you forward the return intent to `finishStart()` (checkout, including Vault with Purchase) or `finishVault()` (Vault without Purchase). Handle all cases — cancellation is a normal buyer choice, not an error.
+`start()` and `vault()` deliver a `PayPalPresentAuthChallengeResult` that only confirms whether the auth challenge (app switch or Auth Tab) launched. The buyer's actual outcome arrives later, when you forward the return intent to `finishStart()` (checkout, including Vault with Purchase) or `finishVault()` (Vault without Purchase). Handle all cases — cancellation is a normal buyer choice, not an error.
 
 | Call | Type | Cases | What you do |
 | --- | --- | --- | --- |
@@ -277,7 +277,7 @@ Test on a **physical device** — the app-switch path does not work on an emulat
 
 ### Trigger the app-switch path
 
-The SDK switches to the PayPal app only when all of the following hold; otherwise it falls back to a Chrome Custom Tab:
+The SDK switches to the PayPal app only when all of the following hold; otherwise it falls back to an Auth Tab (or a Custom Tab on browsers that do not support Auth Tab):
 
 * A physical device with the PayPal app installed (the sandbox app for sandbox testing).
 * Merchant and buyer are in the US, and your integration is App Switch eligible.
@@ -291,7 +291,8 @@ To test the in-app browser path, use a device without the PayPal app installed, 
 | Scenario | Expected result |
 | --- | --- |
 | **App switch — end to end** | The buyer switches to the PayPal app, approves, returns to your app, and the order captures. |
-| **In-app browser — end to end** | With the PayPal app not installed (or an ineligible buyer), checkout completes in a Chrome Custom Tab and the order captures. |
+| **In-app browser — end to end** | With the PayPal app not installed (or an ineligible buyer), checkout completes in an Auth Tab and the order captures. |
+| **In-app browser — buyer cancellation** | Close the Auth Tab before approval and verify the SDK reports `Canceled`. |
 | Buyer cancels in PayPal | The buyer is returned to your checkout screen and no charge is made. |
 | Vault with Purchase | Order captures; the vaulted token is retrievable server-side (not from the SDK result). |
 | Vault without Purchase | You receive and store the approval session ID from `finishVault()`, and can charge the vaulted account later. |

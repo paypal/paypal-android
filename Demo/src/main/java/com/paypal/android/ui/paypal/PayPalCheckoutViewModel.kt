@@ -171,7 +171,7 @@ class PayPalCheckoutViewModel @Inject constructor(
         paypalClient.start(activity, orderId) { startResult ->
             when (startResult) {
                 is PayPalPresentAuthChallengeResult.Success -> {
-                    // do nothing; wait for user to authenticate PayPal checkout in Chrome Custom Tab
+                    // do nothing; wait for user to authenticate PayPal checkout in an Auth Tab
                 }
 
                 is PayPalPresentAuthChallengeResult.Failure ->

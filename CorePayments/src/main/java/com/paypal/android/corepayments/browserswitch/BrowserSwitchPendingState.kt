@@ -16,6 +16,7 @@ data class BrowserSwitchPendingState(val originalOptions: BrowserSwitchOptions) 
             .putOpt(KEY_RETURN_URL_SCHEME, originalOptions.returnUrlScheme)
             .putOpt(KEY_APP_LINK_URL, originalOptions.appLinkUrl)
             .putOpt(KEY_METADATA, originalOptions.metadata)
+            .put(KEY_LAUNCH_MODE, originalOptions.launchMode.name)
         val jsonBytes: ByteArray? = json.toString().toByteArray(StandardCharsets.UTF_8)
         val flags = Base64.DEFAULT or Base64.NO_WRAP
         return Base64.encodeToString(jsonBytes, flags)
@@ -29,6 +30,7 @@ data class BrowserSwitchPendingState(val originalOptions: BrowserSwitchOptions) 
         const val KEY_RETURN_URL_SCHEME = "returnUrlScheme"
         const val KEY_APP_LINK_URL = "appLinkUrl"
         const val KEY_METADATA = "metadata"
+        const val KEY_LAUNCH_MODE = "launchMode"
 
         fun fromBase64(base64EncodedJSON: String): BrowserSwitchPendingState? {
             val data = Base64.decode(base64EncodedJSON, Base64.DEFAULT)
@@ -39,7 +41,11 @@ data class BrowserSwitchPendingState(val originalOptions: BrowserSwitchOptions) 
                 requestCode = json.getInt(KEY_REQUEST_CODE),
                 returnUrlScheme = json.optString(KEY_RETURN_URL_SCHEME),
                 appLinkUrl = json.optString(KEY_APP_LINK_URL),
-                metadata = json.optJSONObject(KEY_METADATA)
+                metadata = json.optJSONObject(KEY_METADATA),
+                launchMode = json.optString(KEY_LAUNCH_MODE)
+                    .takeIf(String::isNotBlank)
+                    ?.let(BrowserSwitchLaunchMode::valueOf)
+                    ?: BrowserSwitchLaunchMode.CUSTOM_TAB,
             )
             return BrowserSwitchPendingState(options)
         }

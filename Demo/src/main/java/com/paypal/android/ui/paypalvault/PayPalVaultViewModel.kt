@@ -106,7 +106,7 @@ class PayPalVaultViewModel @Inject constructor(
             paypalClient.vault(activity, setupTokenId) { result ->
                 when (result) {
                     is PayPalPresentAuthChallengeResult.Success -> {
-                        // do nothing; wait for user to authenticate PayPal vault in Chrome Custom Tab
+                        // do nothing; wait for user to authenticate PayPal vault in an Auth Tab
                     }
 
                     is PayPalPresentAuthChallengeResult.Failure ->

@@ -10,5 +10,12 @@ data class BrowserSwitchOptions(
     val requestCode: Int,
     val returnUrlScheme: String?,
     val appLinkUrl: String?,
-    val metadata: JSONObject? = null
+    val metadata: JSONObject? = null,
+    val launchMode: BrowserSwitchLaunchMode = BrowserSwitchLaunchMode.CUSTOM_TAB,
 )
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+enum class BrowserSwitchLaunchMode {
+    CUSTOM_TAB,
+    AUTH_TAB,
+}

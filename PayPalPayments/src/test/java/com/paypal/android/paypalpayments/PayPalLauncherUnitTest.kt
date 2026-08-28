@@ -8,6 +8,7 @@ import com.paypal.android.corepayments.BrowserSwitchRequestCodes.PAYPAL_CHECKOUT
 import com.paypal.android.corepayments.BrowserSwitchRequestCodes.PAYPAL_VAULT
 import com.paypal.android.corepayments.ReturnToAppStrategy
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchClient
+import com.paypal.android.corepayments.browserswitch.BrowserSwitchLaunchMode
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchOptions
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchPendingState
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchStartResult
@@ -583,6 +584,74 @@ class PayPalLauncherUnitTest {
             get { targetUri }.isEqualTo(Uri.parse("https://paypal.com/checkout"))
             get { requestCode }.isEqualTo(PAYPAL_CHECKOUT)
             get { appLinkUrl }.isEqualTo(null)
+            get { launchMode }.isEqualTo(BrowserSwitchLaunchMode.AUTH_TAB)
         }
+    }
+
+    @Test
+    fun `launchWithUrl() configures Auth Tab fallback`() {
+        sut = PayPalLauncher(browserSwitchClient)
+        val options = slot<BrowserSwitchOptions>()
+        every {
+            browserSwitchClient.start(activity, capture(options))
+        } returns BrowserSwitchStartResult.Success
+
+        sut.launchWithUrl(
+            context = activity,
+            uri = Uri.parse("https://paypal.com/checkout"),
+            token = "order-123",
+            tokenType = TokenType.ORDER_ID,
+            returnToAppStrategy = ReturnToAppStrategy.CustomUrlScheme("custom_url_scheme"),
+            launchMode = BrowserSwitchLaunchMode.AUTH_TAB,
+        )
+
+        expectThat(options.captured) {
+            get { launchMode }.isEqualTo(BrowserSwitchLaunchMode.AUTH_TAB)
+        }
+    }
+
+    @Test
+    fun `completeCheckoutAuthRequest() maps Auth Tab close to cancellation`() {
+        val originalOptions = BrowserSwitchOptions(
+            targetUri = "https://paypal.com/checkout".toUri(),
+            requestCode = PAYPAL_CHECKOUT,
+            returnUrlScheme = "com.example.app",
+            appLinkUrl = null,
+            metadata = createCheckoutMetadata("order-123"),
+            launchMode = BrowserSwitchLaunchMode.AUTH_TAB,
+        )
+        val authState = BrowserSwitchPendingState(originalOptions).toBase64EncodedJSON()
+        intent.putExtra(
+            "com.paypal.android.corepayments.extra.AUTH_TAB_RESULT_CODE",
+            0,
+        )
+
+        sut = PayPalLauncher(browserSwitchClient)
+        val result = sut.completeCheckoutAuthRequest(intent, authState)
+
+        assertTrue(result is PayPalFinishStartResult.Canceled)
+        assertEquals("order-123", (result as PayPalFinishStartResult.Canceled).orderId)
+    }
+
+    @Test
+    fun `completeVaultAuthRequest() maps Auth Tab close to cancellation`() {
+        val originalOptions = BrowserSwitchOptions(
+            targetUri = "https://paypal.com/vault".toUri(),
+            requestCode = PAYPAL_VAULT,
+            returnUrlScheme = "com.example.app",
+            appLinkUrl = null,
+            metadata = createVaultMetadata("setup-token-123"),
+            launchMode = BrowserSwitchLaunchMode.AUTH_TAB,
+        )
+        val authState = BrowserSwitchPendingState(originalOptions).toBase64EncodedJSON()
+        intent.putExtra(
+            "com.paypal.android.corepayments.extra.AUTH_TAB_RESULT_CODE",
+            0,
+        )
+
+        sut = PayPalLauncher(browserSwitchClient)
+        val result = sut.completeVaultAuthRequest(intent, authState)
+
+        assertEquals(PayPalFinishVaultResult.Canceled, result)
     }
 }

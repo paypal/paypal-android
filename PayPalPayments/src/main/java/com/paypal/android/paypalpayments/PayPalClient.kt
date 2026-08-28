@@ -11,6 +11,7 @@ import com.paypal.android.corepayments.HttpRoundTripTiming
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.ReturnToAppStrategy
 import com.paypal.android.corepayments.analytics.AnalyticsService
+import com.paypal.android.corepayments.browserswitch.BrowserSwitchLaunchMode
 import com.paypal.android.corepayments.api.CreateShopperSessionWithAppSwitchEligibilityAPI
 import com.paypal.android.corepayments.common.DeviceInspector
 import com.paypal.android.corepayments.linkType
@@ -340,7 +341,7 @@ class PayPalClient internal constructor(
      * Launches the PayPal checkout/vault UI after the shopper session has been resolved.
      *
      * Attempts a PayPal app switch (App Link) if the PayPal app is installed and eligible;
-     * otherwise falls back to Chrome Custom Tabs.
+     * otherwise falls back to an Auth Tab.
      *
      * @param activity The Activity needed to launch the checkout/vault UI.
      * @param shopperSession The resolved shopper session containing launch URLs and eligibility.
@@ -374,12 +375,18 @@ class PayPalClient internal constructor(
         }
         val endTime = System.currentTimeMillis()
 
+        val launchMode = if (appSwitchEnabled) {
+            BrowserSwitchLaunchMode.CUSTOM_TAB
+        } else {
+            BrowserSwitchLaunchMode.AUTH_TAB
+        }
         val result = payPalLauncher.launchWithUrl(
             context = activity,
             uri = launchUri,
             token = token,
             tokenType = tokenType,
             returnToAppStrategy = returnToAppStrategy,
+            launchMode = launchMode,
         )
         logPresentAuthChallengeResult(result, isVault, startTime, endTime)
         return result

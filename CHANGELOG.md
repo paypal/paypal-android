@@ -1,5 +1,10 @@
 # PayPal Android SDK Release Notes
 
+## Unreleased
+
+* PayPalPayments
+  * Use AndroidX Auth Tab for the PayPal web fallback and report `Canceled` when the buyer closes it
+
 ## 3.0.0 (2026-08-18)
 
 * CardPayments
@@ -416,4 +421,3 @@
   * Use the web Paypal checkout flow in your app
 * Add `PayPalUI`:
   * Provides a set of customizable PayPal Buttons
-

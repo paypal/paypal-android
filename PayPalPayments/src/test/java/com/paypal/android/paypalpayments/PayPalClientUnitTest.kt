@@ -10,6 +10,7 @@ import com.paypal.android.corepayments.LinkType
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.ReturnToAppStrategy
 import com.paypal.android.corepayments.api.CreateShopperSessionWithAppSwitchEligibilityAPI
+import com.paypal.android.corepayments.browserswitch.BrowserSwitchLaunchMode
 import com.paypal.android.corepayments.common.DeviceInspector
 import com.paypal.android.corepayments.model.APIResult
 import com.paypal.android.corepayments.model.CreateShopperSessionWithAppSwitchEligibilityParams
@@ -868,7 +869,14 @@ class PayPalClientUnitTest {
             val sutV3 = makeSutWithUrlScheme()
             val uriSlot = slot<Uri>()
             every {
-                payPalLauncher.launchWithUrl(any(), capture(uriSlot), any(), any(), any())
+                payPalLauncher.launchWithUrl(
+                    any(),
+                    capture(uriSlot),
+                    any(),
+                    any(),
+                    any(),
+                    BrowserSwitchLaunchMode.AUTH_TAB,
+                )
             } returns PayPalPresentAuthChallengeResult.Success("auth-state")
 
             val callback = mockk<PayPalResultCallback>(relaxed = true)
@@ -890,7 +898,14 @@ class PayPalClientUnitTest {
             val sutV3 = makeSutWithUrlScheme()
             val uriSlot = slot<Uri>()
             every {
-                payPalLauncher.launchWithUrl(any(), capture(uriSlot), any(), any(), any())
+                payPalLauncher.launchWithUrl(
+                    any(),
+                    capture(uriSlot),
+                    any(),
+                    any(),
+                    any(),
+                    BrowserSwitchLaunchMode.AUTH_TAB,
+                )
             } returns PayPalPresentAuthChallengeResult.Success("auth-state")
 
             val blankIdResponse = fakeSessionResponse.copy(
@@ -1440,7 +1455,14 @@ class PayPalClientUnitTest {
             every { deviceInspector.canResolvePayPalAppSwitch() } returns true
             val uriSlot = slot<Uri>()
             every {
-                payPalLauncher.launchWithUrl(any(), capture(uriSlot), any(), any(), any())
+                payPalLauncher.launchWithUrl(
+                    any(),
+                    capture(uriSlot),
+                    any(),
+                    any(),
+                    any(),
+                    BrowserSwitchLaunchMode.CUSTOM_TAB,
+                )
             } returns PayPalPresentAuthChallengeResult.Success("auth-state")
 
             val appSwitchEligibleResponse = fakeSessionResponse.copy(
@@ -1513,7 +1535,14 @@ class PayPalClientUnitTest {
             every { deviceInspector.canResolvePayPalAppSwitch() } returns true
             val uriSlot = slot<Uri>()
             every {
-                payPalLauncher.launchWithUrl(any(), capture(uriSlot), any(), any(), any())
+                payPalLauncher.launchWithUrl(
+                    any(),
+                    capture(uriSlot),
+                    any(),
+                    any(),
+                    any(),
+                    BrowserSwitchLaunchMode.CUSTOM_TAB,
+                )
             } returns PayPalPresentAuthChallengeResult.Success("auth-state")
 
             val appSwitchEligibleResponse = fakeSessionResponse.copy(
@@ -1554,7 +1583,14 @@ class PayPalClientUnitTest {
             every { deviceInspector.canResolvePayPalAppSwitch() } returns true
             val uriSlot = slot<Uri>()
             every {
-                payPalLauncher.launchWithUrl(any(), capture(uriSlot), any(), any(), any())
+                payPalLauncher.launchWithUrl(
+                    any(),
+                    capture(uriSlot),
+                    any(),
+                    any(),
+                    any(),
+                    BrowserSwitchLaunchMode.CUSTOM_TAB,
+                )
             } returns PayPalPresentAuthChallengeResult.Success("auth-state")
 
             val appSwitchEligibleResponse = fakeSessionResponse.copy(
@@ -1774,7 +1810,14 @@ class PayPalClientUnitTest {
             every { deviceInspector.isPayPalInstalled } returns true
             every { deviceInspector.canResolvePayPalAppSwitch() } returns true
             every {
-                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any())
+                payPalLauncher.launchWithUrl(
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    BrowserSwitchLaunchMode.CUSTOM_TAB,
+                )
             } returns PayPalPresentAuthChallengeResult.Success("auth-state")
 
             val appSwitchEligibleResponse = fakeSessionResponse.copy(
@@ -1817,7 +1860,14 @@ class PayPalClientUnitTest {
             every { deviceInspector.isPayPalInstalled } returns true
             every { deviceInspector.canResolvePayPalAppSwitch() } returns true
             every {
-                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any())
+                payPalLauncher.launchWithUrl(
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    BrowserSwitchLaunchMode.CUSTOM_TAB,
+                )
             } returns PayPalPresentAuthChallengeResult.Success("auth-state")
 
             val appSwitchEligibleResponse = fakeSessionResponse.copy(
@@ -1969,7 +2019,14 @@ class PayPalClientUnitTest {
             every { deviceInspector.isPayPalInstalled } returns true
             every { deviceInspector.canResolvePayPalAppSwitch() } returns true
             every {
-                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any())
+                payPalLauncher.launchWithUrl(
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    BrowserSwitchLaunchMode.CUSTOM_TAB,
+                )
             } returns PayPalPresentAuthChallengeResult.Success("auth state")
 
             val appSwitchEligibleResponse = fakeSessionResponse.copy(
