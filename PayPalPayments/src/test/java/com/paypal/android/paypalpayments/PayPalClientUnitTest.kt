@@ -1,5 +1,6 @@
 package com.paypal.android.paypalpayments
 
+import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import androidx.fragment.app.FragmentActivity
@@ -11,6 +12,8 @@ import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.ReturnToAppStrategy
 import com.paypal.android.corepayments.api.CreateShopperSessionWithAppSwitchEligibilityAPI
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchLaunchMode
+import com.paypal.android.corepayments.browserswitch.BrowserSwitchOptions
+import com.paypal.android.corepayments.browserswitch.BrowserSwitchPendingState
 import com.paypal.android.corepayments.common.DeviceInspector
 import com.paypal.android.corepayments.model.APIResult
 import com.paypal.android.corepayments.model.CreateShopperSessionWithAppSwitchEligibilityParams
@@ -114,6 +117,66 @@ class PayPalClientUnitTest {
     @Test
     fun `finishStart() with session auth state returns null when start has not been called`() {
         assertNull(sut.finishStart(intent))
+    }
+
+    @Test
+    fun `start() and vault() reject a plain Activity before beginning checkout`() {
+        val plainActivity = mockk<Activity>(relaxed = true)
+        val callback = mockk<PayPalResultCallback>(relaxed = true)
+        val expectedMessage =
+            "PayPal Auth Tab requires the Activity passed to start() or vault() to extend " +
+                "androidx.activity.ComponentActivity (including FragmentActivity and " +
+                "AppCompatActivity); plain android.app.Activity is not supported."
+
+        val startError = runCatching {
+            sut.start(plainActivity, "fake-order-id", callback)
+        }.exceptionOrNull()
+        val vaultError = runCatching {
+            sut.vault(plainActivity, "fake-setup-token-id", callback)
+        }.exceptionOrNull()
+
+        assertTrue(startError is IllegalStateException)
+        assertEquals(expectedMessage, startError?.message)
+        assertTrue(vaultError is IllegalStateException)
+        assertEquals(expectedMessage, vaultError?.message)
+    }
+
+    @Test
+    fun `finishStart() restores Auth Tab state from result intent after process death`() {
+        val options = BrowserSwitchOptions(
+            targetUri = Uri.parse("https://example.com/checkout"),
+            requestCode = com.paypal.android.corepayments.BrowserSwitchRequestCodes.PAYPAL_CHECKOUT,
+            returnUrlScheme = "merchant.app",
+            appLinkUrl = null,
+            launchMode = BrowserSwitchLaunchMode.AUTH_TAB,
+        )
+        val browserSwitchState = BrowserSwitchPendingState(options).toBase64EncodedJSON()
+        val resultIntent = Intent(
+            Intent.ACTION_VIEW,
+            Uri.parse("merchant.app://x-callback-url/paypal-sdk/paypal-checkout/success?PayerID=payer-id"),
+        ).apply {
+            putExtra(
+                "com.paypal.android.corepayments.extra.AUTH_TAB_RESULT_CODE",
+                Activity.RESULT_OK,
+            )
+            putExtra(
+                "com.paypal.android.corepayments.extra.AUTH_TAB_BROWSER_SWITCH_STATE",
+                browserSwitchState,
+            )
+        }
+        val expectedResult = PayPalFinishStartResult.Success("fake-order-id", "payer-id")
+        every {
+            payPalLauncher.completeCheckoutAuthRequest(resultIntent, browserSwitchState)
+        } returns expectedResult
+
+        val result = sut.finishStart(resultIntent)
+
+        assertSame(expectedResult, result)
+        assertFalse(
+            resultIntent.hasExtra(
+                "com.paypal.android.corepayments.extra.AUTH_TAB_BROWSER_SWITCH_STATE"
+            )
+        )
     }
 
     @Test

@@ -110,6 +110,11 @@ val clientMetadataId = dataCollector.collectDeviceData(
 
 ### Step 4: Create the order and start checkout
 
+The Activity passed to `start()` or `vault()` must extend AndroidX `ComponentActivity`. This includes
+the usual `FragmentActivity` and `AppCompatActivity` hosts. A plain `android.app.Activity` cannot
+provide the `ActivityResultRegistry` required by the Auth Tab fallback, so the SDK throws an
+`IllegalStateException` immediately rather than allowing a checkout that cannot return a result.
+
 ```kotlin
 val orderId = myServer.createOrder()   // include the client metadata ID from Step 3
 
@@ -140,7 +145,7 @@ override fun onNewIntent(intent: Intent) {
         is PayPalFinishStartResult.Canceled -> showCheckoutScreen()   // result.orderId also available, if present
         is PayPalFinishStartResult.Failure  -> showError(result.error)   // result.orderId also available, if present
         PayPalFinishStartResult.NoResult    -> Unit   // unrelated intent; ignore
-        null                                 -> Unit   // finishStart() called without a matching start()/vault() call in this process
+        null                                 -> Unit   // no matching in-memory or restored browser-switch state
     }
 }
 ```
@@ -238,7 +243,7 @@ override fun onNewIntent(intent: Intent) {
         PayPalFinishVaultResult.Canceled   -> showVaultScreen()
         is PayPalFinishVaultResult.Failure -> showError(result.error)
         PayPalFinishVaultResult.NoResult   -> Unit   // unrelated intent; ignore
-        null                                -> Unit   // finishVault() called without a matching start()/vault() call in this process
+        null                                -> Unit   // no matching in-memory or restored browser-switch state
     }
 }
 ```
@@ -258,8 +263,19 @@ Dedicated buttons exist — `PayLaterButton` and `PayPalCreditButton` (`payment-
 | Call | Type | Cases | What you do |
 | --- | --- | --- | --- |
 | `start()` / `vault()` callback | `PayPalPresentAuthChallengeResult` | `Success` / `Failure(error)` | `Success` only confirms the challenge launched. `Failure` means checkout/vault never launched — show the error. `SESSION_NOT_STARTED` means `createPayPalSession()` was not called before `start()` / `vault()` — fix the ordering. |
-| `finishStart(intent)` | `PayPalFinishStartResult?` | `Success(orderId?, payerId?)` / `Canceled(orderId?)` / `Failure(error, orderId?)` / `NoResult` / `null` | Success: capture the order if `orderId` is present. Canceled: return the buyer to your checkout screen; `orderId` is included when available; no charge was made. Failure: show an error; `orderId` is included when available. `NoResult`: the intent was not a PayPal return — ignore it. `null`: `finishStart()` was called with no matching `start()`/`vault()` call in this process — ignore it. |
-| `finishVault(intent)` | `PayPalFinishVaultResult?` | `Success(approvalSessionId)` / `Canceled` / `Failure(error)` / `NoResult` / `null` | Success: store the returned `approvalSessionId`. Canceled: return the buyer to your save screen. Failure: show an error. `NoResult`: the intent was not a PayPal return — ignore it. `null`: same as above — no matching `start()`/`vault()` call in this process. |
+| `finishStart(intent)` | `PayPalFinishStartResult?` | `Success(orderId?, payerId?)` / `Canceled(orderId?)` / `Failure(error, orderId?)` / `NoResult` / `null` | Success: capture the order if `orderId` is present. Canceled: return the buyer to your checkout screen; `orderId` is included when available; no charge was made. Failure: show an error; `orderId` is included when available. `NoResult`: the intent was not a PayPal return — ignore it. `null`: `finishStart()` was called with no matching in-memory or restored browser-switch state — ignore it. |
+| `finishVault(intent)` | `PayPalFinishVaultResult?` | `Success(approvalSessionId)` / `Canceled` / `Failure(error)` / `NoResult` / `null` | Success: store the returned `approvalSessionId`. Canceled: return the buyer to your save screen. Failure: show an error. `NoResult`: the intent was not a PayPal return — ignore it. `null`: same as above — no matching in-memory or restored browser-switch state. |
+
+**Configuration changes and process death.** For an Auth Tab flow, AndroidX saves the pending
+launcher's registry mapping with the host Activity, while the SDK saves minimal browser-switch request
+state. The SDK re-registers the same key before the recreated Activity reaches `STARTED`, then includes
+the restored request state on the return intent. This lets a newly constructed `PayPalClient` complete
+`finishStart()` or `finishVault()` even if the app process was killed while the browser was
+foregrounded. Android must retain the Activity's saved state; force-stop, clearing app data, removing
+the task, or disabling the SDK's initializer provider invalidates the in-flight result. If
+`finishStart()` / `finishVault()` is invoked without in-memory or restored state, it returns the
+documented `null` result. The PayPal-app switch path still relies on the existing `instanceState` /
+`restore()` mechanism because it does not use an Activity Result launcher.
 
 ## Best practices
 
@@ -293,6 +309,8 @@ To test the in-app browser path, use a device without the PayPal app installed, 
 | **App switch — end to end** | The buyer switches to the PayPal app, approves, returns to your app, and the order captures. |
 | **In-app browser — end to end** | With the PayPal app not installed (or an ineligible buyer), checkout completes in an Auth Tab and the order captures. |
 | **In-app browser — buyer cancellation** | Close the Auth Tab before approval and verify the SDK reports `Canceled`. |
+| **In-app browser — configuration change** | Rotate the device while the Auth Tab is open, then approve or cancel; the recreated Activity receives exactly one result. |
+| **In-app browser — process recreation** | With the Auth Tab open, let Android kill the merchant app process, then complete or cancel; a newly constructed client handles the restored result. |
 | Buyer cancels in PayPal | The buyer is returned to your checkout screen and no charge is made. |
 | Vault with Purchase | Order captures; the vaulted token is retrievable server-side (not from the SDK result). |
 | Vault without Purchase | You receive and store the approval session ID from `finishVault()`, and can charge the vaulted account later. |
