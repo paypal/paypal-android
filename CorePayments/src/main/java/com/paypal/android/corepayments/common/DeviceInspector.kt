@@ -15,24 +15,39 @@ class DeviceInspector(private val context: Context) {
         get() = isAppInstalled(PAYPAL_APP_PACKAGE)
 
     /**
-     * The installed PayPal app's version code (build number), or `null` if the app isn't
+     * The installed PayPal app's version code (build number), or `0` if the app isn't
      * installed or its version can't be read. Uses [android.content.pm.PackageInfo.longVersionCode]
      * on API 28+ and falls back to the deprecated `versionCode` int below that.
      */
     private val payPalAppVersionCode: Long
-        get() = runCatching {
-            val packageInfo = context.packageManager.getPackageInfo(PAYPAL_APP_PACKAGE, 0)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+        get() {
+            val packageInfo = try {
+                context.packageManager.getPackageInfo(PAYPAL_APP_PACKAGE, 0)
+            } catch (_: PackageManager.NameNotFoundException) {
+                null
+            } catch (_: RuntimeException) {
+                null
+            }
+            return if (packageInfo == null) {
+                0
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                 packageInfo.longVersionCode
             } else {
                 @Suppress("DEPRECATION")
                 packageInfo.versionCode.toLong()
             }
-        }.getOrDefault(0)
+        }
 
-    private fun isAppInstalled(packageName: String): Boolean = runCatching {
-        context.packageManager.getApplicationInfo(packageName, 0).enabled
-    }.getOrDefault(false)
+    private fun isAppInstalled(packageName: String): Boolean {
+        val applicationInfo = try {
+            context.packageManager.getApplicationInfo(packageName, 0)
+        } catch (_: PackageManager.NameNotFoundException) {
+            null
+        } catch (_: RuntimeException) {
+            null
+        }
+        return applicationInfo?.enabled == true
+    }
 
     /**
      * Whether [uri] actually resolves to the PayPal app, not just whether it's installed — the

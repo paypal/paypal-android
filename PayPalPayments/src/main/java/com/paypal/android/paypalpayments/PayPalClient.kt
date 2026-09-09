@@ -173,39 +173,28 @@ class PayPalClient internal constructor(
             return
         }
         applicationScope.launch {
-            try {
-                val shopperSession = deferred.await()
-                analytics.notify(PayPalEvent.STARTED, params = analyticsEventParams)
+            val shopperSession = try {
+                deferred.await()
+            } catch (error: Exception) {
+                handleShopperSessionFailure(error, callback)
+                return@launch
+            }
+            analytics.notify(PayPalEvent.STARTED, params = analyticsEventParams)
+            if (shopperSession == null) {
+                handleShopperSessionFailure(PayPalError.sessionCreationFailedError, callback)
+                return@launch
+            }
 
-                if (shopperSession != null) {
-                    val result = withContext(Dispatchers.Main) {
-                        launchCheckout(
-                            activity = activity,
-                            shopperSession = shopperSession,
-                            orderId = orderId,
-                            startTime = startTime,
-                        )
-                    }
-                    withContext(Dispatchers.Main) {
-                        callback.onPayPalResult(result)
-                    }
-                } else {
-                    throw PayPalError.sessionCreationFailedError
-                }
-            } catch (e: Exception) {
-                analytics.notify(
-                    event = PayPalEvent.FAILED,
-                    params = analyticsEventParams,
-                    errorDescription = e.message
+            val result = withContext(Dispatchers.Main) {
+                launchCheckout(
+                    activity = activity,
+                    shopperSession = shopperSession,
+                    orderId = orderId,
+                    startTime = startTime,
                 )
-                shopperSessionDeferred = null
-                withContext(Dispatchers.Main) {
-                    callback.onPayPalResult(
-                        PayPalPresentAuthChallengeResult.Failure(
-                            e as? PayPalSDKError ?: PayPalError.unknownError
-                        )
-                    )
-                }
+            }
+            withContext(Dispatchers.Main) {
+                callback.onPayPalResult(result)
             }
         }
     }
@@ -249,39 +238,28 @@ class PayPalClient internal constructor(
             return
         }
         applicationScope.launch {
-            try {
-                val shopperSession = deferred.await()
-                analytics.notify(PayPalEvent.STARTED, params = analyticsEventParams)
+            val shopperSession = try {
+                deferred.await()
+            } catch (error: Exception) {
+                handleShopperSessionFailure(error, callback)
+                return@launch
+            }
+            analytics.notify(PayPalEvent.STARTED, params = analyticsEventParams)
+            if (shopperSession == null) {
+                handleShopperSessionFailure(PayPalError.sessionCreationFailedError, callback)
+                return@launch
+            }
 
-                if (shopperSession != null) {
-                    val result = withContext(Dispatchers.Main) {
-                        launchVault(
-                            activity = activity,
-                            shopperSession = shopperSession,
-                            setupTokenId = setupTokenId,
-                            startTime = startTime,
-                        )
-                    }
-                    withContext(Dispatchers.Main) {
-                        callback.onPayPalResult(result)
-                    }
-                } else {
-                    throw PayPalError.sessionCreationFailedError
-                }
-            } catch (e: Exception) {
-                analytics.notify(
-                    event = PayPalEvent.FAILED,
-                    params = analyticsEventParams,
-                    errorDescription = e.message
+            val result = withContext(Dispatchers.Main) {
+                launchVault(
+                    activity = activity,
+                    shopperSession = shopperSession,
+                    setupTokenId = setupTokenId,
+                    startTime = startTime,
                 )
-                shopperSessionDeferred = null
-                withContext(Dispatchers.Main) {
-                    callback.onPayPalResult(
-                        PayPalPresentAuthChallengeResult.Failure(
-                            e as? PayPalSDKError ?: PayPalError.unknownError
-                        )
-                    )
-                }
+            }
+            withContext(Dispatchers.Main) {
+                callback.onPayPalResult(result)
             }
         }
     }
@@ -492,6 +470,25 @@ class PayPalClient internal constructor(
     // endregion
 
     // region Private Helpers
+    private suspend fun handleShopperSessionFailure(
+        error: Exception,
+        callback: PayPalResultCallback,
+    ) {
+        analytics.notify(
+            event = PayPalEvent.FAILED,
+            params = analyticsEventParams,
+            errorDescription = error.message
+        )
+        shopperSessionDeferred = null
+        withContext(Dispatchers.Main) {
+            callback.onPayPalResult(
+                PayPalPresentAuthChallengeResult.Failure(
+                    error as? PayPalSDKError ?: PayPalError.unknownError
+                )
+            )
+        }
+    }
+
     private fun initAnalyticsEventParams() {
         analyticsEventParams = AnalyticsEventParams(
             merchantId = coreConfig.merchantId,

@@ -14,64 +14,69 @@ class AuthTabClient internal constructor(
     private val authTabRegistry: AuthTabRegistry = AuthTabRegistry.shared,
 ) {
 
+    @Suppress("ReturnCount") // Keeps each catch local to the registry registration call.
     fun launch(
         activity: ComponentActivity,
         options: BrowserSwitchOptions,
     ): LaunchAuthTabResult {
         authTabRegistry.initialize(activity.application)
-        val registration = try {
-            Result.success(authTabRegistry.register(activity, options))
+        val launcher = try {
+            authTabRegistry.register(activity, options)
         } catch (error: IllegalArgumentException) {
-            Result.failure(error)
+            authTabRegistry.cancel(activity)
+            return LaunchAuthTabResult.Failure(error)
         } catch (error: IllegalStateException) {
-            Result.failure(error)
+            authTabRegistry.cancel(activity)
+            return LaunchAuthTabResult.Failure(error)
         }
-
-        return registration.fold(
-            onSuccess = { launcher -> launchRegistered(activity, options, launcher) },
-            onFailure = { error ->
-                authTabRegistry.cancel(activity)
-                LaunchAuthTabResult.Failure(error as Exception)
-            },
-        )
+        return launchRegistered(activity, options, launcher)
     }
 
     private fun launchRegistered(
         activity: ComponentActivity,
         options: BrowserSwitchOptions,
         launcher: ActivityResultLauncher<Intent>,
-    ): LaunchAuthTabResult = try {
-        val authTabIntent = AuthTabIntent.Builder().build()
+    ): LaunchAuthTabResult {
         val returnUrlScheme = options.returnUrlScheme
-        if (returnUrlScheme != null) {
-            authTabIntent.launch(launcher, options.targetUri, returnUrlScheme)
-        } else {
-            val appLinkUri = requireNotNull(options.appLinkUrl) {
+        val appLinkUri = if (returnUrlScheme == null) options.appLinkUrl?.toUri() else null
+        val appLinkHost = appLinkUri?.host
+        val validationError = when {
+            returnUrlScheme == null && appLinkUri == null ->
                 "Auth Tab requires a return URL scheme or App Link."
-            }.toUri()
-            val appLinkHost = requireNotNull(appLinkUri.host) {
+            returnUrlScheme == null && appLinkHost == null ->
                 "Auth Tab App Link must include a host."
-            }
-            authTabIntent.launch(
-                launcher,
-                options.targetUri,
-                appLinkHost,
-                appLinkUri.path.orEmpty(),
+            else -> null
+        }
+        if (validationError != null) {
+            authTabRegistry.cancel(activity)
+            return LaunchAuthTabResult.Failure(
+                IllegalArgumentException(validationError)
             )
         }
-        LaunchAuthTabResult.Success
-    } catch (_: ActivityNotFoundException) {
-        authTabRegistry.cancel(activity)
-        LaunchAuthTabResult.ActivityNotFound
-    } catch (error: IllegalArgumentException) {
-        authTabRegistry.cancel(activity)
-        LaunchAuthTabResult.Failure(error)
-    } catch (error: IllegalStateException) {
-        authTabRegistry.cancel(activity)
-        LaunchAuthTabResult.Failure(error)
-    } catch (error: SecurityException) {
-        authTabRegistry.cancel(activity)
-        LaunchAuthTabResult.Failure(error)
+
+        val authTabIntent = AuthTabIntent.Builder().build()
+        return try {
+            if (returnUrlScheme != null) {
+                authTabIntent.launch(launcher, options.targetUri, returnUrlScheme)
+            } else {
+                authTabIntent.launch(
+                    launcher,
+                    options.targetUri,
+                    appLinkHost.orEmpty(),
+                    appLinkUri?.path.orEmpty(),
+                )
+            }
+            LaunchAuthTabResult.Success
+        } catch (_: ActivityNotFoundException) {
+            authTabRegistry.cancel(activity)
+            LaunchAuthTabResult.ActivityNotFound
+        } catch (error: IllegalStateException) {
+            authTabRegistry.cancel(activity)
+            LaunchAuthTabResult.Failure(error)
+        } catch (error: SecurityException) {
+            authTabRegistry.cancel(activity)
+            LaunchAuthTabResult.Failure(error)
+        }
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
