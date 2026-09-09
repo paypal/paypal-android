@@ -2,15 +2,11 @@ package com.paypal.android.corepayments.browserswitch
 
 import android.app.Activity
 import android.app.Application
-import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContract
 import androidx.browser.auth.AuthTabIntent
-import androidx.core.net.toUri
 import java.util.WeakHashMap
 
 /**
@@ -169,75 +165,6 @@ internal class AuthTabRegistry(
         state.launcher = null
     }
 
-    private data class ActivityState(
-        var pendingRequest: PendingRequest?,
-        var launcher: ActivityResultLauncher<Intent>? = null,
-    )
-
-    private data class PendingRequest(
-        val encodedBrowserSwitchState: String,
-        val fallbackResultUri: Uri?,
-    ) {
-        fun toBundle() = Bundle().apply {
-            putString(KEY_BROWSER_SWITCH_STATE, encodedBrowserSwitchState)
-            putString(KEY_FALLBACK_RESULT_URI, fallbackResultUri?.toString())
-        }
-
-        companion object {
-            fun from(options: BrowserSwitchOptions): PendingRequest {
-                val fallbackResultUri = options.appLinkUrl?.toUri()
-                    ?: options.returnUrlScheme?.let { scheme ->
-                        "$scheme://x-callback-url/paypal-sdk/paypal-checkout/cancel".toUri()
-                    }
-                // The launch URL is not needed to finish a returned checkout and may contain
-                // short-lived identifiers. Persist only the fields captureDeepLink() consumes.
-                val completionOptions = options.copy(targetUri = Uri.EMPTY)
-                return PendingRequest(
-                    encodedBrowserSwitchState = BrowserSwitchPendingState(completionOptions)
-                        .toBase64EncodedJSON(),
-                    fallbackResultUri = fallbackResultUri,
-                )
-            }
-
-            fun from(bundle: Bundle): PendingRequest? {
-                val encodedState = bundle.getString(KEY_BROWSER_SWITCH_STATE)
-                val pendingState = encodedState?.let(BrowserSwitchPendingState::fromBase64)
-                return if (
-                    encodedState != null &&
-                    pendingState?.originalOptions?.launchMode == BrowserSwitchLaunchMode.AUTH_TAB
-                ) {
-                    PendingRequest(
-                        encodedBrowserSwitchState = encodedState,
-                        fallbackResultUri = bundle.getString(KEY_FALLBACK_RESULT_URI)?.toUri(),
-                    )
-                } else {
-                    null
-                }
-            }
-        }
-    }
-
-    private data class AuthTabResult(
-        val resultCode: Int,
-        val resultUri: Uri?,
-    )
-
-    private class AuthenticateUserResultContract : ActivityResultContract<Intent, AuthTabResult>() {
-        override fun createIntent(context: Context, input: Intent) = input
-
-        override fun parseResult(resultCode: Int, intent: Intent?): AuthTabResult {
-            val normalizedResultCode = when (resultCode) {
-                AuthTabIntent.RESULT_OK,
-                AuthTabIntent.RESULT_CANCELED,
-                AuthTabIntent.RESULT_VERIFICATION_FAILED,
-                AuthTabIntent.RESULT_VERIFICATION_TIMED_OUT -> resultCode
-                else -> AuthTabIntent.RESULT_UNKNOWN_CODE
-            }
-            val resultUri = if (normalizedResultCode == AuthTabIntent.RESULT_OK) intent?.data else null
-            return AuthTabResult(normalizedResultCode, resultUri)
-        }
-    }
-
     companion object {
         internal val shared = AuthTabRegistry()
 
@@ -245,7 +172,5 @@ internal class AuthTabRegistry(
             "com.paypal.android.corepayments.browserswitch.AUTH_TAB"
         private const val SAVED_STATE_KEY =
             "com.paypal.android.corepayments.browserswitch.AUTH_TAB_STATE"
-        private const val KEY_BROWSER_SWITCH_STATE = "browserSwitchState"
-        private const val KEY_FALLBACK_RESULT_URI = "fallbackResultUri"
     }
 }

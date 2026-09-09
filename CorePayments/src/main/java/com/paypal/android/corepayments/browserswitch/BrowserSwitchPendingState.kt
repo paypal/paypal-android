@@ -3,7 +3,6 @@ package com.paypal.android.corepayments.browserswitch
 import android.util.Base64
 import androidx.annotation.RestrictTo
 import androidx.core.net.toUri
-import org.json.JSONException
 import org.json.JSONObject
 import java.nio.charset.StandardCharsets
 
@@ -33,54 +32,22 @@ data class BrowserSwitchPendingState(val originalOptions: BrowserSwitchOptions) 
         const val KEY_METADATA = "metadata"
         const val KEY_LAUNCH_MODE = "launchMode"
 
-        fun fromBase64(base64EncodedJSON: String): BrowserSwitchPendingState? {
-            val data = try {
-                Base64.decode(base64EncodedJSON, Base64.DEFAULT)
-            } catch (_: IllegalArgumentException) {
-                null
-            }
-            val json = if (data == null) {
-                null
-            } else {
-                try {
-                    JSONObject(String(data, StandardCharsets.UTF_8))
-                } catch (_: JSONException) {
-                    null
-                }
-            }
-            val requestCode = if (json == null) {
-                null
-            } else {
-                try {
-                    json.getInt(KEY_REQUEST_CODE)
-                } catch (_: JSONException) {
-                    null
-                }
-            }
-            val targetUri = json?.opt(KEY_TARGET_URI) as? String
-            val launchMode = json?.optString(KEY_LAUNCH_MODE)?.let { launchModeName ->
-                if (launchModeName.isBlank()) {
-                    BrowserSwitchLaunchMode.CUSTOM_TAB
-                } else {
-                    BrowserSwitchLaunchMode.entries.firstOrNull { it.name == launchModeName }
-                }
-            }
-            return if (json == null || targetUri == null) {
-                null
-            } else if (requestCode == null || launchMode == null) {
-                null
-            } else {
-                BrowserSwitchPendingState(
-                    BrowserSwitchOptions(
-                        targetUri = targetUri.toUri(),
-                        requestCode = requestCode,
-                        returnUrlScheme = json.optString(KEY_RETURN_URL_SCHEME).takeIf(String::isNotBlank),
-                        appLinkUrl = json.optString(KEY_APP_LINK_URL).takeIf(String::isNotBlank),
-                        metadata = json.optJSONObject(KEY_METADATA),
-                        launchMode = launchMode,
-                    )
-                )
-            }
-        }
+        fun fromBase64(base64EncodedJSON: String): BrowserSwitchPendingState? = runCatching {
+            val data = Base64.decode(base64EncodedJSON, Base64.DEFAULT)
+            val requestJSONString = String(data, StandardCharsets.UTF_8)
+            val json = JSONObject(requestJSONString)
+            val options = BrowserSwitchOptions(
+                targetUri = json.getString(KEY_TARGET_URI).toUri(),
+                requestCode = json.getInt(KEY_REQUEST_CODE),
+                returnUrlScheme = json.optString(KEY_RETURN_URL_SCHEME).takeIf(String::isNotBlank),
+                appLinkUrl = json.optString(KEY_APP_LINK_URL).takeIf(String::isNotBlank),
+                metadata = json.optJSONObject(KEY_METADATA),
+                launchMode = json.optString(KEY_LAUNCH_MODE)
+                    .takeIf(String::isNotBlank)
+                    ?.let(BrowserSwitchLaunchMode::valueOf)
+                    ?: BrowserSwitchLaunchMode.CUSTOM_TAB,
+            )
+            BrowserSwitchPendingState(options)
+        }.getOrNull()
     }
 }
