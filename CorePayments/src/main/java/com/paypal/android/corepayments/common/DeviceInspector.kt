@@ -60,12 +60,23 @@ class DeviceInspector(private val context: Context) {
 
     fun isDeepLinkConfiguredInManifest(returnUrlScheme: String): Boolean {
         val testUri = "$returnUrlScheme://".toUri()
-        val deepLinkIntent = Intent(Intent.ACTION_VIEW, testUri)
-        deepLinkIntent.addCategory(Intent.CATEGORY_DEFAULT)
-        deepLinkIntent.addCategory(Intent.CATEGORY_BROWSABLE)
+        val deepLinkIntent = Intent(Intent.ACTION_VIEW, testUri).apply {
+            addCategory(Intent.CATEGORY_DEFAULT)
+            addCategory(Intent.CATEGORY_BROWSABLE)
+            setPackage(context.packageName)
+        }
         val candidateActivities =
             context.packageManager.queryIntentActivities(deepLinkIntent, 0)
         return candidateActivities.isNotEmpty()
+    }
+
+    fun isAppLinkConfiguredInManifest(appLinkUrl: String): Boolean {
+        val appLinkIntent = Intent(Intent.ACTION_VIEW, appLinkUrl.toUri()).apply {
+            addCategory(Intent.CATEGORY_DEFAULT)
+            addCategory(Intent.CATEGORY_BROWSABLE)
+            setPackage(context.packageName)
+        }
+        return context.packageManager.queryIntentActivities(appLinkIntent, 0).isNotEmpty()
     }
 
     companion object {

@@ -1,5 +1,6 @@
 package com.paypal.android.corepayments.browserswitch
 
+import android.app.Activity
 import android.content.Context
 import androidx.activity.ComponentActivity
 import androidx.core.net.toUri
@@ -94,6 +95,21 @@ class BrowserSwitchClientUnitTest {
     }
 
     @Test
+    fun `it should reject auth tab launch from a plain Activity`() {
+        val activity = Robolectric.buildActivity(Activity::class.java).setup().get()
+        val authTabOptions = browserSwitchOptions.copy(launchMode = BrowserSwitchLaunchMode.AUTH_TAB)
+        every {
+            deviceInspector.isDeepLinkConfiguredInManifest("example.return.url.scheme")
+        } returns true
+
+        val error = runCatching { sut.start(activity, authTabOptions) }.exceptionOrNull()
+
+        assertTrue(error is IllegalStateException)
+        assertEquals(AuthTabClient.COMPONENT_ACTIVITY_REQUIRED_MESSAGE, error?.message)
+        verify(exactly = 0) { authTabClient.launch(any(), any()) }
+    }
+
+    @Test
     fun `it should fail to launch when no browser activity is present on the device`() {
         every {
             deviceInspector.isDeepLinkConfiguredInManifest("example.return.url.scheme")
@@ -133,6 +149,29 @@ class BrowserSwitchClientUnitTest {
         val message = (result as BrowserSwitchStartResult.Failure).error.message
         val expected = "This app is not correctly configured to handle deep links from the return url scheme provided."
         assertEquals(expected, message)
+    }
+
+    @Test
+    fun `it should reject auth tab launch when the App Link receiver is not configured`() {
+        val activity = Robolectric.buildActivity(ComponentActivity::class.java).get()
+        val authTabOptions = browserSwitchOptions.copy(
+            returnUrlScheme = null,
+            appLinkUrl = "https://merchant.example/return",
+            launchMode = BrowserSwitchLaunchMode.AUTH_TAB,
+        )
+        every {
+            deviceInspector.isAppLinkConfiguredInManifest("https://merchant.example/return")
+        } returns false
+
+        val result = sut.start(activity, authTabOptions)
+
+        assertTrue(result is BrowserSwitchStartResult.Failure)
+        val message = (result as BrowserSwitchStartResult.Failure).error.message
+        assertEquals(
+            "This app is not correctly configured to handle the provided App Link return URL.",
+            message,
+        )
+        verify(exactly = 0) { authTabClient.launch(any(), any()) }
     }
 
     @Test

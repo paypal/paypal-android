@@ -3,7 +3,7 @@ package com.paypal.android.corepayments
 import android.content.Intent
 import androidx.browser.auth.AuthTabIntent
 import androidx.core.net.toUri
-import com.paypal.android.corepayments.browserswitch.AuthTabActivity
+import com.paypal.android.corepayments.browserswitch.AuthTabClient
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchLaunchMode
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchOptions
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchPendingState
@@ -31,7 +31,7 @@ class DeepLinkUtilsUnitTest {
     fun `auth tab canceled result is captured without relying on uri shape`() {
         val intent = Intent()
             .setData("example.app://checkout".toUri())
-            .putExtra(AuthTabActivity.EXTRA_AUTH_TAB_RESULT_CODE, AuthTabIntent.RESULT_CANCELED)
+            .putExtra(AuthTabClient.EXTRA_AUTH_TAB_RESULT_CODE, AuthTabIntent.RESULT_CANCELED)
 
         val result = captureDeepLink(options.requestCode, intent, authState)
 
@@ -46,7 +46,7 @@ class DeepLinkUtilsUnitTest {
         val redirectUri = "example.app://checkout/success?PayerID=payer-123".toUri()
         val intent = Intent()
             .setData(redirectUri)
-            .putExtra(AuthTabActivity.EXTRA_AUTH_TAB_RESULT_CODE, AuthTabIntent.RESULT_OK)
+            .putExtra(AuthTabClient.EXTRA_AUTH_TAB_RESULT_CODE, AuthTabIntent.RESULT_OK)
 
         val result = captureDeepLink(options.requestCode, intent, authState)
 
@@ -59,7 +59,7 @@ class DeepLinkUtilsUnitTest {
         val intent = Intent()
             .setData("example.app://checkout".toUri())
             .putExtra(
-                AuthTabActivity.EXTRA_AUTH_TAB_RESULT_CODE,
+                AuthTabClient.EXTRA_AUTH_TAB_RESULT_CODE,
                 AuthTabIntent.RESULT_VERIFICATION_FAILED,
             )
 

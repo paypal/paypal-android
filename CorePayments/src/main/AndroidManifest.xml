@@ -5,11 +5,10 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application>
-        <activity
-            android:name=".browserswitch.AuthTabActivity"
-            android:excludeFromRecents="true"
-            android:exported="false"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+        <provider
+            android:name=".browserswitch.AuthTabRegistryInitializer"
+            android:authorities="${applicationId}.paypal-core-payments-auth-tab-init"
+            android:exported="false" />
     </application>
 
     <queries>

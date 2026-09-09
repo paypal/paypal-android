@@ -5,7 +5,7 @@ import android.net.Uri
 import androidx.annotation.RestrictTo
 import androidx.browser.auth.AuthTabIntent
 import androidx.core.net.toUri
-import com.paypal.android.corepayments.browserswitch.AuthTabActivity
+import com.paypal.android.corepayments.browserswitch.AuthTabClient
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchOptions
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchPendingState
 
@@ -49,9 +49,9 @@ fun captureDeepLink(
         return CaptureDeepLinkResult.Ignore("Request code does not match.")
     }
 
-    if (intent.hasExtra(AuthTabActivity.EXTRA_AUTH_TAB_RESULT_CODE)) {
+    if (intent.hasExtra(AuthTabClient.EXTRA_AUTH_TAB_RESULT_CODE)) {
         return when (val resultCode = intent.getIntExtra(
-            AuthTabActivity.EXTRA_AUTH_TAB_RESULT_CODE,
+            AuthTabClient.EXTRA_AUTH_TAB_RESULT_CODE,
             AuthTabIntent.RESULT_UNKNOWN_CODE,
         )) {
             AuthTabIntent.RESULT_CANCELED -> CaptureDeepLinkResult.Canceled(options)
