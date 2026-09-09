@@ -50,19 +50,32 @@ fun captureDeepLink(
     }
 
     if (intent.hasExtra(AuthTabClient.EXTRA_AUTH_TAB_RESULT_CODE)) {
-        return when (val resultCode = intent.getIntExtra(
-            AuthTabClient.EXTRA_AUTH_TAB_RESULT_CODE,
-            AuthTabIntent.RESULT_UNKNOWN_CODE,
-        )) {
-            AuthTabIntent.RESULT_CANCELED -> CaptureDeepLinkResult.Canceled(options)
-            AuthTabIntent.RESULT_OK -> captureDeepLinkUri(intent, options)
-            else -> CaptureDeepLinkResult.Failure(
-                PayPalSDKError(0, "Auth Tab failed with result code $resultCode.")
-            )
-        }
+        return captureAuthTabResult(intent, options)
     }
 
     return captureDeepLinkUri(intent, options)
+}
+
+private fun captureAuthTabResult(
+    intent: Intent,
+    options: BrowserSwitchOptions
+): CaptureDeepLinkResult {
+    val resultCode = intent.getIntExtra(
+        AuthTabClient.EXTRA_AUTH_TAB_RESULT_CODE,
+        AuthTabIntent.RESULT_UNKNOWN_CODE
+    )
+
+    return when (resultCode) {
+        AuthTabIntent.RESULT_CANCELED -> CaptureDeepLinkResult.Canceled(options)
+        AuthTabIntent.RESULT_OK -> captureDeepLinkUri(intent, options)
+        else -> {
+            val reason = PayPalSDKError(
+                code = 0,
+                errorDescription = "Auth Tab failed with result code $resultCode."
+            )
+            CaptureDeepLinkResult.Failure(reason)
+        }
+    }
 }
 
 private fun captureDeepLinkUri(
