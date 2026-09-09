@@ -120,25 +120,81 @@ class PayPalClientUnitTest {
     }
 
     @Test
-    fun `start() and vault() reject a plain Activity before beginning checkout`() {
+    fun `start() uses a custom tab for web fallback from a plain Activity`() = runTest {
         val plainActivity = mockk<Activity>(relaxed = true)
+        val sutV3 = makeSutWithUrlScheme()
+        val launchResult = PayPalPresentAuthChallengeResult.Success("auth-state")
+        every {
+            payPalLauncher.launchWithUrl(
+                plainActivity,
+                any(),
+                "fake-order-id",
+                TokenType.ORDER_ID,
+                any(),
+                BrowserSwitchLaunchMode.CUSTOM_TAB,
+            )
+        } returns launchResult
         val callback = mockk<PayPalResultCallback>(relaxed = true)
-        val expectedMessage =
-            "PayPal Auth Tab requires the Activity passed to start() or vault() to extend " +
-                "androidx.activity.ComponentActivity (including FragmentActivity and " +
-                "AppCompatActivity); plain android.app.Activity is not supported."
+        sutV3.createPayPalSession(
+            tokenType = TokenType.ORDER_ID,
+            userIdentity = fakeUserIdentity,
+            urlConfig = fakeUrlConfig,
+        )
+        sutV3.shopperSessionDeferred = CompletableDeferred(fakeSessionResponse)
 
-        val startError = runCatching {
-            sut.start(plainActivity, "fake-order-id", callback)
-        }.exceptionOrNull()
-        val vaultError = runCatching {
-            sut.vault(plainActivity, "fake-setup-token-id", callback)
-        }.exceptionOrNull()
+        sutV3.start(plainActivity, "fake-order-id", callback)
+        testDispatcher.scheduler.advanceUntilIdle()
 
-        assertTrue(startError is IllegalStateException)
-        assertEquals(expectedMessage, startError?.message)
-        assertTrue(vaultError is IllegalStateException)
-        assertEquals(expectedMessage, vaultError?.message)
+        verify {
+            payPalLauncher.launchWithUrl(
+                plainActivity,
+                any(),
+                "fake-order-id",
+                TokenType.ORDER_ID,
+                any(),
+                BrowserSwitchLaunchMode.CUSTOM_TAB,
+            )
+        }
+        verify { callback.onPayPalResult(launchResult) }
+    }
+
+    @Test
+    fun `vault() uses a custom tab for web fallback from a plain Activity`() = runTest {
+        val plainActivity = mockk<Activity>(relaxed = true)
+        val sutV3 = makeSutWithUrlScheme()
+        val launchResult = PayPalPresentAuthChallengeResult.Success("auth-state")
+        every {
+            payPalLauncher.launchWithUrl(
+                plainActivity,
+                any(),
+                "fake-setup-token-id",
+                TokenType.VAULT_ID,
+                any(),
+                BrowserSwitchLaunchMode.CUSTOM_TAB,
+            )
+        } returns launchResult
+        val callback = mockk<PayPalResultCallback>(relaxed = true)
+        sutV3.createPayPalSession(
+            tokenType = TokenType.VAULT_ID,
+            userIdentity = fakeUserIdentity,
+            urlConfig = fakeUrlConfig,
+        )
+        sutV3.shopperSessionDeferred = CompletableDeferred(fakeSessionResponse)
+
+        sutV3.vault(plainActivity, "fake-setup-token-id", callback)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        verify {
+            payPalLauncher.launchWithUrl(
+                plainActivity,
+                any(),
+                "fake-setup-token-id",
+                TokenType.VAULT_ID,
+                any(),
+                BrowserSwitchLaunchMode.CUSTOM_TAB,
+            )
+        }
+        verify { callback.onPayPalResult(launchResult) }
     }
 
     @Test

@@ -1,6 +1,5 @@
 package com.paypal.android.corepayments.browserswitch
 
-import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import androidx.activity.ComponentActivity
@@ -85,18 +84,6 @@ class AuthTabClient internal constructor(
             "com.paypal.android.corepayments.extra.AUTH_TAB_RESULT_CODE"
         internal const val EXTRA_BROWSER_SWITCH_STATE =
             "com.paypal.android.corepayments.extra.AUTH_TAB_BROWSER_SWITCH_STATE"
-
-        internal const val COMPONENT_ACTIVITY_REQUIRED_MESSAGE =
-            "PayPal Auth Tab requires the Activity passed to start() or vault() to extend " +
-                "androidx.activity.ComponentActivity (including FragmentActivity and " +
-                "AppCompatActivity); plain android.app.Activity is not supported."
-
-        fun requireCompatibleActivity(activity: Activity): ComponentActivity {
-            if (activity !is ComponentActivity) {
-                throw IllegalStateException(COMPONENT_ACTIVITY_REQUIRED_MESSAGE)
-            }
-            return activity
-        }
 
         fun restoredBrowserSwitchState(intent: Intent): String? =
             intent.takeIf { it.hasExtra(EXTRA_AUTH_TAB_RESULT_CODE) }

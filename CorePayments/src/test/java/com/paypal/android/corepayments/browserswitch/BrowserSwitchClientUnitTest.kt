@@ -95,17 +95,22 @@ class BrowserSwitchClientUnitTest {
     }
 
     @Test
-    fun `it should reject auth tab launch from a plain Activity`() {
+    fun `it should fall back to a chrome custom tab for auth tab options from a plain Activity`() {
         val activity = Robolectric.buildActivity(Activity::class.java).setup().get()
         val authTabOptions = browserSwitchOptions.copy(launchMode = BrowserSwitchLaunchMode.AUTH_TAB)
         every {
             deviceInspector.isDeepLinkConfiguredInManifest("example.return.url.scheme")
         } returns true
+        every {
+            chromeCustomTabsClient.launch(any(), any())
+        } returns LaunchChromeCustomTabResult.Success
 
-        val error = runCatching { sut.start(activity, authTabOptions) }.exceptionOrNull()
+        val result = sut.start(activity, authTabOptions)
+        val expectedCCTOptions =
+            ChromeCustomTabOptions(launchUri = "https://example.com/uri".toUri())
 
-        assertTrue(error is IllegalStateException)
-        assertEquals(AuthTabClient.COMPONENT_ACTIVITY_REQUIRED_MESSAGE, error?.message)
+        assertTrue(result is BrowserSwitchStartResult.Success)
+        verify { chromeCustomTabsClient.launch(activity, expectedCCTOptions) }
         verify(exactly = 0) { authTabClient.launch(any(), any()) }
     }
 

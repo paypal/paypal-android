@@ -24,20 +24,35 @@ class BrowserSwitchClient internal constructor(
         options: BrowserSwitchOptions
     ): BrowserSwitchStartResult {
         val activity = context as? Activity
-        getValidationFailure(activity, options)?.let { return it }
+        val launchMode = getLaunchMode(activity, options.launchMode)
+        getValidationFailure(activity, options, launchMode)?.let { return it }
 
-        return when (options.launchMode) {
+        return when (launchMode) {
             BrowserSwitchLaunchMode.CUSTOM_TAB -> launchCustomTab(context, options)
-            BrowserSwitchLaunchMode.AUTH_TAB -> {
-                val componentActivity = AuthTabClient.requireCompatibleActivity(requireNotNull(activity))
-                launchAuthTab(componentActivity, options)
-            }
+            BrowserSwitchLaunchMode.AUTH_TAB -> launchAuthTab(
+                requireNotNull(activity as? ComponentActivity),
+                options,
+            )
         }
     }
+
+    private fun getLaunchMode(
+        activity: Activity?,
+        requestedLaunchMode: BrowserSwitchLaunchMode,
+    ): BrowserSwitchLaunchMode =
+        if (requestedLaunchMode == BrowserSwitchLaunchMode.AUTH_TAB &&
+            activity != null &&
+            activity !is ComponentActivity
+        ) {
+            BrowserSwitchLaunchMode.CUSTOM_TAB
+        } else {
+            requestedLaunchMode
+        }
 
     private fun getValidationFailure(
         activity: Activity?,
         options: BrowserSwitchOptions,
+        launchMode: BrowserSwitchLaunchMode,
     ): BrowserSwitchStartResult.Failure? {
         val returnUrlScheme = options.returnUrlScheme
         val appLinkUrl = options.appLinkUrl
@@ -48,12 +63,12 @@ class BrowserSwitchClient internal constructor(
         } else if (returnUrlScheme != null && !hasValidDeepLinkConfig(returnUrlScheme)) {
             Failure.ManifestDeepLinkConfigurationInvalid
         } else if (
-            options.launchMode == BrowserSwitchLaunchMode.AUTH_TAB &&
+            launchMode == BrowserSwitchLaunchMode.AUTH_TAB &&
             appLinkUrl != null &&
             !hasValidAppLinkConfig(appLinkUrl)
         ) {
             Failure.ManifestAppLinkConfigurationInvalid
-        } else if (options.launchMode == BrowserSwitchLaunchMode.AUTH_TAB && activity == null) {
+        } else if (launchMode == BrowserSwitchLaunchMode.AUTH_TAB && activity == null) {
             Failure.AuthTabHostActivityRequired
         } else {
             null

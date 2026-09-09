@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import androidx.activity.ComponentActivity
 import androidx.annotation.VisibleForTesting
 import androidx.core.net.toUri
 import com.paypal.android.corepayments.CoreConfig
@@ -141,9 +142,8 @@ class PayPalClient internal constructor(
      * launching checkout. If [createPayPalSession] was never called the callback receives a
      * [PayPalPresentAuthChallengeResult.Failure].
      *
-     * @param activity The Activity to launch the PayPal checkout from. It must extend AndroidX
-     * [androidx.activity.ComponentActivity], including FragmentActivity and AppCompatActivity;
-     * plain [Activity] is not supported.
+     * @param activity The Activity to launch the PayPal checkout from. A [ComponentActivity] host
+     * uses an Auth Tab for web fallback; other Activity hosts use a Chrome Custom Tab.
      * @param orderId The id of the order to be approved.
      * @param callback Callback to receive the auth-challenge result.
      */
@@ -153,7 +153,6 @@ class PayPalClient internal constructor(
         orderId: String,
         callback: PayPalResultCallback,
     ) {
-        AuthTabClient.requireCompatibleActivity(activity)
         val startTime = System.currentTimeMillis()
         val urlConfig = returnToAppUrlConfig
         val deferred = shopperSessionDeferred
@@ -217,9 +216,8 @@ class PayPalClient internal constructor(
      * launching the vault flow. If [createPayPalSession] was never called the callback receives a
      * [PayPalPresentAuthChallengeResult.Failure].
      *
-     * @param activity The Activity to launch the PayPal vault flow from. It must extend AndroidX
-     * [androidx.activity.ComponentActivity], including FragmentActivity and AppCompatActivity;
-     * plain [Activity] is not supported.
+     * @param activity The Activity to launch the PayPal vault flow from. A [ComponentActivity]
+     * host uses an Auth Tab for web fallback; other Activity hosts use a Chrome Custom Tab.
      * @param setupTokenId The setup token id associated with the vault approval.
      * @param callback Callback to receive the vault result.
      */
@@ -229,7 +227,6 @@ class PayPalClient internal constructor(
         setupTokenId: String,
         callback: PayPalResultCallback,
     ) {
-        AuthTabClient.requireCompatibleActivity(activity)
         val startTime = System.currentTimeMillis()
         val urlConfig = returnToAppUrlConfig
         val deferred = shopperSessionDeferred
@@ -357,7 +354,8 @@ class PayPalClient internal constructor(
      * Launches the PayPal checkout/vault UI after the shopper session has been resolved.
      *
      * Attempts a PayPal app switch (App Link) if the PayPal app is installed and eligible;
-     * otherwise falls back to an Auth Tab.
+     * otherwise falls back to an Auth Tab when the host is a [ComponentActivity], or a Chrome
+     * Custom Tab for other Activity hosts.
      *
      * @param activity The Activity needed to launch the checkout/vault UI.
      * @param shopperSession The resolved shopper session containing launch URLs and eligibility.
@@ -391,10 +389,10 @@ class PayPalClient internal constructor(
         }
         val endTime = System.currentTimeMillis()
 
-        val launchMode = if (appSwitchEnabled) {
-            BrowserSwitchLaunchMode.CUSTOM_TAB
-        } else {
-            BrowserSwitchLaunchMode.AUTH_TAB
+        val launchMode = when {
+            appSwitchEnabled -> BrowserSwitchLaunchMode.CUSTOM_TAB
+            activity is ComponentActivity -> BrowserSwitchLaunchMode.AUTH_TAB
+            else -> BrowserSwitchLaunchMode.CUSTOM_TAB
         }
         val result = payPalLauncher.launchWithUrl(
             context = activity,
