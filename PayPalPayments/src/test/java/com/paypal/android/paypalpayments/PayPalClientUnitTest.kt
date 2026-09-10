@@ -1,5 +1,6 @@
 package com.paypal.android.paypalpayments
 
+import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import androidx.fragment.app.FragmentActivity
@@ -11,6 +12,8 @@ import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.ReturnToAppStrategy
 import com.paypal.android.corepayments.api.CreateShopperSessionWithAppSwitchEligibilityAPI
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchLaunchMode
+import com.paypal.android.corepayments.browserswitch.BrowserSwitchOptions
+import com.paypal.android.corepayments.browserswitch.BrowserSwitchPendingState
 import com.paypal.android.corepayments.common.DeviceInspector
 import com.paypal.android.corepayments.model.APIResult
 import com.paypal.android.corepayments.model.CreateShopperSessionWithAppSwitchEligibilityParams
@@ -114,6 +117,122 @@ class PayPalClientUnitTest {
     @Test
     fun `finishStart() with session auth state returns null when start has not been called`() {
         assertNull(sut.finishStart(intent))
+    }
+
+    @Test
+    fun `start() uses a custom tab for web fallback from a plain Activity`() = runTest {
+        val plainActivity = mockk<Activity>(relaxed = true)
+        val sutV3 = makeSutWithUrlScheme()
+        val launchResult = PayPalPresentAuthChallengeResult.Success("auth-state")
+        every {
+            payPalLauncher.launchWithUrl(
+                plainActivity,
+                any(),
+                "fake-order-id",
+                TokenType.ORDER_ID,
+                any(),
+                BrowserSwitchLaunchMode.CUSTOM_TAB,
+            )
+        } returns launchResult
+        val callback = mockk<PayPalResultCallback>(relaxed = true)
+        sutV3.createPayPalSession(
+            tokenType = TokenType.ORDER_ID,
+            userIdentity = fakeUserIdentity,
+            urlConfig = fakeUrlConfig,
+        )
+        sutV3.shopperSessionDeferred = CompletableDeferred(fakeSessionResponse)
+
+        sutV3.start(plainActivity, "fake-order-id", callback)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        verify {
+            payPalLauncher.launchWithUrl(
+                plainActivity,
+                any(),
+                "fake-order-id",
+                TokenType.ORDER_ID,
+                any(),
+                BrowserSwitchLaunchMode.CUSTOM_TAB,
+            )
+        }
+        verify { callback.onPayPalResult(launchResult) }
+    }
+
+    @Test
+    fun `vault() uses a custom tab for web fallback from a plain Activity`() = runTest {
+        val plainActivity = mockk<Activity>(relaxed = true)
+        val sutV3 = makeSutWithUrlScheme()
+        val launchResult = PayPalPresentAuthChallengeResult.Success("auth-state")
+        every {
+            payPalLauncher.launchWithUrl(
+                plainActivity,
+                any(),
+                "fake-setup-token-id",
+                TokenType.VAULT_ID,
+                any(),
+                BrowserSwitchLaunchMode.CUSTOM_TAB,
+            )
+        } returns launchResult
+        val callback = mockk<PayPalResultCallback>(relaxed = true)
+        sutV3.createPayPalSession(
+            tokenType = TokenType.VAULT_ID,
+            userIdentity = fakeUserIdentity,
+            urlConfig = fakeUrlConfig,
+        )
+        sutV3.shopperSessionDeferred = CompletableDeferred(fakeSessionResponse)
+
+        sutV3.vault(plainActivity, "fake-setup-token-id", callback)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        verify {
+            payPalLauncher.launchWithUrl(
+                plainActivity,
+                any(),
+                "fake-setup-token-id",
+                TokenType.VAULT_ID,
+                any(),
+                BrowserSwitchLaunchMode.CUSTOM_TAB,
+            )
+        }
+        verify { callback.onPayPalResult(launchResult) }
+    }
+
+    @Test
+    fun `finishStart() restores Auth Tab state from result intent after process death`() {
+        val options = BrowserSwitchOptions(
+            targetUri = Uri.parse("https://example.com/checkout"),
+            requestCode = com.paypal.android.corepayments.BrowserSwitchRequestCodes.PAYPAL_CHECKOUT,
+            returnUrlScheme = "merchant.app",
+            appLinkUrl = null,
+            launchMode = BrowserSwitchLaunchMode.AUTH_TAB,
+        )
+        val browserSwitchState = BrowserSwitchPendingState(options).toBase64EncodedJSON()
+        val resultIntent = Intent(
+            Intent.ACTION_VIEW,
+            Uri.parse("merchant.app://x-callback-url/paypal-sdk/paypal-checkout/success?PayerID=payer-id"),
+        ).apply {
+            putExtra(
+                "com.paypal.android.corepayments.extra.AUTH_TAB_RESULT_CODE",
+                Activity.RESULT_OK,
+            )
+            putExtra(
+                "com.paypal.android.corepayments.extra.AUTH_TAB_BROWSER_SWITCH_STATE",
+                browserSwitchState,
+            )
+        }
+        val expectedResult = PayPalFinishStartResult.Success("fake-order-id", "payer-id")
+        every {
+            payPalLauncher.completeCheckoutAuthRequest(resultIntent, browserSwitchState)
+        } returns expectedResult
+
+        val result = sut.finishStart(resultIntent)
+
+        assertSame(expectedResult, result)
+        assertFalse(
+            resultIntent.hasExtra(
+                "com.paypal.android.corepayments.extra.AUTH_TAB_BROWSER_SWITCH_STATE"
+            )
+        )
     }
 
     @Test

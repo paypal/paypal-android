@@ -1,9 +1,9 @@
 package com.paypal.android.ui.paypal
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.util.Log
-import androidx.activity.ComponentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.paypal.android.DemoConstants
@@ -156,7 +156,7 @@ class PayPalCheckoutViewModel @Inject constructor(
         PayPalUserAction.SETUP_NOW -> UserActionSelected.SETUP_NOW
     }
 
-    fun startCheckout(activity: ComponentActivity) {
+    fun startCheckout(activity: Activity) {
         val orderId = createdOrder?.id
         if (orderId == null) {
             payPalCheckoutState = ActionState.Failure(Exception("Create an order to continue."))
@@ -165,13 +165,13 @@ class PayPalCheckoutViewModel @Inject constructor(
         }
     }
 
-    private fun startCheckoutWithOrderId(activity: ComponentActivity, orderId: String) {
+    private fun startCheckoutWithOrderId(activity: Activity, orderId: String) {
         payPalCheckoutState = ActionState.Loading
 
         paypalClient.start(activity, orderId) { startResult ->
             when (startResult) {
                 is PayPalPresentAuthChallengeResult.Success -> {
-                    // do nothing; wait for user to authenticate PayPal checkout in an Auth Tab
+                    // do nothing; wait for web checkout to return to the app
                 }
 
                 is PayPalPresentAuthChallengeResult.Failure ->

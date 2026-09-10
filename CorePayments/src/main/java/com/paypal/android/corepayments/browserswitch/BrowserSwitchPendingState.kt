@@ -32,22 +32,22 @@ data class BrowserSwitchPendingState(val originalOptions: BrowserSwitchOptions) 
         const val KEY_METADATA = "metadata"
         const val KEY_LAUNCH_MODE = "launchMode"
 
-        fun fromBase64(base64EncodedJSON: String): BrowserSwitchPendingState? {
+        fun fromBase64(base64EncodedJSON: String): BrowserSwitchPendingState? = runCatching {
             val data = Base64.decode(base64EncodedJSON, Base64.DEFAULT)
             val requestJSONString = String(data, StandardCharsets.UTF_8)
             val json = JSONObject(requestJSONString)
             val options = BrowserSwitchOptions(
                 targetUri = json.getString(KEY_TARGET_URI).toUri(),
                 requestCode = json.getInt(KEY_REQUEST_CODE),
-                returnUrlScheme = json.optString(KEY_RETURN_URL_SCHEME),
-                appLinkUrl = json.optString(KEY_APP_LINK_URL),
+                returnUrlScheme = json.optString(KEY_RETURN_URL_SCHEME).takeIf(String::isNotBlank),
+                appLinkUrl = json.optString(KEY_APP_LINK_URL).takeIf(String::isNotBlank),
                 metadata = json.optJSONObject(KEY_METADATA),
                 launchMode = json.optString(KEY_LAUNCH_MODE)
                     .takeIf(String::isNotBlank)
                     ?.let(BrowserSwitchLaunchMode::valueOf)
                     ?: BrowserSwitchLaunchMode.CUSTOM_TAB,
             )
-            return BrowserSwitchPendingState(options)
-        }
+            BrowserSwitchPendingState(options)
+        }.getOrNull()
     }
 }
