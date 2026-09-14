@@ -22,10 +22,10 @@ internal class GooglePayAPI(
 ) {
     companion object {
         const val ERROR_GOOGLE_PAY_CONFIG_QUERY_MISSING = 0
-        const val ERROR_GOOGLE_PAY_CONFIG_DATA_MISSING = 1
+        const val ERROR_GOOGLE_PAY_CONFIG_RESPONSE_INVALID = 1
         const val ERROR_GOOGLE_PAY_CONFIG_REQUEST_FAILED = 2
         const val ERROR_GOOGLE_PAY_APPROVE_QUERY_MISSING = 3
-        const val ERROR_GOOGLE_PAY_APPROVE_DATA_MISSING = 4
+        const val ERROR_GOOGLE_PAY_APPROVE_RESPONSE_INVALID = 4
         const val ERROR_GOOGLE_PAY_APPROVE_REQUEST_FAILED = 5
     }
 
@@ -76,7 +76,7 @@ internal class GooglePayAPI(
             is GraphQLResult.Success -> {
                 val googlePayConfig = graphQLResponse.response.data?.googlePayConfig
                 if (googlePayConfig == null) {
-                    val code = ERROR_GOOGLE_PAY_CONFIG_DATA_MISSING
+                    val code = ERROR_GOOGLE_PAY_CONFIG_RESPONSE_INVALID
                     val errorDescription = "Unable to launch google pay: config missing."
                     SDKResult.Failure(PayPalSDKError(code, errorDescription))
                 } else {
@@ -137,7 +137,7 @@ internal class GooglePayAPI(
             is GraphQLResult.Success -> {
                 val approveGooglePayPayment = graphQLResponse.response.data?.approveGooglePayPayment
                 if (approveGooglePayPayment == null) {
-                    val code = ERROR_GOOGLE_PAY_APPROVE_DATA_MISSING
+                    val code = ERROR_GOOGLE_PAY_APPROVE_RESPONSE_INVALID
                     val errorDescription = "Unable to confirm order: response data missing."
                     val error = PayPalSDKError(code, errorDescription)
                     SDKResult.Failure(error)
