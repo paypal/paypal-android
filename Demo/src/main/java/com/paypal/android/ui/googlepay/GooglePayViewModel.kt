@@ -113,8 +113,7 @@ class GooglePayViewModel @Inject constructor(
     fun requestGooglePayLaunch() {
         googlePayStartState = ActionState.Loading
         viewModelScope.launch {
-            val request =
-                GooglePayCheckoutRequest(merchantId = MerchantIntegration.DEFAULT.merchantId)
+            val request = GooglePayCheckoutRequest(merchantId = null)
             val result = googlePayClient.start(request)
             googlePayStartState = when (result) {
                 is GooglePayStartResult.Success -> ActionState.Success(result)

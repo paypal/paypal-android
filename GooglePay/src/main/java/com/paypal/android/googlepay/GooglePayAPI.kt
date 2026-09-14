@@ -20,6 +20,15 @@ internal class GooglePayAPI(
     private val graphQLClient: GraphQLClient,
     private val resourceLoader: ResourceLoader
 ) {
+    companion object {
+        const val ERROR_GOOGLE_PAY_CONFIG_QUERY_MISSING = 0
+        const val ERROR_GOOGLE_PAY_CONFIG_DATA_MISSING = 1
+        const val ERROR_GOOGLE_PAY_CONFIG_REQUEST_FAILED = 2
+        const val ERROR_GOOGLE_PAY_APPROVE_QUERY_MISSING = 3
+        const val ERROR_GOOGLE_PAY_APPROVE_DATA_MISSING = 4
+        const val ERROR_GOOGLE_PAY_APPROVE_REQUEST_FAILED = 5
+    }
+
     constructor(context: Context, coreConfig: CoreConfig) : this(
         coreConfig,
         context.applicationContext,
@@ -28,15 +37,15 @@ internal class GooglePayAPI(
     )
 
     @OptIn(InternalSerializationApi::class)
-    suspend fun getGooglePayConfig(merchantId: String): SDKResult<GooglePayConfig> {
+    suspend fun getGooglePayConfig(merchantId: String?): SDKResult<GooglePayConfig> {
         @RawRes val resId = R.raw.graphql_google_pay_config_sandbox
         return when (val result = resourceLoader.loadRawResource(applicationContext, resId)) {
             is LoadRawResourceResult.Success ->
                 sendGraphQLGooglePayConfigRequest(result.value, merchantId)
 
             is LoadRawResourceResult.Failure -> {
-                val error =
-                    PayPalSDKError(123, "Unable to launch google pay: config query missing.")
+                val errorDescription = "Unable to launch google pay: GraphQL query missing."
+                val error = PayPalSDKError(ERROR_GOOGLE_PAY_CONFIG_QUERY_MISSING, errorDescription)
                 SDKResult.Failure(error)
             }
         }
@@ -45,11 +54,11 @@ internal class GooglePayAPI(
     @OptIn(InternalSerializationApi::class)
     private suspend fun sendGraphQLGooglePayConfigRequest(
         query: String,
-        merchantId: String
+        merchantId: String?
     ): SDKResult<GooglePayConfig> {
         val variables = GetGooglePayConfigVariables(
             clientId = coreConfig.clientId,
-            merchantId = listOf(merchantId),
+            merchantId = merchantId?.let { listOf(it) } ?: emptyList(),
             // TODO: see if we need this
             merchantOrigin = "com.paypal.android.sdk",
         )
@@ -67,17 +76,18 @@ internal class GooglePayAPI(
             is GraphQLResult.Success -> {
                 val googlePayConfig = graphQLResponse.response.data?.googlePayConfig
                 if (googlePayConfig == null) {
-                    val error = PayPalSDKError(123, "Unable to launch google pay: config missing.")
-                    SDKResult.Failure(error)
+                    val code = ERROR_GOOGLE_PAY_CONFIG_DATA_MISSING
+                    val errorDescription = "Unable to launch google pay: config missing."
+                    SDKResult.Failure(PayPalSDKError(code, errorDescription))
                 } else {
                     SDKResult.Success(googlePayConfig)
                 }
             }
 
             is GraphQLResult.Failure -> {
-                val error =
-                    PayPalSDKError(123, "Unable to launch google pay: unable to fetch config.")
-                SDKResult.Failure(error)
+                val code = ERROR_GOOGLE_PAY_CONFIG_REQUEST_FAILED
+                val errorDescription = "Unable to launch google pay: unable to fetch config."
+                SDKResult.Failure(PayPalSDKError(code, errorDescription))
             }
         }
     }
@@ -93,8 +103,9 @@ internal class GooglePayAPI(
                 sendGraphQLApproveGooglePayPaymentRequest(result.value, orderId, paymentMethodData)
 
             is LoadRawResourceResult.Failure -> {
-                val error = PayPalSDKError(123, "Unable to confirm order: query missing.")
-                SDKResult.Failure(error)
+                val code = ERROR_GOOGLE_PAY_APPROVE_QUERY_MISSING
+                val errorDescription = "Unable to confirm order: query missing."
+                SDKResult.Failure(PayPalSDKError(code, errorDescription))
             }
         }
     }
@@ -126,8 +137,9 @@ internal class GooglePayAPI(
             is GraphQLResult.Success -> {
                 val approveGooglePayPayment = graphQLResponse.response.data?.approveGooglePayPayment
                 if (approveGooglePayPayment == null) {
-                    val error =
-                        PayPalSDKError(123, "Unable to confirm order: response data missing.")
+                    val code = ERROR_GOOGLE_PAY_APPROVE_DATA_MISSING
+                    val errorDescription = "Unable to confirm order: response data missing."
+                    val error = PayPalSDKError(code, errorDescription)
                     SDKResult.Failure(error)
                 } else {
                     SDKResult.Success(value = approveGooglePayPayment)
@@ -135,9 +147,9 @@ internal class GooglePayAPI(
             }
 
             is GraphQLResult.Failure -> {
-                val error =
-                    PayPalSDKError(123, "Unable to confirm order: request fialed.")
-                SDKResult.Failure(error)
+                val code = ERROR_GOOGLE_PAY_APPROVE_REQUEST_FAILED
+                val errorDescription = "Unable to confirm order: request fialed."
+                SDKResult.Failure(PayPalSDKError(code, errorDescription))
             }
         }
     }
