@@ -73,7 +73,6 @@ class GooglePayClient internal constructor(
             apiVersionMinor = 0,
             merchantInfo = googlePayConfig.merchantInfo,
             allowedPaymentMethods = googlePayConfig.allowedPaymentMethods,
-            callbackIntents = listOf("PAYMENT_AUTHORIZATION"),
             transactionInfo = transactionInfo
         )
     }

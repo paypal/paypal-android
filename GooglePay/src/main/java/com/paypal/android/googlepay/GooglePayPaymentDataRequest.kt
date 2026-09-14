@@ -12,7 +12,6 @@ internal data class GooglePayPaymentDataRequest(
     val apiVersionMinor: Int,
     val merchantInfo: JsonElement?,
     val allowedPaymentMethods: JsonElement?,
-    val callbackIntents: List<String>,
     val transactionInfo: GooglePayTransactionInfo
 )
 
