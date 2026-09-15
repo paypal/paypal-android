@@ -7,6 +7,8 @@ import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.fraudprotection.PayPalDataCollector
+import com.paypal.android.fraudprotection.PayPalDataCollectorRequest
 import com.paypal.android.googlepay.GooglePayCheckoutRequest
 import com.paypal.android.googlepay.GooglePayClient
 import com.paypal.android.googlepay.GooglePayFinishStartResult
@@ -33,6 +35,7 @@ class GooglePayViewModel @Inject constructor(
 
     private val config = CoreConfig(SDKSampleServerAPI.clientId, SDKSampleServerAPI.merchantId)
     private val googlePayClient = GooglePayClient(applicationContext, config)
+    private val dataCollector = PayPalDataCollector(config)
 
     private val _uiState = MutableStateFlow(GooglePayUiState())
     val uiState = _uiState.asStateFlow()
@@ -103,8 +106,12 @@ class GooglePayViewModel @Inject constructor(
         } else {
             viewModelScope.launch {
                 completeOrderState = ActionState.Loading
+
+                val dataCollectorRequest = PayPalDataCollectorRequest(false)
+                val clientMetadataId =
+                    dataCollector.collectDeviceData(applicationContext, dataCollectorRequest)
                 completeOrderState =
-                    completeOrderUseCase(orderId, intentOption, "").mapToActionState()
+                    completeOrderUseCase(orderId, intentOption, clientMetadataId).mapToActionState()
             }
         }
     }
@@ -112,8 +119,7 @@ class GooglePayViewModel @Inject constructor(
     fun requestGooglePayLaunch() {
         googlePayStartState = ActionState.Loading
         viewModelScope.launch {
-            val request = GooglePayCheckoutRequest(merchantId = null)
-            val result = googlePayClient.start(request)
+            val result = googlePayClient.start(GooglePayCheckoutRequest())
             googlePayStartState = when (result) {
                 is GooglePayStartResult.Success -> ActionState.Success(result)
                 is GooglePayStartResult.Failure -> ActionState.Failure(result.error)
