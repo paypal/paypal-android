@@ -1,0 +1,11 @@
+mutation ApproveGooglePayPayment(
+    $paymentMethodData: GooglePayPaymentMethodData!
+    $orderID: String!
+    $clientID : String!
+) {
+    approveGooglePayPayment(
+        paymentMethodData: $paymentMethodData
+        orderID: $orderID
+        clientID: $clientID
+    )
+}
