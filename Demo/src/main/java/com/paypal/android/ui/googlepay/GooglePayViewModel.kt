@@ -9,7 +9,6 @@ import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.fraudprotection.PayPalDataCollector
 import com.paypal.android.fraudprotection.PayPalDataCollectorRequest
-import com.paypal.android.googlepay.GooglePayCheckoutRequest
 import com.paypal.android.googlepay.GooglePayClient
 import com.paypal.android.googlepay.GooglePayFinishStartResult
 import com.paypal.android.googlepay.GooglePayLaunchResult
@@ -119,7 +118,7 @@ class GooglePayViewModel @Inject constructor(
     fun requestGooglePayLaunch() {
         googlePayStartState = ActionState.Loading
         viewModelScope.launch {
-            val result = googlePayClient.start(GooglePayCheckoutRequest())
+            val result = googlePayClient.start()
             googlePayStartState = when (result) {
                 is GooglePayStartResult.Success -> ActionState.Success(result)
                 is GooglePayStartResult.Failure -> ActionState.Failure(result.error)

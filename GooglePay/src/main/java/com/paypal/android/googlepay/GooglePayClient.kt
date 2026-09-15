@@ -16,18 +16,20 @@ import kotlinx.serialization.json.Json
 import org.json.JSONObject
 
 class GooglePayClient internal constructor(
+    private val config: CoreConfig,
     private val googlePayAPI: GooglePayAPI,
     private val paymentsClient: PaymentsClient
 ) {
 
     constructor(context: Context, config: CoreConfig) : this(
+        config,
         googlePayAPI = GooglePayAPI(context, config),
         paymentsClient = createPaymentsClient(context, config)
     )
 
     @OptIn(InternalSerializationApi::class)
-    suspend fun start(request: GooglePayCheckoutRequest): GooglePayStartResult {
-        val merchantId = request.merchantId
+    suspend fun start(): GooglePayStartResult {
+        val merchantId = config.merchantId
         return when (val result = googlePayAPI.getGooglePayConfig(merchantId)) {
             is SDKResult.Success -> {
                 val config = result.value
