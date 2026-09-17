@@ -12,7 +12,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ApplicationProvider
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -25,10 +24,10 @@ import org.robolectric.Shadows.shadowOf
 import org.robolectric.android.controller.ActivityController
 
 @RunWith(RobolectricTestRunner::class)
-class AuthTabRegistryUnitTest {
+class AuthTabLauncherUnitTest {
 
     private val application: Application = ApplicationProvider.getApplicationContext()
-    private lateinit var registry: AuthTabRegistry
+    private lateinit var lifecycleCallbacks: AuthTabLauncherLifecycleCallbacks
     private lateinit var client: AuthTabClient
     private lateinit var controller: ActivityController<AuthTabHostActivity>
 
@@ -42,23 +41,20 @@ class AuthTabRegistryUnitTest {
 
     @Before
     fun beforeEach() {
-        registry = AuthTabRegistry(
-            registryKey = "test.paypal.auth-tab.registry",
-            savedStateKey = "test.paypal.auth-tab.saved-state",
-        )
-        registry.initialize(application)
-        client = AuthTabClient(registry)
+        lifecycleCallbacks = AuthTabLauncherLifecycleCallbacks()
+        lifecycleCallbacks.initialize(application)
+        client = AuthTabClient()
         controller = Robolectric.buildActivity(AuthTabHostActivity::class.java).setup()
     }
 
     @After
     fun afterEach() {
-        registry.dispose()
+        lifecycleCallbacks.dispose()
         controller.pause().stop().destroy()
     }
 
     @Test
-    fun `launch registers directly and returns success to the manifest receiver`() {
+    fun `launch uses the Activity-owned contract and returns success to the manifest receiver`() {
         val activity = controller.get()
 
         assertEquals(LaunchAuthTabResult.Success, client.launch(activity, options))
@@ -77,7 +73,7 @@ class AuthTabRegistryUnitTest {
         )
 
         assertTrue(wasDelivered)
-        val returnIntent = shadowOf(activity).nextStartedActivity
+        val returnIntent = shadowOf(application).nextStartedActivity
         assertEquals(Intent.ACTION_VIEW, returnIntent.action)
         assertEquals(successUri, returnIntent.data)
         assertEquals(activity.packageName, returnIntent.`package`)
@@ -89,26 +85,36 @@ class AuthTabRegistryUnitTest {
                 AuthTabIntent.RESULT_UNKNOWN_CODE,
             ),
         )
-        assertFalse(returnIntent.flags and Intent.FLAG_ACTIVITY_CLEAR_TOP != 0)
         assertNotNull(AuthTabClient.restoredBrowserSwitchState(returnIntent))
     }
 
     @Test
-    fun `configuration change reconnects the pending result to the replacement Activity`() {
+    fun `a recreated Activity receives an in-flight result through the same registry key`() {
         val originalActivity = controller.get()
         assertEquals(LaunchAuthTabResult.Success, client.launch(originalActivity, options))
         val requestCode = shadowOf(originalActivity).nextStartedActivityForResult.requestCode
+        shadowOf(application).nextStartedActivity
+        val savedState = Bundle()
+        controller.pause().saveInstanceState(savedState).stop().destroy()
 
-        controller.configurationChange()
-        val replacementActivity = controller.get()
-        val wasDelivered = replacementActivity.activityResultRegistry.dispatchResult(
+        lifecycleCallbacks.dispose()
+        lifecycleCallbacks = AuthTabLauncherLifecycleCallbacks().also {
+            it.initialize(application)
+        }
+        controller = Robolectric.buildActivity(AuthTabHostActivity::class.java).create(savedState)
+        val restoredActivity = controller.get()
+        assertEquals(Lifecycle.State.CREATED, restoredActivity.lifecycle.currentState)
+
+        val wasDelivered = restoredActivity.activityResultRegistry.dispatchResult(
             requestCode,
             Activity.RESULT_CANCELED,
             null,
         )
 
         assertTrue(wasDelivered)
-        val returnIntent = shadowOf(replacementActivity).nextStartedActivity
+        assertNull(shadowOf(application).nextStartedActivity)
+        controller.start().resume()
+        val returnIntent = shadowOf(application).nextStartedActivity
         assertEquals(
             "merchant.app://x-callback-url/paypal-sdk/paypal-checkout/cancel".toUri(),
             returnIntent.data,
@@ -120,34 +126,6 @@ class AuthTabRegistryUnitTest {
                 AuthTabIntent.RESULT_UNKNOWN_CODE,
             ),
         )
-    }
-
-    @Test
-    fun `process recreation restores pending state and completes without the old registry instance`() {
-        val originalActivity = controller.get()
-        assertEquals(LaunchAuthTabResult.Success, client.launch(originalActivity, options))
-        val requestCode = shadowOf(originalActivity).nextStartedActivityForResult.requestCode
-        val savedState = Bundle()
-        controller.pause().saveInstanceState(savedState).stop().destroy()
-        registry.dispose()
-
-        registry = AuthTabRegistry(
-            registryKey = "test.paypal.auth-tab.registry",
-            savedStateKey = "test.paypal.auth-tab.saved-state",
-        )
-        registry.initialize(application)
-        controller = Robolectric.buildActivity(AuthTabHostActivity::class.java).create(savedState)
-        val restoredActivity = controller.get()
-        assertEquals(Lifecycle.State.CREATED, restoredActivity.lifecycle.currentState)
-        val successUri = "merchant.app://x-callback-url/paypal-sdk/paypal-checkout/success".toUri()
-        val wasDelivered = restoredActivity.activityResultRegistry.dispatchResult(
-            requestCode,
-            Activity.RESULT_OK,
-            Intent().setData(successUri),
-        )
-
-        assertTrue(wasDelivered)
-        val returnIntent = shadowOf(restoredActivity).nextStartedActivity
         val restoredBrowserSwitchState = AuthTabClient.restoredBrowserSwitchState(returnIntent)
         assertNotNull(restoredBrowserSwitchState)
         val restoredOptions = BrowserSwitchPendingState
@@ -157,7 +135,20 @@ class AuthTabRegistryUnitTest {
         assertEquals(options.requestCode, restoredOptions?.requestCode)
         assertEquals(options.returnUrlScheme, restoredOptions?.returnUrlScheme)
         assertEquals(options.launchMode, restoredOptions?.launchMode)
-        controller.start().resume()
+    }
+
+    @Test
+    fun `a second launch fails while the first Auth Tab is pending`() {
+        val activity = controller.get()
+        assertEquals(LaunchAuthTabResult.Success, client.launch(activity, options))
+
+        val result = client.launch(activity, options)
+
+        assertTrue(result is LaunchAuthTabResult.Failure)
+        assertEquals(
+            "An Auth Tab is already pending for this Activity.",
+            (result as LaunchAuthTabResult.Failure).error.message,
+        )
     }
 
     class AuthTabHostActivity : ComponentActivity()

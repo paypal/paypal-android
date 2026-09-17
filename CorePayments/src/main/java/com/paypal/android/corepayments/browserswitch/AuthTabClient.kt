@@ -3,38 +3,17 @@ package com.paypal.android.corepayments.browserswitch
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import androidx.activity.ComponentActivity
-import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.RestrictTo
-import androidx.browser.auth.AuthTabIntent
 import androidx.core.net.toUri
+import androidx.lifecycle.Lifecycle
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class AuthTabClient internal constructor(
-    private val authTabRegistry: AuthTabRegistry = AuthTabRegistry.shared,
-) {
+class AuthTabClient internal constructor() {
 
-    @Suppress("ReturnCount") // Keeps each catch local to the registry registration call.
+    @Suppress("ReturnCount") // Keeps validation and launcher failures local to this call.
     fun launch(
         activity: ComponentActivity,
         options: BrowserSwitchOptions,
-    ): LaunchAuthTabResult {
-        authTabRegistry.initialize(activity.application)
-        val launcher = try {
-            authTabRegistry.register(activity, options)
-        } catch (error: IllegalArgumentException) {
-            authTabRegistry.cancel(activity)
-            return LaunchAuthTabResult.Failure(error)
-        } catch (error: IllegalStateException) {
-            authTabRegistry.cancel(activity)
-            return LaunchAuthTabResult.Failure(error)
-        }
-        return launchRegistered(activity, options, launcher)
-    }
-
-    private fun launchRegistered(
-        activity: ComponentActivity,
-        options: BrowserSwitchOptions,
-        launcher: ActivityResultLauncher<Intent>,
     ): LaunchAuthTabResult {
         val returnUrlScheme = options.returnUrlScheme
         val appLinkUri = if (returnUrlScheme == null) options.appLinkUrl?.toUri() else null
@@ -47,36 +26,36 @@ class AuthTabClient internal constructor(
             else -> null
         }
         if (validationError != null) {
-            authTabRegistry.cancel(activity)
             return LaunchAuthTabResult.Failure(
                 IllegalArgumentException(validationError)
             )
         }
 
-        val authTabIntent = AuthTabIntent.Builder().build()
-        return try {
-            if (returnUrlScheme != null) {
-                authTabIntent.launch(launcher, options.targetUri, returnUrlScheme)
-            } else {
-                authTabIntent.launch(
-                    launcher,
-                    options.targetUri,
-                    appLinkHost.orEmpty(),
-                    appLinkUri?.path.orEmpty(),
+        val launcher = AuthTabLauncher.from(activity)
+            ?: attachBeforeStarted(activity)
+            ?: return LaunchAuthTabResult.Failure(
+                IllegalStateException(
+                    "Auth Tab launcher was not registered before the host Activity reached STARTED."
                 )
-            }
+            )
+        return try {
+            launcher.launch(options)
             LaunchAuthTabResult.Success
         } catch (_: ActivityNotFoundException) {
-            authTabRegistry.cancel(activity)
             LaunchAuthTabResult.ActivityNotFound
         } catch (error: IllegalStateException) {
-            authTabRegistry.cancel(activity)
             LaunchAuthTabResult.Failure(error)
         } catch (error: SecurityException) {
-            authTabRegistry.cancel(activity)
             LaunchAuthTabResult.Failure(error)
         }
     }
+
+    private fun attachBeforeStarted(activity: ComponentActivity): AuthTabLauncher? =
+        if (!activity.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
+            AuthTabLauncher.attach(activity)
+        } else {
+            null
+        }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {

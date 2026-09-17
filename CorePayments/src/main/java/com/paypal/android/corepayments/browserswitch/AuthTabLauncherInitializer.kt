@@ -6,12 +6,12 @@ import android.content.ContentValues
 import android.database.Cursor
 import android.net.Uri
 
-/** Installs Auth Tab recreation handling before the merchant's first Activity is created. */
-internal class AuthTabRegistryInitializer : ContentProvider() {
+/** Installs SDK-owned Auth Tab launchers before the merchant's first Activity is created. */
+internal class AuthTabLauncherInitializer : ContentProvider() {
 
     override fun onCreate(): Boolean {
         val application = context?.applicationContext as? Application ?: return false
-        AuthTabRegistry.shared.initialize(application)
+        lifecycleCallbacks.initialize(application)
         return true
     }
 
@@ -35,4 +35,8 @@ internal class AuthTabRegistryInitializer : ContentProvider() {
         selection: String?,
         selectionArgs: Array<out String>?,
     ): Int = 0
+
+    companion object {
+        private val lifecycleCallbacks = AuthTabLauncherLifecycleCallbacks()
+    }
 }

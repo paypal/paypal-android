@@ -6,7 +6,7 @@
 
     <application>
         <provider
-            android:name=".browserswitch.AuthTabRegistryInitializer"
+            android:name=".browserswitch.AuthTabLauncherInitializer"
             android:authorities="${applicationId}.paypal-core-payments-auth-tab-init"
             android:exported="false" />
     </application>
