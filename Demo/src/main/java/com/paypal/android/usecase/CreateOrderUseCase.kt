@@ -37,8 +37,7 @@ class CreateOrderUseCase @Inject constructor(
                 experienceContext = PayPalOrderExperienceContext(
                     returnUrl = returnToAppUrlConfig.returnAppUrl,
                     cancelUrl = returnToAppUrlConfig.cancelAppUrl,
-                    paymentMethodSelected = request.paymentMethodSelected,
-                    userAction = request.userAction
+                    paymentMethodSelected = request.paymentMethodSelected
                 )
             )
         )
