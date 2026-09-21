@@ -1,5 +1,10 @@
 # PayPal Android SDK Release Notes
 
+## unreleased
+
+* FraudProtection
+  * Update Magnes SDK embedded jar file to avoid symbol collisions with other PayPal SDKs.
+
 ## 3.0.0 (2026-08-18)
 
 * CardPayments
