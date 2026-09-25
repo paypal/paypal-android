@@ -326,3 +326,12 @@ public final class com/paypal/android/corepayments/model/APIResult$Success : com
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class com/paypal/android/corepayments/model/TokenType : java/lang/Enum {
+	public static final field BILLING_TOKEN Lcom/paypal/android/corepayments/model/TokenType;
+	public static final field ORDER_ID Lcom/paypal/android/corepayments/model/TokenType;
+	public static final field VAULT_ID Lcom/paypal/android/corepayments/model/TokenType;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/paypal/android/corepayments/model/TokenType;
+	public static fun values ()[Lcom/paypal/android/corepayments/model/TokenType;
+}
+
