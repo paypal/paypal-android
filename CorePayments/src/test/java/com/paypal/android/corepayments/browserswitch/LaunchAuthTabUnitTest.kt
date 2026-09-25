@@ -73,6 +73,21 @@ class LaunchAuthTabUnitTest {
     }
 
     @Test
+    fun `parseResult preserves verification failures without a redirect URI`() {
+        val resultIntent = Intent().setData("merchant.app://ignored".toUri())
+
+        listOf(
+            AuthTabIntent.RESULT_VERIFICATION_FAILED,
+            AuthTabIntent.RESULT_VERIFICATION_TIMED_OUT,
+        ).forEach { resultCode ->
+            assertEquals(
+                AuthTabResult(resultCode, null),
+                sut.parseResult(resultCode, resultIntent),
+            )
+        }
+    }
+
+    @Test
     fun `parseResult normalizes unsupported result code`() {
         val result = sut.parseResult(42, Intent().setData("merchant.app://ignored".toUri()))
 

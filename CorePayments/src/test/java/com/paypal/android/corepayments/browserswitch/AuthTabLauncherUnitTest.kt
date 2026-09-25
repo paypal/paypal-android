@@ -89,7 +89,7 @@ class AuthTabLauncherUnitTest {
     }
 
     @Test
-    fun `a recreated Activity receives an in-flight result through the same registry key`() {
+    fun `process recreation restores an in-flight result through the same registry key`() {
         val originalActivity = controller.get()
         assertEquals(LaunchAuthTabResult.Success, client.launch(originalActivity, options))
         val requestCode = shadowOf(originalActivity).nextStartedActivityForResult.requestCode
@@ -101,6 +101,7 @@ class AuthTabLauncherUnitTest {
         lifecycleCallbacks = AuthTabLauncherLifecycleCallbacks().also {
             it.initialize(application)
         }
+        client = AuthTabClient()
         controller = Robolectric.buildActivity(AuthTabHostActivity::class.java).create(savedState)
         val restoredActivity = controller.get()
         assertEquals(Lifecycle.State.CREATED, restoredActivity.lifecycle.currentState)

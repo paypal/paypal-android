@@ -29,11 +29,14 @@ internal class AuthTabLauncher private constructor(
         }
 
         pendingRequest = PendingRequest.from(options)
+        var launchSucceeded = false
         try {
             launcher.launch(options)
-        } catch (error: RuntimeException) {
-            pendingRequest = null
-            throw error
+            launchSucceeded = true
+        } finally {
+            if (!launchSucceeded) {
+                pendingRequest = null
+            }
         }
     }
 
