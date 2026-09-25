@@ -15,7 +15,7 @@ class DeviceInspector(private val context: Context) {
         get() = isAppInstalled(PAYPAL_APP_PACKAGE)
 
     /**
-     * The installed PayPal app's version code (build number), or `null` if the app isn't
+     * The installed PayPal app's version code (build number), or `0` if the app isn't
      * installed or its version can't be read. Uses [android.content.pm.PackageInfo.longVersionCode]
      * on API 28+ and falls back to the deprecated `versionCode` int below that.
      */
@@ -60,12 +60,23 @@ class DeviceInspector(private val context: Context) {
 
     fun isDeepLinkConfiguredInManifest(returnUrlScheme: String): Boolean {
         val testUri = "$returnUrlScheme://".toUri()
-        val deepLinkIntent = Intent(Intent.ACTION_VIEW, testUri)
-        deepLinkIntent.addCategory(Intent.CATEGORY_DEFAULT)
-        deepLinkIntent.addCategory(Intent.CATEGORY_BROWSABLE)
+        val deepLinkIntent = Intent(Intent.ACTION_VIEW, testUri).apply {
+            addCategory(Intent.CATEGORY_DEFAULT)
+            addCategory(Intent.CATEGORY_BROWSABLE)
+            setPackage(context.packageName)
+        }
         val candidateActivities =
             context.packageManager.queryIntentActivities(deepLinkIntent, 0)
         return candidateActivities.isNotEmpty()
+    }
+
+    fun isAppLinkConfiguredInManifest(appLinkUrl: String): Boolean {
+        val appLinkIntent = Intent(Intent.ACTION_VIEW, appLinkUrl.toUri()).apply {
+            addCategory(Intent.CATEGORY_DEFAULT)
+            addCategory(Intent.CATEGORY_BROWSABLE)
+            setPackage(context.packageName)
+        }
+        return context.packageManager.queryIntentActivities(appLinkIntent, 0).isNotEmpty()
     }
 
     companion object {

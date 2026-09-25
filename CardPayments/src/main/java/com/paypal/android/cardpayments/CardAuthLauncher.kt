@@ -75,6 +75,7 @@ internal class CardAuthLauncher(private val browserSwitchClient: BrowserSwitchCl
         return when (val result = captureDeepLink(requestCode, intent, authState)) {
             is CaptureDeepLinkResult.Success -> parseApproveOrderSuccessResult(result.deepLink)
             is CaptureDeepLinkResult.Failure -> CardFinishApproveOrderResult.Failure(result.reason)
+            is CaptureDeepLinkResult.Canceled -> CardFinishApproveOrderResult.NoResult
             is CaptureDeepLinkResult.Ignore -> CardFinishApproveOrderResult.NoResult
         }
     }
@@ -84,6 +85,7 @@ internal class CardAuthLauncher(private val browserSwitchClient: BrowserSwitchCl
         return when (val result = captureDeepLink(requestCode, intent, authState)) {
             is CaptureDeepLinkResult.Success -> parseVaultSuccessResult(result.deepLink)
             is CaptureDeepLinkResult.Failure -> CardFinishVaultResult.Failure(result.reason)
+            is CaptureDeepLinkResult.Canceled -> CardFinishVaultResult.NoResult
             is CaptureDeepLinkResult.Ignore -> CardFinishVaultResult.NoResult
         }
     }

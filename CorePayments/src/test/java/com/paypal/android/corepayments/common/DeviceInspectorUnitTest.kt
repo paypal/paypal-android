@@ -31,6 +31,7 @@ class DeviceInspectorUnitTest {
         context = mockk()
         packageManager = mockk()
         every { context.packageManager } returns packageManager
+        every { context.packageName } returns "merchant.app"
         sut = DeviceInspector(context)
     }
 
@@ -220,6 +221,7 @@ class DeviceInspectorUnitTest {
         val capturedIntent = intentSlot.captured
         assertEquals(Intent.ACTION_VIEW, capturedIntent.action)
         assertEquals("com.example.app.returnscheme://", capturedIntent.data.toString())
+        assertEquals("merchant.app", capturedIntent.`package`)
         assertTrue(capturedIntent.hasCategory(Intent.CATEGORY_DEFAULT))
         assertTrue(capturedIntent.hasCategory(Intent.CATEGORY_BROWSABLE))
     }
@@ -242,5 +244,22 @@ class DeviceInspectorUnitTest {
 
         val result = sut.isDeepLinkConfiguredInManifest("com.example.app.returnscheme")
         assertFalse(result)
+    }
+
+    @Test
+    fun `isAppLinkConfiguredInManifest restricts resolution to the merchant package`() {
+        val intentSlot = slot<Intent>()
+        every {
+            packageManager.queryIntentActivities(capture(intentSlot), 0)
+        } returns listOf(ResolveInfo())
+
+        val result = sut.isAppLinkConfiguredInManifest("https://merchant.example/return")
+
+        assertTrue(result)
+        val capturedIntent = intentSlot.captured
+        assertEquals("https://merchant.example/return", capturedIntent.data.toString())
+        assertEquals("merchant.app", capturedIntent.`package`)
+        assertTrue(capturedIntent.hasCategory(Intent.CATEGORY_DEFAULT))
+        assertTrue(capturedIntent.hasCategory(Intent.CATEGORY_BROWSABLE))
     }
 }

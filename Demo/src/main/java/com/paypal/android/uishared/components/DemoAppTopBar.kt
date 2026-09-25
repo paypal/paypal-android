@@ -46,7 +46,7 @@ fun DemoAppTopBar(
                 IconButton(onClick = it) {
                     Icon(
                         imageVector = Icons.Filled.Settings,
-                        contentDescription = "Environment Settings"
+                        contentDescription = "Settings"
                     )
                 }
             }

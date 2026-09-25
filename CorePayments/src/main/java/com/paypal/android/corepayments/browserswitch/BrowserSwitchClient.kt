@@ -2,22 +2,58 @@ package com.paypal.android.corepayments.browserswitch
 
 import android.app.Activity
 import android.content.Context
+import androidx.activity.ComponentActivity
 import androidx.annotation.RestrictTo
 import com.paypal.android.corepayments.common.DeviceInspector
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class BrowserSwitchClient internal constructor(
     private val chromeCustomTabsClient: ChromeCustomTabsClient,
+    private val authTabClient: AuthTabClient,
     private val deviceInspector: DeviceInspector
 ) {
 
-    constructor(context: Context) : this(ChromeCustomTabsClient(), DeviceInspector(context))
+    constructor(context: Context) : this(
+        ChromeCustomTabsClient(),
+        AuthTabClient(),
+        DeviceInspector(context),
+    )
 
     fun start(
         context: Context,
         options: BrowserSwitchOptions
     ): BrowserSwitchStartResult {
         val activity = context as? Activity
+        val launchMode = getLaunchMode(activity, options.launchMode)
+        getValidationFailure(activity, options, launchMode)?.let { return it }
+
+        return when (launchMode) {
+            BrowserSwitchLaunchMode.CUSTOM_TAB -> launchCustomTab(context, options)
+            BrowserSwitchLaunchMode.AUTH_TAB -> launchAuthTab(
+                requireNotNull(activity as? ComponentActivity),
+                options,
+            )
+        }
+    }
+
+    private fun getLaunchMode(
+        activity: Activity?,
+        requestedLaunchMode: BrowserSwitchLaunchMode,
+    ): BrowserSwitchLaunchMode =
+        if (requestedLaunchMode == BrowserSwitchLaunchMode.AUTH_TAB &&
+            activity != null &&
+            activity !is ComponentActivity
+        ) {
+            BrowserSwitchLaunchMode.CUSTOM_TAB
+        } else {
+            requestedLaunchMode
+        }
+
+    private fun getValidationFailure(
+        activity: Activity?,
+        options: BrowserSwitchOptions,
+        launchMode: BrowserSwitchLaunchMode,
+    ): BrowserSwitchStartResult.Failure? {
         val returnUrlScheme = options.returnUrlScheme
         val appLinkUrl = options.appLinkUrl
         return if (activity != null && activity.isFinishing) {
@@ -26,18 +62,47 @@ class BrowserSwitchClient internal constructor(
             Failure.ReturnUrlSchemeAndAppLinkUrlBothNull
         } else if (returnUrlScheme != null && !hasValidDeepLinkConfig(returnUrlScheme)) {
             Failure.ManifestDeepLinkConfigurationInvalid
+        } else if (
+            launchMode == BrowserSwitchLaunchMode.AUTH_TAB &&
+            appLinkUrl != null &&
+            !hasValidAppLinkConfig(appLinkUrl)
+        ) {
+            Failure.ManifestAppLinkConfigurationInvalid
+        } else if (launchMode == BrowserSwitchLaunchMode.AUTH_TAB && activity == null) {
+            Failure.AuthTabHostActivityRequired
         } else {
-            val cctOptions = ChromeCustomTabOptions(launchUri = options.targetUri)
-            when (chromeCustomTabsClient.launch(context, cctOptions)) {
-                LaunchChromeCustomTabResult.Success -> BrowserSwitchStartResult.Success
-                LaunchChromeCustomTabResult.ActivityNotFound -> Failure.NoWebBrowser
-            }
+            null
+        }
+    }
+
+    private fun launchCustomTab(
+        context: Context,
+        options: BrowserSwitchOptions,
+    ): BrowserSwitchStartResult {
+        val customTabOptions = ChromeCustomTabOptions(launchUri = options.targetUri)
+        return when (chromeCustomTabsClient.launch(context, customTabOptions)) {
+            LaunchChromeCustomTabResult.Success -> BrowserSwitchStartResult.Success
+            LaunchChromeCustomTabResult.ActivityNotFound -> Failure.NoWebBrowser
+        }
+    }
+
+    private fun launchAuthTab(
+        activity: ComponentActivity,
+        options: BrowserSwitchOptions,
+    ): BrowserSwitchStartResult {
+        return when (val result = authTabClient.launch(activity, options)) {
+            LaunchAuthTabResult.Success -> BrowserSwitchStartResult.Success
+            LaunchAuthTabResult.ActivityNotFound -> Failure.NoWebBrowser
+            is LaunchAuthTabResult.Failure -> BrowserSwitchStartResult.Failure(result.error)
         }
     }
 
     // check for invalid deep link configuration in AndroidManifest.xml
     private fun hasValidDeepLinkConfig(returnUrlScheme: String) =
         deviceInspector.isDeepLinkConfiguredInManifest(returnUrlScheme)
+
+    private fun hasValidAppLinkConfig(appLinkUrl: String) =
+        deviceInspector.isAppLinkConfiguredInManifest(appLinkUrl)
 
     internal companion object {
         object Failure {
@@ -60,6 +125,14 @@ class BrowserSwitchClient internal constructor(
                 Exception(
                     "This app is not correctly configured to handle deep links from the return url scheme provided."
                 )
+            )
+            val ManifestAppLinkConfigurationInvalid = BrowserSwitchStartResult.Failure(
+                Exception(
+                    "This app is not correctly configured to handle the provided App Link return URL."
+                )
+            )
+            val AuthTabHostActivityRequired = BrowserSwitchStartResult.Failure(
+                Exception("Unable to launch Auth Tab without a source Activity.")
             )
         }
     }
