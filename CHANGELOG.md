@@ -4,8 +4,10 @@
 
 * PayPalPayments
   * Use AndroidX Auth Tab for the PayPal web fallback and report `Canceled` when the buyer closes it
-  * Require the Activity passed to `start()` or `vault()` to extend `ComponentActivity`, so Auth Tab
-    results can survive configuration changes and process recreation without an SDK trampoline Activity
+  * Register the Auth Tab result contract inside the SDK with no merchant integration changes or
+    retained Activity registry; plain `Activity` hosts continue to use Chrome Custom Tabs
+  * Preserve Auth Tab results across configuration changes and process recreation without an SDK
+    trampoline Activity
 
 ## 3.0.0 (2026-08-18)
 

@@ -114,8 +114,10 @@ val clientMetadataId = dataCollector.collectDeviceData(
 An AndroidX `ComponentActivity` host is recommended for `start()` and `vault()`. This includes
 `FragmentActivity` and `AppCompatActivity`. These hosts provide the `ActivityResultRegistry` used by
 Auth Tab and support restoration across configuration changes and process recreation during the web
-fallback. A plain `android.app.Activity` is also supported; for that host, the SDK opens the web
-fallback in a Chrome Custom Tab without the same automatic restoration guarantees.
+fallback. The SDK registers its Auth Tab contract automatically; your integration still only calls
+the `PayPalClient` methods shown below. A plain `android.app.Activity` is also supported; for that
+host, the SDK opens the web fallback in a Chrome Custom Tab without the same automatic restoration
+guarantees.
 
 ```kotlin
 val orderId = myServer.createOrder()   // include the client metadata ID from Step 3
@@ -269,17 +271,19 @@ Dedicated buttons exist — `PayLaterButton` and `PayPalCreditButton` (`payment-
 | `finishVault(intent)` | `PayPalFinishVaultResult?` | `Success(approvalSessionId)` / `Canceled` / `Failure(error)` / `NoResult` / `null` | Success: store the returned `approvalSessionId`. Canceled: return the buyer to your save screen. Failure: show an error. `NoResult`: the intent was not a PayPal return — ignore it. `null`: same as above — no matching in-memory or restored browser-switch state. |
 
 **Configuration changes and process death.** For an Auth Tab flow hosted by a `ComponentActivity`,
-AndroidX saves the pending launcher's registry mapping with the host Activity, while the SDK saves
-minimal browser-switch request state. The SDK re-registers the same key before the recreated Activity
-reaches `STARTED`, then includes the restored request state on the return intent. This lets a newly
-constructed `PayPalClient` complete `finishStart()` or `finishVault()` even if the app process was
-killed while the browser was foregrounded. Android must retain the Activity's saved state; force-stop,
-clearing app data, removing the task, or disabling the SDK's initializer provider invalidates the
-in-flight result. If `finishStart()` / `finishVault()` is invoked without in-memory or restored state,
-it returns the documented `null` result. Chrome Custom Tab flows from a plain `Activity`, like the
-PayPal-app switch path, do not use the Activity Result registry and therefore do not have the same
-automatic restoration guarantees; use the existing `instanceState` / `restore()` mechanism where
-manual state recovery is needed.
+the SDK's initializer registers an Activity-owned Auth Tab result contract before the host reaches
+`STARTED`; merchants do not register or retain an `ActivityResultLauncher`. AndroidX saves the
+launcher's registry mapping with the host Activity, while the SDK saves only minimal browser-switch
+request state. The recreated Activity receives the same registry key and includes the restored request
+state on the return intent. The SDK does not keep a process-wide collection of Activity references.
+This lets a newly constructed `PayPalClient` complete `finishStart()` or `finishVault()` even if the
+app process was killed while the browser was foregrounded. Android must retain the Activity's saved
+state; force-stop, clearing app data, removing the task, or disabling the SDK's initializer provider
+invalidates the in-flight result. If `finishStart()` / `finishVault()` is invoked without in-memory or
+restored state, it returns the documented `null` result. Chrome Custom Tab flows from a plain
+`Activity`, like the PayPal-app switch path, do not use the Activity Result registry and therefore do
+not have the same automatic restoration guarantees; use the existing `instanceState` / `restore()`
+mechanism where manual state recovery is needed.
 
 ## Best practices
 

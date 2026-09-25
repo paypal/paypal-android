@@ -14,6 +14,13 @@ How to move an existing **PayPal Mobile SDK V2 (2.x)** Android integration to **
 
 Card (ACDC) keeps its own client; the main change it inherits is the `merchantId` on `CoreConfig`. Card's `approveOrder()` / `presentAuthChallenge()` / `finishApproveOrder()` result-type pattern is unchanged from 2.x.
 
+The Auth Tab web fallback does not add any migration steps. Continue passing the same `Activity` to
+`start()` and `vault()`; the SDK owns the Activity Result contract and result handling. A
+`ComponentActivity` (including `FragmentActivity` and `AppCompatActivity`) uses Auth Tab
+automatically, while a plain `android.app.Activity` remains supported through the Chrome Custom Tab
+fallback. You do not need to register an `ActivityResultLauncher`, change your Activity base class,
+or add return-result wiring.
+
 ## Before you upgrade
 
 * Get your **merchant ID** (the encrypted merchant account ID) from the [PayPal Developer Dashboard](https://developer.paypal.com/dashboard/) — it is now required to initialize the SDK.
