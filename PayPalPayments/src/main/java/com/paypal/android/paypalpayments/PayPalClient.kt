@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import androidx.activity.ComponentActivity
 import androidx.annotation.VisibleForTesting
 import androidx.core.net.toUri
 import com.paypal.android.corepayments.CoreConfig
@@ -11,6 +12,8 @@ import com.paypal.android.corepayments.HttpRoundTripTiming
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.ReturnToAppStrategy
 import com.paypal.android.corepayments.analytics.AnalyticsService
+import com.paypal.android.corepayments.browserswitch.AuthTabClient
+import com.paypal.android.corepayments.browserswitch.BrowserSwitchLaunchMode
 import com.paypal.android.corepayments.api.CreateShopperSessionWithAppSwitchEligibilityAPI
 import com.paypal.android.corepayments.common.DeviceInspector
 import com.paypal.android.corepayments.linkType
@@ -29,6 +32,9 @@ import com.paypal.android.paypalpayments.analytics.PayPalAnalytics
 import com.paypal.android.paypalpayments.analytics.PresentationType
 import com.paypal.android.paypalpayments.errors.PayPalError
 import com.paypal.android.paypalpayments.usecase.GetEffectiveReturnUrlConfigUseCase
+import java.text.ParsePosition
+import java.text.SimpleDateFormat
+import java.util.Locale
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -139,7 +145,8 @@ class PayPalClient internal constructor(
      * launching checkout. If [createPayPalSession] was never called the callback receives a
      * [PayPalPresentAuthChallengeResult.Failure].
      *
-     * @param activity The Activity to launch the PayPal checkout from.
+     * @param activity The Activity to launch the PayPal checkout from. A [ComponentActivity] host
+     * uses an Auth Tab for web fallback; other Activity hosts use a Chrome Custom Tab.
      * @param orderId The id of the order to be approved.
      * @param callback Callback to receive the auth-challenge result.
      */
@@ -170,16 +177,22 @@ class PayPalClient internal constructor(
         applicationScope.launch {
             try {
                 val shopperSession = deferred.await()
-                shopperSessionDeferred = null
+
+                if (shopperSession?.hasExpired() == true) {
+                    shopperSessionDeferred = null
+                    return@launch notifyCheckoutSessionNotStarted(callback, startTime)
+                }
                 analytics.notify(PayPalEvent.STARTED, params = analyticsEventParams)
 
                 if (shopperSession != null) {
-                    val result = launchCheckout(
-                        activity = activity,
-                        shopperSession = shopperSession,
-                        orderId = orderId,
-                        startTime = startTime,
-                    )
+                    val result = withContext(Dispatchers.Main) {
+                        launchCheckout(
+                            activity = activity,
+                            shopperSession = shopperSession,
+                            orderId = orderId,
+                            startTime = startTime,
+                        )
+                    }
                     withContext(Dispatchers.Main) {
                         callback.onPayPalResult(result)
                     }
@@ -211,7 +224,8 @@ class PayPalClient internal constructor(
      * launching the vault flow. If [createPayPalSession] was never called the callback receives a
      * [PayPalPresentAuthChallengeResult.Failure].
      *
-     * @param activity The Activity to launch the PayPal vault flow from.
+     * @param activity The Activity to launch the PayPal vault flow from. A [ComponentActivity]
+     * host uses an Auth Tab for web fallback; other Activity hosts use a Chrome Custom Tab.
      * @param setupTokenId The setup token id associated with the vault approval.
      * @param callback Callback to receive the vault result.
      */
@@ -242,16 +256,22 @@ class PayPalClient internal constructor(
         applicationScope.launch {
             try {
                 val shopperSession = deferred.await()
-                shopperSessionDeferred = null
+
+                if (shopperSession?.hasExpired() == true) {
+                    shopperSessionDeferred = null
+                    return@launch notifyVaultSessionNotStarted(callback, startTime)
+                }
                 analytics.notify(PayPalEvent.STARTED, params = analyticsEventParams)
 
                 if (shopperSession != null) {
-                    val result = launchVault(
-                        activity = activity,
-                        shopperSession = shopperSession,
-                        setupTokenId = setupTokenId,
-                        startTime = startTime,
-                    )
+                    val result = withContext(Dispatchers.Main) {
+                        launchVault(
+                            activity = activity,
+                            shopperSession = shopperSession,
+                            setupTokenId = setupTokenId,
+                            startTime = startTime,
+                        )
+                    }
                     withContext(Dispatchers.Main) {
                         callback.onPayPalResult(result)
                     }
@@ -285,12 +305,14 @@ class PayPalClient internal constructor(
      * back into the foreground after an auth challenge.
      */
     fun finishStart(intent: Intent): PayPalFinishStartResult? =
-        sessionStore.authState?.let { authState ->
+        getBrowserSwitchState(intent)?.let { authState ->
             analytics.notify(PayPalEvent.HANDLE_RETURN_STARTED, params = analyticsEventParams)
             val result = payPalLauncher.completeCheckoutAuthRequest(intent, authState)
             logCheckoutResult(result)
             if (result != PayPalFinishStartResult.NoResult) {
+                shopperSessionDeferred = null
                 sessionStore.clear()
+                AuthTabClient.clearRestoredBrowserSwitchState(intent)
             }
             result
         }
@@ -304,15 +326,20 @@ class PayPalClient internal constructor(
      * back into the foreground after an auth challenge.
      */
     fun finishVault(intent: Intent): PayPalFinishVaultResult? =
-        sessionStore.authState?.let { authState ->
+        getBrowserSwitchState(intent)?.let { authState ->
             analytics.notify(PayPalEvent.HANDLE_RETURN_STARTED, params = analyticsEventParams)
             val result = payPalLauncher.completeVaultAuthRequest(intent, authState)
             logVaultResult(result)
             if (result != PayPalFinishVaultResult.NoResult) {
+                shopperSessionDeferred = null
                 sessionStore.clear()
+                AuthTabClient.clearRestoredBrowserSwitchState(intent)
             }
             result
         }
+
+    private fun getBrowserSwitchState(intent: Intent): String? =
+        sessionStore.authState ?: AuthTabClient.restoredBrowserSwitchState(intent)
 
     /**
      * Launches the PayPal checkout UI after the shopper session has been resolved. @see [launch].
@@ -340,7 +367,8 @@ class PayPalClient internal constructor(
      * Launches the PayPal checkout/vault UI after the shopper session has been resolved.
      *
      * Attempts a PayPal app switch (App Link) if the PayPal app is installed and eligible;
-     * otherwise falls back to Chrome Custom Tabs.
+     * otherwise falls back to an Auth Tab when the host is a [ComponentActivity], or a Chrome
+     * Custom Tab for other Activity hosts.
      *
      * @param activity The Activity needed to launch the checkout/vault UI.
      * @param shopperSession The resolved shopper session containing launch URLs and eligibility.
@@ -374,12 +402,18 @@ class PayPalClient internal constructor(
         }
         val endTime = System.currentTimeMillis()
 
+        val launchMode = when {
+            appSwitchEnabled -> BrowserSwitchLaunchMode.CUSTOM_TAB
+            activity is ComponentActivity -> BrowserSwitchLaunchMode.AUTH_TAB
+            else -> BrowserSwitchLaunchMode.CUSTOM_TAB
+        }
         val result = payPalLauncher.launchWithUrl(
             context = activity,
             uri = launchUri,
             token = token,
             tokenType = tokenType,
             returnToAppStrategy = returnToAppStrategy,
+            launchMode = launchMode,
         )
         logPresentAuthChallengeResult(result, isVault, startTime, endTime)
         return result
@@ -503,6 +537,9 @@ class PayPalClient internal constructor(
             appendObservabilityQueryParams()
         }.build()
     }
+
+    private fun CreateShopperSessionWithAppSwitchEligibilityResponse.hasExpired(): Boolean =
+        isShopperSessionExpired(shopperSessionConfig.expiresAt, System.currentTimeMillis())
 
     /**
      * Appends the given token as a query param.
@@ -705,6 +742,7 @@ class PayPalClient internal constructor(
                 logUserPerceivedLatency(flowType, result, startTime, endTime)
             }
             is PayPalPresentAuthChallengeResult.Failure -> {
+                shopperSessionDeferred = null
                 val event = if (appSwitchEnabled) {
                     PayPalEvent.APP_SWITCH_FAILED
                 } else {
@@ -852,4 +890,32 @@ class PayPalClient internal constructor(
         }
     }
     // endregion
+}
+
+private val RFC_3339_TIMESTAMP = Regex(
+    """^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})(?:\.(\d+))?(Z|[+-]\d{2}:\d{2})$"""
+)
+private const val MILLISECOND_DIGITS = 3
+
+@VisibleForTesting
+internal fun isShopperSessionExpired(expiresAt: String, nowMillis: Long): Boolean {
+    val match = RFC_3339_TIMESTAMP.matchEntire(expiresAt) ?: return true
+    val (timestamp, fractionalSeconds, zone) = match.destructured
+    val milliseconds = fractionalSeconds
+        .take(MILLISECOND_DIGITS)
+        .padEnd(MILLISECOND_DIGITS, '0')
+    val timeZone = zone.let {
+        if (zone == "Z") "+0000" else zone.replace(":", "")
+    }
+    val normalizedTimestamp = "$timestamp.$milliseconds$timeZone"
+    val parsePosition = ParsePosition(0)
+    val expirationTime = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.US).run {
+        isLenient = false
+        parse(normalizedTimestamp, parsePosition)
+    }
+
+    // Missing or malformed expiration data is not safe to cache, so fail closed as expired.
+    return expirationTime == null ||
+        parsePosition.index != normalizedTimestamp.length ||
+        expirationTime.time <= nowMillis
 }

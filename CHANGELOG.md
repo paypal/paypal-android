@@ -1,5 +1,14 @@
 # PayPal Android SDK Release Notes
 
+## Unreleased
+
+* PayPalPayments
+  * Use AndroidX Auth Tab for the PayPal web fallback and report `Canceled` when the buyer closes it
+  * Register the Auth Tab result contract inside the SDK with no merchant integration changes or
+    retained Activity registry; plain `Activity` hosts continue to use Chrome Custom Tabs
+  * Preserve Auth Tab results across configuration changes and process recreation without an SDK
+    trampoline Activity
+
 ## 3.0.0 (2026-08-18)
 
 * CardPayments
@@ -416,4 +425,3 @@
   * Use the web Paypal checkout flow in your app
 * Add `PayPalUI`:
   * Provides a set of customizable PayPal Buttons
-
