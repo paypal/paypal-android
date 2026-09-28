@@ -32,6 +32,9 @@ import com.paypal.android.paypalpayments.analytics.PayPalAnalytics
 import com.paypal.android.paypalpayments.analytics.PresentationType
 import com.paypal.android.paypalpayments.errors.PayPalError
 import com.paypal.android.paypalpayments.usecase.GetEffectiveReturnUrlConfigUseCase
+import java.text.ParsePosition
+import java.text.SimpleDateFormat
+import java.util.Locale
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -174,6 +177,11 @@ class PayPalClient internal constructor(
         applicationScope.launch {
             try {
                 val shopperSession = deferred.await()
+
+                if (shopperSession?.hasExpired() == true) {
+                    shopperSessionDeferred = null
+                    return@launch notifyCheckoutSessionNotStarted(callback, startTime)
+                }
                 analytics.notify(PayPalEvent.STARTED, params = analyticsEventParams)
 
                 if (shopperSession != null) {
@@ -248,6 +256,11 @@ class PayPalClient internal constructor(
         applicationScope.launch {
             try {
                 val shopperSession = deferred.await()
+
+                if (shopperSession?.hasExpired() == true) {
+                    shopperSessionDeferred = null
+                    return@launch notifyVaultSessionNotStarted(callback, startTime)
+                }
                 analytics.notify(PayPalEvent.STARTED, params = analyticsEventParams)
 
                 if (shopperSession != null) {
@@ -524,6 +537,9 @@ class PayPalClient internal constructor(
             appendObservabilityQueryParams()
         }.build()
     }
+
+    private fun CreateShopperSessionWithAppSwitchEligibilityResponse.hasExpired(): Boolean =
+        isShopperSessionExpired(shopperSessionConfig.expiresAt, System.currentTimeMillis())
 
     /**
      * Appends the given token as a query param.
@@ -874,4 +890,32 @@ class PayPalClient internal constructor(
         }
     }
     // endregion
+}
+
+private val RFC_3339_TIMESTAMP = Regex(
+    """^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})(?:\.(\d+))?(Z|[+-]\d{2}:\d{2})$"""
+)
+private const val MILLISECOND_DIGITS = 3
+
+@VisibleForTesting
+internal fun isShopperSessionExpired(expiresAt: String, nowMillis: Long): Boolean {
+    val match = RFC_3339_TIMESTAMP.matchEntire(expiresAt) ?: return true
+    val (timestamp, fractionalSeconds, zone) = match.destructured
+    val milliseconds = fractionalSeconds
+        .take(MILLISECOND_DIGITS)
+        .padEnd(MILLISECOND_DIGITS, '0')
+    val timeZone = zone.let {
+        if (zone == "Z") "+0000" else zone.replace(":", "")
+    }
+    val normalizedTimestamp = "$timestamp.$milliseconds$timeZone"
+    val parsePosition = ParsePosition(0)
+    val expirationTime = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.US).run {
+        isLenient = false
+        parse(normalizedTimestamp, parsePosition)
+    }
+
+    // Missing or malformed expiration data is not safe to cache, so fail closed as expired.
+    return expirationTime == null ||
+        parsePosition.index != normalizedTimestamp.length ||
+        expirationTime.time <= nowMillis
 }

@@ -766,13 +766,17 @@ class PayPalClientUnitTest {
         fallbackSchemeUrl = "com.example.app://paypal",
     )
     private val fakeUserIdentity = PayPalUserIdentity()
+    private val validShopperSessionExpiration = "9999-12-31T23:59:59Z"
     private val fakeSessionResponse = CreateShopperSessionWithAppSwitchEligibilityResponse(
         appSwitchEligible = false,
         redirectUrl = "",
         checkoutFallbackUrl = "",
         ineligibleReason = "",
         matchedAuthenticationMethods = emptyList(),
-        shopperSessionConfig = ShopperSessionConfig("fake-session-id", "")
+        shopperSessionConfig = ShopperSessionConfig(
+            "fake-session-id",
+            validShopperSessionExpiration,
+        )
     )
 
     private fun placeholderTokenUrl(
@@ -780,6 +784,16 @@ class PayPalClientUnitTest {
         tokenType: TokenType,
     ): String {
         return "$baseUrl?appSwitchEligible=true&tokenType=${tokenType.name}&"
+    }
+
+    @Test
+    fun `shopper session expiration parses RFC 3339 and fails closed`() {
+        val startOf2024 = 1_704_067_200_000L
+
+        assertFalse(isShopperSessionExpired("2024-01-01T00:00:00.001Z", startOf2024))
+        assertTrue(isShopperSessionExpired("2024-01-01T01:00:00+01:00", startOf2024))
+        assertTrue(isShopperSessionExpired("", startOf2024))
+        assertTrue(isShopperSessionExpired("not-a-timestamp", startOf2024))
     }
 
     // --- start(activity, orderId, callback) ---
@@ -902,6 +916,37 @@ class PayPalClientUnitTest {
             )
         }
         verify { callback.onPayPalResult(launchResult) }
+    }
+
+    @Test
+    fun `start() with orderId rejects an expired cached shopper session`() = runTest {
+        val sutV3 = makeSutWithUrlScheme()
+        val callback = mockk<PayPalResultCallback>(relaxed = true)
+        val expiredSession = fakeSessionResponse.copy(
+            shopperSessionConfig = fakeSessionResponse.shopperSessionConfig.copy(
+                expiresAt = "2000-01-01T00:00:00Z"
+            )
+        )
+        sutV3.createPayPalSession(
+            tokenType = TokenType.ORDER_ID,
+            userIdentity = fakeUserIdentity,
+            urlConfig = fakeUrlConfig,
+        )
+        sutV3.shopperSessionDeferred = CompletableDeferred(expiredSession)
+
+        sutV3.start(activity, "fake-order-id", callback)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        assertNull(sutV3.shopperSessionDeferred)
+        verify(exactly = 0) {
+            payPalLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
+        }
+        verify {
+            callback.onPayPalResult(match {
+                it is PayPalPresentAuthChallengeResult.Failure &&
+                    it.error.code == PayPalError.sessionNotCreatedError.code
+            })
+        }
     }
 
     @Test
@@ -1032,7 +1077,7 @@ class PayPalClientUnitTest {
                     "https://example.com/fallback",
                     tokenType = TokenType.ORDER_ID,
                 ),
-                shopperSessionConfig = ShopperSessionConfig("", "")
+                shopperSessionConfig = ShopperSessionConfig("", validShopperSessionExpiration)
             )
             val callback = mockk<PayPalResultCallback>(relaxed = true)
             sutV3.createPayPalSession(
@@ -1291,6 +1336,37 @@ class PayPalClientUnitTest {
             )
         }
         verify { callback.onPayPalResult(launchResult) }
+    }
+
+    @Test
+    fun `vault() with setupTokenId rejects an expired cached shopper session`() = runTest {
+        val sutV3 = makeSutWithUrlScheme()
+        val callback = mockk<PayPalResultCallback>(relaxed = true)
+        val expiredSession = fakeSessionResponse.copy(
+            shopperSessionConfig = fakeSessionResponse.shopperSessionConfig.copy(
+                expiresAt = "2000-01-01T00:00:00Z"
+            )
+        )
+        sutV3.createPayPalSession(
+            tokenType = TokenType.VAULT_ID,
+            userIdentity = fakeUserIdentity,
+            urlConfig = fakeUrlConfig,
+        )
+        sutV3.shopperSessionDeferred = CompletableDeferred(expiredSession)
+
+        sutV3.vault(activity, "fake-setup-token-id", callback)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        assertNull(sutV3.shopperSessionDeferred)
+        verify(exactly = 0) {
+            payPalLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
+        }
+        verify {
+            callback.onPayPalResult(match {
+                it is PayPalPresentAuthChallengeResult.Failure &&
+                    it.error.code == PayPalError.sessionNotCreatedError.code
+            })
+        }
     }
 
     @Test
