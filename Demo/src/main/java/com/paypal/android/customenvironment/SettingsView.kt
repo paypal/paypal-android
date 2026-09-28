@@ -37,16 +37,6 @@ import com.paypal.android.DemoActivityType
 
 private val successGreen = Color(color = 0xff007f5f)
 
-private data class ActivityTypeSettings(
-    val type: DemoActivityType,
-    val onSwitch: () -> Unit,
-)
-
-private data class SettingsContentState(
-    val uiState: SettingsUiState,
-    val activityTypeSettings: ActivityTypeSettings,
-)
-
 @Composable
 fun SettingsView(
     activityType: DemoActivityType,

@@ -16,7 +16,6 @@ import androidx.core.util.Consumer
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
@@ -26,17 +25,11 @@ import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
-import com.paypal.android.customenvironment.CustomEnvironmentRepository
 import com.paypal.android.customenvironment.SettingsViewModel
 import com.paypal.android.ui.CustomTabDemoApp
 import com.paypal.android.ui.paypal.PayPalCheckoutViewModel
-import com.paypal.android.usecase.CompleteOrderUseCase
-import com.paypal.android.usecase.CreateOrderUseCase
 import com.paypal.android.utils.NewIntentListenerHost
-import dagger.hilt.EntryPoint
-import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
-import dagger.hilt.components.SingletonComponent
 
 /**
  * Hosts the PayPal checkout demo without inheriting from ComponentActivity. This makes the SDK's
@@ -181,32 +174,4 @@ class CustomTabActivity : Activity(),
     }
 
     private data class NonConfigurationState(val viewModelStore: ViewModelStore)
-}
-
-@EntryPoint
-@InstallIn(SingletonComponent::class)
-interface CustomTabActivityDependencies {
-    fun customEnvironmentRepository(): CustomEnvironmentRepository
-    fun createOrderUseCase(): CreateOrderUseCase
-    fun completeOrderUseCase(): CompleteOrderUseCase
-}
-
-private class CustomTabViewModelFactory(
-    private val applicationContext: android.content.Context,
-    private val dependencies: CustomTabActivityDependencies,
-) : ViewModelProvider.Factory {
-
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel> create(modelClass: Class<T>): T = when (modelClass) {
-        PayPalCheckoutViewModel::class.java -> PayPalCheckoutViewModel(
-            applicationContext = applicationContext,
-            createOrderUseCase = dependencies.createOrderUseCase(),
-            completeOrderUseCase = dependencies.completeOrderUseCase(),
-            customEnvironmentRepository = dependencies.customEnvironmentRepository(),
-        ) as T
-        SettingsViewModel::class.java -> SettingsViewModel(
-            customEnvironmentRepository = dependencies.customEnvironmentRepository(),
-        ) as T
-        else -> throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
-    }
 }
