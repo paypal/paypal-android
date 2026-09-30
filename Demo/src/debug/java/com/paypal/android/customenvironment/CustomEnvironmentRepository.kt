@@ -103,7 +103,7 @@ class CustomEnvironmentRepository @Inject constructor(
                     bnCode = resolvedBnCode,
                 )
             } else {
-                fallbackConfig.copy(bnCode = resolvedBnCode)
+                fallbackConfig
             }
         }
     }
