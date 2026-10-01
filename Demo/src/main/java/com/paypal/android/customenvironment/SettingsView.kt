@@ -150,7 +150,7 @@ private fun CustomEnvironmentFields(
     )
     UrlField(
         label = "Venmo Checkout URL Prefix (Optional)",
-        placeholder = "e.g., qa, staging (formats as https://account.\$prefix.venmo.com/go/web/paypal)",
+        placeholder = "e.g., qa, staging, ext.live (formats as https://account.\$prefix.venmo.com/go/web/paypal)",
         value = settings.customVenmoCheckoutUrlPrefix,
         onValueChange = onCustomVenmoCheckoutUrlPrefixChange,
         imeAction = ImeAction.Next,

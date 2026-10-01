@@ -167,7 +167,6 @@ class SettingsViewModel @Inject constructor(
      */
     private fun validateUrl(url: String, optional: Boolean = false): String? = when {
         url.isBlank() -> if (optional) null else "URL is required"
-        url != url.trim() || url.contains(' ') -> "URL must not contain spaces"
         else -> try {
             val uri = URI(url)
             when {
@@ -180,11 +179,12 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    private fun validateVenmoCheckoutPrefix(value: String): String? = when {
-        value != value.trim() || value.contains(' ') -> "Prefix must not contain spaces"
-        !value.matches(Regex("[a-zA-Z0-9-]+")) -> "Prefix must contain only alphanumeric characters and hyphens"
-        else -> null
-    }
+    private fun validateVenmoCheckoutPrefix(value: String): String? =
+        if (value.matches(Regex("[a-zA-Z0-9.-]+"))) {
+            null
+        } else {
+            "Prefix must contain only alphanumeric characters, periods, and hyphens"
+        }
 
     private fun validateMerchantId(value: String): String? {
         @Suppress("MagicNumber")
