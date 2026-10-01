@@ -36,6 +36,18 @@ import androidx.hilt.navigation.compose.hiltViewModel
 
 private val successGreen = Color(color = 0xff007f5f)
 
+private data class SettingsCallbacks(
+    val onEnvironmentChange: (SelectedEnvironment) -> Unit,
+    val onCustomSdkRestUrlChange: (String) -> Unit,
+    val onCustomSdkGraphQLUrlChange: (String) -> Unit,
+    val onCustomClientIdChange: (String) -> Unit,
+    val onCustomMerchantBaseUrlChange: (String) -> Unit,
+    val onCustomMerchantIdChange: (String) -> Unit,
+    val onCustomBnCodeChange: (String) -> Unit,
+    val onSaveClick: () -> Unit,
+    val onClearClick: () -> Unit
+)
+
 @Composable
 fun SettingsView(
     viewModel: SettingsViewModel = hiltViewModel()
@@ -43,28 +55,24 @@ fun SettingsView(
     val uiState by viewModel.uiState.collectAsState()
     SettingsContent(
         uiState = uiState,
-        onEnvironmentChange = viewModel::updateSelectedEnvironment,
-        onCustomSdkRestUrlChange = viewModel::updateCustomSdkRestUrl,
-        onCustomSdkGraphQLUrlChange = viewModel::updateCustomSdkGraphQLUrl,
-        onCustomClientIdChange = viewModel::updateCustomClientId,
-        onCustomMerchantBaseUrlChange = viewModel::updateCustomMerchantBaseUrl,
-        onCustomMerchantIdChange = viewModel::updateCustomMerchantId,
-        onSaveClick = viewModel::saveConfig,
-        onClearClick = viewModel::clearConfig
+        callbacks = SettingsCallbacks(
+            onEnvironmentChange = viewModel::updateSelectedEnvironment,
+            onCustomSdkRestUrlChange = viewModel::updateCustomSdkRestUrl,
+            onCustomSdkGraphQLUrlChange = viewModel::updateCustomSdkGraphQLUrl,
+            onCustomClientIdChange = viewModel::updateCustomClientId,
+            onCustomMerchantBaseUrlChange = viewModel::updateCustomMerchantBaseUrl,
+            onCustomMerchantIdChange = viewModel::updateCustomMerchantId,
+            onCustomBnCodeChange = viewModel::updateCustomBnCode,
+            onSaveClick = viewModel::saveConfig,
+            onClearClick = viewModel::clearConfig
+        )
     )
 }
 
 @Composable
 private fun SettingsContent(
     uiState: SettingsUiState,
-    onEnvironmentChange: (SelectedEnvironment) -> Unit,
-    onCustomSdkRestUrlChange: (String) -> Unit,
-    onCustomSdkGraphQLUrlChange: (String) -> Unit,
-    onCustomClientIdChange: (String) -> Unit,
-    onCustomMerchantBaseUrlChange: (String) -> Unit,
-    onCustomMerchantIdChange: (String) -> Unit,
-    onSaveClick: () -> Unit,
-    onClearClick: () -> Unit
+    callbacks: SettingsCallbacks
 ) {
     val scrollState = rememberScrollState()
     Column(
@@ -74,22 +82,30 @@ private fun SettingsContent(
             .padding(horizontal = 16.dp, vertical = 24.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
+        BnCodeField(
+            value = uiState.settings.customBnCode,
+            onValueChange = callbacks.onCustomBnCodeChange,
+        )
+        Spacer(modifier = Modifier.height(8.dp))
         SettingsHeader()
-        EnvironmentSelector(selected = uiState.settings.selectedEnvironment, onSelect = onEnvironmentChange)
+        EnvironmentSelector(
+            selected = uiState.settings.selectedEnvironment,
+            onSelect = callbacks.onEnvironmentChange
+        )
         if (uiState.settings.selectedEnvironment == SelectedEnvironment.CUSTOM) {
             CustomEnvironmentFields(
                 uiState = uiState,
-                onCustomSdkRestUrlChange = onCustomSdkRestUrlChange,
-                onCustomSdkGraphQLUrlChange = onCustomSdkGraphQLUrlChange,
-                onCustomMerchantBaseUrlChange = onCustomMerchantBaseUrlChange,
-                onCustomClientIdChange = onCustomClientIdChange,
-                onCustomMerchantIdChange = onCustomMerchantIdChange,
+                onCustomSdkRestUrlChange = callbacks.onCustomSdkRestUrlChange,
+                onCustomSdkGraphQLUrlChange = callbacks.onCustomSdkGraphQLUrlChange,
+                onCustomMerchantBaseUrlChange = callbacks.onCustomMerchantBaseUrlChange,
+                onCustomClientIdChange = callbacks.onCustomClientIdChange,
+                onCustomMerchantIdChange = callbacks.onCustomMerchantIdChange,
             )
         }
         Spacer(modifier = Modifier.height(4.dp))
         SettingsStatus(settings = uiState.settings)
         Spacer(modifier = Modifier.height(8.dp))
-        SettingsActionButtons(onSaveClick = onSaveClick, onClearClick = onClearClick)
+        SettingsActionButtons(onSaveClick = callbacks.onSaveClick, onClearClick = callbacks.onClearClick)
         if (uiState.showSaveSuccess) {
             Text(
                 text = "Custom URLs saved successfully.",
@@ -144,6 +160,25 @@ private fun CustomEnvironmentFields(
         value = uiState.settings.customMerchantId,
         onValueChange = onCustomMerchantIdChange,
         imeAction = ImeAction.Done,
+    )
+}
+
+@Composable
+private fun BnCodeField(
+    value: String,
+    onValueChange: (String) -> Unit,
+) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = { Text("BN Code") },
+        placeholder = { Text("Enter BN Code (optional)", style = MaterialTheme.typography.bodySmall) },
+        modifier = Modifier.fillMaxWidth(),
+        singleLine = true,
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Ascii,
+            imeAction = ImeAction.Done
+        )
     )
 }
 
@@ -258,19 +293,23 @@ private fun SettingsViewPreview() {
                         customClientId = "client-id-entered-at-runtime",
                         customMerchantBaseUrl = "bad merchant url",
                         customMerchantId = "merchant-id-entered-at-runtime",
+                        customBnCode = "bn-code-entered-at-runtime",
                     ),
                     restUrlError = "URL must start with https://",
                     graphQLUrlError = "URL is required",
                     merchantBaseUrlError = "URL must not contain spaces"
                 ),
-                onEnvironmentChange = {},
-                onCustomSdkRestUrlChange = {},
-                onCustomSdkGraphQLUrlChange = {},
-                onCustomClientIdChange = {},
-                onCustomMerchantBaseUrlChange = {},
-                onCustomMerchantIdChange = {},
-                onSaveClick = {},
-                onClearClick = {}
+                callbacks = SettingsCallbacks(
+                    onEnvironmentChange = {},
+                    onCustomSdkRestUrlChange = {},
+                    onCustomSdkGraphQLUrlChange = {},
+                    onCustomClientIdChange = {},
+                    onCustomMerchantBaseUrlChange = {},
+                    onCustomMerchantIdChange = {},
+                    onCustomBnCodeChange = {},
+                    onSaveClick = {},
+                    onClearClick = {}
+                )
             )
         }
     }
