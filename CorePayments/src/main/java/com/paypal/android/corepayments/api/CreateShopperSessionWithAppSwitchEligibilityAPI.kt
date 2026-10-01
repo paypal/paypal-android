@@ -89,6 +89,7 @@ class CreateShopperSessionWithAppSwitchEligibilityAPI internal constructor(
                     isWebLLSEligible = false,
                     isWebView = false,
                     paymentType = params.paymentType,
+                    bnCode = params.bnCode,
                 ),
                 merchantOptInForAppSwitch = true,
                 osType = OS_TYPE,

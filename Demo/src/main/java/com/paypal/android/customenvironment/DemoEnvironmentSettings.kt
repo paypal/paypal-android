@@ -25,6 +25,9 @@ data class DemoEnvironmentSettings(
 
     /** Optional merchant ID override. When blank, falls back to the default integration merchant ID. */
     val customMerchantId: String = "",
+
+    /** Optional BN Code override. When blank, falls back to the default (none). */
+    val customBnCode: String = "",
 ) {
     /**
      * True when the config is ready to use. Only false when [selectedEnvironment] is CUSTOM

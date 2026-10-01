@@ -35,6 +35,7 @@ internal data class CreateShopperSessionExperimentationContext(
     val isWebLLSEligible: Boolean,
     val isWebView: Boolean,
     val paymentType: String,
+    val bnCode: String? = null,
 )
 
 @OptIn(InternalSerializationApi::class)
