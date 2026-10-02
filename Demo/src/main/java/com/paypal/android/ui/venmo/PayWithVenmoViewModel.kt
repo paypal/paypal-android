@@ -1,0 +1,159 @@
+package com.paypal.android.ui.venmo
+
+import android.content.Context
+import android.content.Intent
+import androidx.activity.ComponentActivity
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.paypal.android.api.model.Order
+import com.paypal.android.api.model.OrderIntent
+import com.paypal.android.api.services.SDKSampleServerAPI
+import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.customenvironment.CustomEnvironmentRepository
+import com.paypal.android.fraudprotection.PayPalDataCollector
+import com.paypal.android.fraudprotection.PayPalDataCollectorRequest
+import com.paypal.android.models.OrderRequest
+import com.paypal.android.uishared.state.ActionState
+import com.paypal.android.usecase.CompleteOrderUseCase
+import com.paypal.android.usecase.CreateVenmoOrderUseCase
+import com.paypal.android.venmo.VenmoClient
+import com.paypal.android.venmo.VenmoFinishStartResult
+import com.paypal.android.venmo.VenmoStartResult
+import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+
+@HiltViewModel
+class PayWithVenmoViewModel @Inject constructor(
+    @ApplicationContext val applicationContext: Context,
+    val createOrderUseCase: CreateVenmoOrderUseCase,
+    val completeOrderUseCase: CompleteOrderUseCase,
+    private val customEnvironmentRepository: CustomEnvironmentRepository,
+) : ViewModel() {
+
+    private val _uiState = MutableStateFlow(PayWithVenmoUiState())
+    val uiState = _uiState.asStateFlow()
+
+    private fun buildCoreConfig(): CoreConfig =
+        customEnvironmentRepository.getCoreConfig(
+            CoreConfig(
+                SDKSampleServerAPI.clientId,
+                merchantId = SDKSampleServerAPI.merchantId
+            )
+        )
+
+    private val coreConfig by lazy { buildCoreConfig() }
+    private val payPalDataCollector by lazy { PayPalDataCollector(coreConfig) }
+    private val venmoClient by lazy { VenmoClient(applicationContext, coreConfig) }
+
+    private var checkEligibilityState
+        get() = _uiState.value.checkEligibilityState
+        set(value) {
+            _uiState.update { it.copy(checkEligibilityState = value) }
+        }
+
+    private var createOrderState
+        get() = _uiState.value.createOrderState
+        set(value) {
+            _uiState.update { it.copy(createOrderState = value) }
+        }
+
+    private var payWithVenmoState
+        get() = _uiState.value.payWithVenmoState
+        set(value) {
+            _uiState.update { it.copy(payWithVenmoState = value) }
+        }
+
+    private var completeOrderState
+        get() = _uiState.value.completeOrderState
+        set(value) {
+            _uiState.update { it.copy(completeOrderState = value) }
+        }
+
+    private val createdOrder: Order?
+        get() = (createOrderState as? ActionState.Success)?.value
+
+    fun checkEligibility() {
+        checkEligibilityState = ActionState.Loading
+        venmoClient.isEligible(
+            buyerCountry = "US",
+            callback = { result ->
+                checkEligibilityState = ActionState.Success(result)
+            }
+        )
+    }
+
+    fun createOrder() {
+        viewModelScope.launch {
+            createOrderState = ActionState.Loading
+            val orderRequest = _uiState.value.run {
+                OrderRequest(
+                    intent = OrderIntent.CAPTURE,
+                    shouldVaultOnSuccess = false
+                )
+            }
+            createOrderState = createOrderUseCase(orderRequest).mapToActionState()
+        }
+    }
+
+    fun startVenmo(activity: ComponentActivity) {
+        val orderId = createdOrder?.id
+        if (orderId == null) {
+            payWithVenmoState = ActionState.Failure(Exception("Create an order to continue."))
+            return
+        }
+        payWithVenmoState = ActionState.Loading
+        venmoClient.start(
+            activity = activity,
+            orderId = orderId,
+            callback = { result ->
+                when (result) {
+                    is VenmoStartResult.Success -> {
+                        // App switch initiated successfully, waiting for callback
+                    }
+                    is VenmoStartResult.Failure -> {
+                        payWithVenmoState = ActionState.Failure(result.error)
+                    }
+                }
+            }
+        )
+    }
+
+    fun finishVenmo(intent: Intent) {
+        when (val result = venmoClient.finishStart(intent)) {
+            is VenmoFinishStartResult.Success -> {
+                payWithVenmoState = ActionState.Success(result)
+            }
+            is VenmoFinishStartResult.Failure -> {
+                payWithVenmoState = ActionState.Failure(result.error)
+            }
+            is VenmoFinishStartResult.Canceled -> {
+                payWithVenmoState = ActionState.Failure(Exception("User canceled Venmo payment."))
+            }
+            is VenmoFinishStartResult.NoResult -> {
+                // Do nothing - canceled or unrelated intent
+            }
+        }
+    }
+
+    fun completeOrder(context: Context) {
+        val orderId = createdOrder?.id
+        if (orderId == null) {
+            completeOrderState = ActionState.Failure(Exception("Create an order to continue."))
+        } else {
+            viewModelScope.launch {
+                completeOrderState = ActionState.Loading
+                val dataCollectorRequest =
+                    PayPalDataCollectorRequest(hasUserLocationConsent = false)
+                val cmid = payPalDataCollector.collectDeviceData(context, dataCollectorRequest)
+                // TODO: allow order intent to be configurable
+                completeOrderState =
+                    completeOrderUseCase(orderId, OrderIntent.CAPTURE, cmid).mapToActionState()
+            }
+        }
+    }
+}

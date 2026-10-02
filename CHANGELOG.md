@@ -6,6 +6,17 @@
   * Fixed `TokenType` being inaccessible outside the SDK despite being a required parameter of `PayPalClient.createPayPalSession()`
 * FraudProtection
   * Update Magnes SDK embedded jar file to avoid symbol collisions with other PayPal SDKs.
+* Venmo
+  * Add `VenmoClient.isEligible(buyerCountry: String)` suspend function to check Venmo payment eligibility. Returns `VenmoEligibilityResult.Eligible`,
+    `VenmoEligibilityResult.Ineligible(reason: String)`, or `VenmoEligibilityResult.Error(error: PayPalSDKError)`
+  * Add `VenmoClient.isEligible(buyerCountry: String, callback: VenmoEligibilityCallback)` callback-based method for Java compatibility
+  * Add `VenmoClient.start(activity: Activity, orderId: String)` suspend function to initiate Venmo checkout
+  * Add `VenmoClient.start(activity: Activity, orderId: String, callback: VenmoStartCallback)` callback-based method for Java compatibility
+  * Enhance `VenmoClient.finishStart(intent: Intent)` to return type-safe results:
+    * `VenmoFinishStartResult.Success` for successful payments
+    * `VenmoFinishStartResult.Canceled` when user cancels payment
+    * `VenmoFinishStartResult.NoResult` when intent is unrelated to Venmo flow
+    * `VenmoFinishStartResult.Failure` for errors
 
 ## 3.0.0 (2026-08-18)
 

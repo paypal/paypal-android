@@ -30,6 +30,7 @@ class CustomEnvironmentRepository @Inject constructor(
         customSdkGraphQLUrl = (prefs.getString(KEY_SDK_GRAPHQL_URL, "") ?: ""),
         customClientId = (prefs.getString(KEY_CLIENT_ID, "") ?: ""),
         customMerchantBaseUrl = (prefs.getString(KEY_MERCHANT_BASE_URL, "") ?: ""),
+        customVenmoCheckoutUrlPrefix = (prefs.getString(KEY_VENMO_CHECKOUT_URL_PREFIX, "") ?: ""),
         customMerchantId = (prefs.getString(KEY_MERCHANT_ID, "") ?: ""),
     )
 
@@ -41,6 +42,7 @@ class CustomEnvironmentRepository @Inject constructor(
             putString(KEY_SDK_GRAPHQL_URL, settings.customSdkGraphQLUrl)
             putString(KEY_CLIENT_ID, settings.customClientId)
             putString(KEY_MERCHANT_BASE_URL, settings.customMerchantBaseUrl)
+            putString(KEY_VENMO_CHECKOUT_URL_PREFIX, settings.customVenmoCheckoutUrlPrefix)
             putString(KEY_MERCHANT_ID, settings.customMerchantId)
         }
     }
@@ -89,6 +91,11 @@ class CustomEnvironmentRepository @Inject constructor(
             SelectedEnvironment.CUSTOM -> if (settings.isValidEnvironment) {
                 CoreEnvironment.customRestUrl = settings.customSdkRestUrl.trim().trimEnd('/')
                 CoreEnvironment.customGraphQLUrl = settings.customSdkGraphQLUrl.trim().trimEnd('/')
+                if (settings.customVenmoCheckoutUrlPrefix.isNotBlank()) {
+                    val prefix = settings.customVenmoCheckoutUrlPrefix.trim()
+                    CoreEnvironment.customVenmoCheckoutBaseUrl =
+                        "https://account.$prefix.venmo.com/go/web/paypal"
+                }
                 val resolvedClientId = settings.customClientId.trim().ifBlank { fallbackConfig.clientId }
                 val resolvedMerchantId = settings.customMerchantId.trim().ifBlank { fallbackConfig.merchantId }
                 CoreConfig(clientId = resolvedClientId, resolvedMerchantId, coreEnvironment = CoreEnvironment.CUSTOM)
@@ -111,6 +118,7 @@ class CustomEnvironmentRepository @Inject constructor(
         private const val KEY_SDK_GRAPHQL_URL = "sdk_graphql_url"
         private const val KEY_CLIENT_ID = "client_id"
         private const val KEY_MERCHANT_BASE_URL = "merchant_base_url"
+        private const val KEY_VENMO_CHECKOUT_URL_PREFIX = "venmo_checkout_url_prefix"
         private const val KEY_MERCHANT_ID = "merchant_id"
     }
 }

@@ -48,12 +48,14 @@ fun SettingsView(
         onCustomSdkGraphQLUrlChange = viewModel::updateCustomSdkGraphQLUrl,
         onCustomClientIdChange = viewModel::updateCustomClientId,
         onCustomMerchantBaseUrlChange = viewModel::updateCustomMerchantBaseUrl,
+        onCustomVenmoCheckoutUrlPrefixChange = viewModel::updateCustomVenmoCheckoutUrlPrefix,
         onCustomMerchantIdChange = viewModel::updateCustomMerchantId,
         onSaveClick = viewModel::saveConfig,
         onClearClick = viewModel::clearConfig
     )
 }
 
+@Suppress("LongParameterList")
 @Composable
 private fun SettingsContent(
     uiState: SettingsUiState,
@@ -62,6 +64,7 @@ private fun SettingsContent(
     onCustomSdkGraphQLUrlChange: (String) -> Unit,
     onCustomClientIdChange: (String) -> Unit,
     onCustomMerchantBaseUrlChange: (String) -> Unit,
+    onCustomVenmoCheckoutUrlPrefixChange: (String) -> Unit,
     onCustomMerchantIdChange: (String) -> Unit,
     onSaveClick: () -> Unit,
     onClearClick: () -> Unit
@@ -83,6 +86,7 @@ private fun SettingsContent(
                 onCustomSdkGraphQLUrlChange = onCustomSdkGraphQLUrlChange,
                 onCustomMerchantBaseUrlChange = onCustomMerchantBaseUrlChange,
                 onCustomClientIdChange = onCustomClientIdChange,
+                onCustomVenmoCheckoutUrlPrefixChange = onCustomVenmoCheckoutUrlPrefixChange,
                 onCustomMerchantIdChange = onCustomMerchantIdChange,
             )
         }
@@ -102,6 +106,7 @@ private fun SettingsContent(
     }
 }
 
+@Suppress("LongParameterList")
 @Composable
 private fun CustomEnvironmentFields(
     uiState: SettingsUiState,
@@ -109,6 +114,7 @@ private fun CustomEnvironmentFields(
     onCustomSdkGraphQLUrlChange: (String) -> Unit,
     onCustomMerchantBaseUrlChange: (String) -> Unit,
     onCustomClientIdChange: (String) -> Unit,
+    onCustomVenmoCheckoutUrlPrefixChange: (String) -> Unit,
     onCustomMerchantIdChange: (String) -> Unit,
 ) {
     UrlField(
@@ -137,6 +143,13 @@ private fun CustomEnvironmentFields(
         placeholder = "Enter PayPal client ID (optional)",
         value = uiState.settings.customClientId,
         onValueChange = onCustomClientIdChange,
+    )
+    UrlField(
+        label = "Venmo Checkout URL Prefix (Optional)",
+        placeholder = "e.g., qa, staging, ext.live (formats as https://account.\$prefix.venmo.com/go/web/paypal)",
+        value = uiState.settings.customVenmoCheckoutUrlPrefix,
+        onValueChange = onCustomVenmoCheckoutUrlPrefixChange,
+        error = uiState.venmoCheckoutUrlPrefixError
     )
     UrlField(
         label = "Merchant ID",
@@ -268,6 +281,7 @@ private fun SettingsViewPreview() {
                 onCustomSdkGraphQLUrlChange = {},
                 onCustomClientIdChange = {},
                 onCustomMerchantBaseUrlChange = {},
+                onCustomVenmoCheckoutUrlPrefixChange = {},
                 onCustomMerchantIdChange = {},
                 onSaveClick = {},
                 onClearClick = {}

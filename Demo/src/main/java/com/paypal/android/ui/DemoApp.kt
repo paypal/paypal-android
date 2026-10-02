@@ -34,6 +34,7 @@ import com.paypal.android.ui.paypalvault.PayPalVaultView
 import com.paypal.android.ui.selectcard.SelectCardView
 import com.paypal.android.ui.vaultcard.VaultCardView
 import com.paypal.android.ui.vaultcard.VaultCardViewModel
+import com.paypal.android.ui.venmo.PayWithVenmoView
 import com.paypal.android.uishared.components.DemoAppTopBar
 import com.paypal.android.uishared.effects.NavDestinationChangeDisposableEffect
 import com.paypal.android.utils.UIConstants
@@ -132,6 +133,14 @@ fun DemoApp() {
                         prevBackStackEntry?.savedStateHandle?.set("test_card_id", testCardId)
                         navController.popBackStack()
                     })
+                }
+                composable(DemoAppDestinations.PAY_WITH_VENMO) {
+                    PayWithVenmoView()
+                }
+                if (BuildConfig.DEBUG) {
+                    composable(DemoAppDestinations.SETTINGS) {
+                        SettingsView()
+                    }
                 }
                 if (BuildConfig.DEBUG) {
                     composable(DemoAppDestinations.SETTINGS) {

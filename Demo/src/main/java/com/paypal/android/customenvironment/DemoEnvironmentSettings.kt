@@ -23,6 +23,9 @@ data class DemoEnvironmentSettings(
      */
     val customMerchantBaseUrl: String = "",
 
+    /** Venmo checkout URL prefix (e.g., "qa", "staging"). Formatted as https://account.$prefix.venmo.com/go/web/paypal*/
+    val customVenmoCheckoutUrlPrefix: String = "",
+
     /** Optional merchant ID override. When blank, falls back to the default integration merchant ID. */
     val customMerchantId: String = "",
 ) {
