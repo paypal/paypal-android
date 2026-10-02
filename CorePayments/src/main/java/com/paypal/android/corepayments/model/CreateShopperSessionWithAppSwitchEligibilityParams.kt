@@ -15,7 +15,6 @@ import androidx.annotation.RestrictTo
  * @param buyerEmailAddressMerchantPassed The shopper's email address, as passed by the
  * merchant to identify user.
  * @param existingPayPalSessionId A server-side shopper session id from a previous session.
- * @param bnCode The merchant's BN Code.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class CreateShopperSessionWithAppSwitchEligibilityParams(
@@ -28,5 +27,4 @@ data class CreateShopperSessionWithAppSwitchEligibilityParams(
     val nationalNumber: String? = null,
     val buyerEmailAddressMerchantPassed: String? = null,
     val existingPayPalSessionId: String? = null,
-    val bnCode: String? = null,
 )
