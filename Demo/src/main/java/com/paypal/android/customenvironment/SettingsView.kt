@@ -27,9 +27,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -78,19 +78,16 @@ private fun SettingsContent(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         SettingsHeader()
-        EnvironmentSelector(
-            selected = uiState.settings.selectedEnvironment,
-            onSelect = onEnvironmentChange
-        )
+        EnvironmentSelector(selected = uiState.settings.selectedEnvironment, onSelect = onEnvironmentChange)
         if (uiState.settings.selectedEnvironment == SelectedEnvironment.CUSTOM) {
             CustomEnvironmentFields(
                 uiState = uiState,
                 onCustomSdkRestUrlChange = onCustomSdkRestUrlChange,
                 onCustomSdkGraphQLUrlChange = onCustomSdkGraphQLUrlChange,
-                onCustomClientIdChange = onCustomClientIdChange,
                 onCustomMerchantBaseUrlChange = onCustomMerchantBaseUrlChange,
+                onCustomClientIdChange = onCustomClientIdChange,
                 onCustomVenmoCheckoutUrlPrefixChange = onCustomVenmoCheckoutUrlPrefixChange,
-                onCustomMerchantIdChange = onCustomMerchantIdChange
+                onCustomMerchantIdChange = onCustomMerchantIdChange,
             )
         }
         Spacer(modifier = Modifier.height(4.dp))
@@ -109,60 +106,57 @@ private fun SettingsContent(
     }
 }
 
+@Suppress("LongParameterList")
 @Composable
 private fun CustomEnvironmentFields(
     uiState: SettingsUiState,
     onCustomSdkRestUrlChange: (String) -> Unit,
     onCustomSdkGraphQLUrlChange: (String) -> Unit,
-    onCustomClientIdChange: (String) -> Unit,
     onCustomMerchantBaseUrlChange: (String) -> Unit,
+    onCustomClientIdChange: (String) -> Unit,
     onCustomVenmoCheckoutUrlPrefixChange: (String) -> Unit,
-    onCustomMerchantIdChange: (String) -> Unit
+    onCustomMerchantIdChange: (String) -> Unit,
 ) {
-    val settings = uiState.settings
     UrlField(
         label = "SDK REST Base URL",
         placeholder = "Enter SDK REST base URL",
-        value = settings.customSdkRestUrl,
+        value = uiState.settings.customSdkRestUrl,
         onValueChange = onCustomSdkRestUrlChange,
         error = uiState.restUrlError
     )
     UrlField(
         label = "SDK GraphQL Base URL",
         placeholder = "Enter SDK GraphQL base URL",
-        value = settings.customSdkGraphQLUrl,
+        value = uiState.settings.customSdkGraphQLUrl,
         onValueChange = onCustomSdkGraphQLUrlChange,
         error = uiState.graphQLUrlError
     )
     UrlField(
         label = "Merchant Server Base URL",
         placeholder = "Enter merchant server base URL",
-        value = settings.customMerchantBaseUrl,
+        value = uiState.settings.customMerchantBaseUrl,
         onValueChange = onCustomMerchantBaseUrlChange,
-        imeAction = ImeAction.Done,
         error = uiState.merchantBaseUrlError
     )
     UrlField(
         label = "Client ID",
         placeholder = "Enter PayPal client ID (optional)",
-        value = settings.customClientId,
+        value = uiState.settings.customClientId,
         onValueChange = onCustomClientIdChange,
     )
     UrlField(
         label = "Venmo Checkout URL Prefix (Optional)",
-        placeholder = "e.g., qa, staging (formats as https://account.\$prefix.venmo.com/go/web/paypal)",
-        value = settings.customVenmoCheckoutUrlPrefix,
+        placeholder = "e.g., qa, staging, ext.live (formats as https://account.\$prefix.venmo.com/go/web/paypal)",
+        value = uiState.settings.customVenmoCheckoutUrlPrefix,
         onValueChange = onCustomVenmoCheckoutUrlPrefixChange,
-        imeAction = ImeAction.Next,
         error = uiState.venmoCheckoutUrlPrefixError
     )
     UrlField(
-        label = "Merchant ID (Optional)",
-        placeholder = "Enter merchant ID",
-        value = settings.customMerchantId,
+        label = "Merchant ID",
+        placeholder = "Enter PayPal merchant ID (optional)",
+        value = uiState.settings.customMerchantId,
         onValueChange = onCustomMerchantIdChange,
         imeAction = ImeAction.Done,
-        error = uiState.merchantIdError
     )
 }
 
@@ -276,6 +270,7 @@ private fun SettingsViewPreview() {
                         customSdkGraphQLUrl = "",
                         customClientId = "client-id-entered-at-runtime",
                         customMerchantBaseUrl = "bad merchant url",
+                        customMerchantId = "merchant-id-entered-at-runtime",
                     ),
                     restUrlError = "URL must start with https://",
                     graphQLUrlError = "URL is required",

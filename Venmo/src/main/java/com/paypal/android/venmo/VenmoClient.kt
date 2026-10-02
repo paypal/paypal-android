@@ -96,7 +96,7 @@ class VenmoClient internal constructor(
             fundingSource = FundingSource.VENMO.name
         )
 
-        val appSwitchUri = coreConfig.environment.venmoCheckoutBaseUrl.toUri()
+        val appSwitchUri = coreConfig.coreEnvironment.venmoCheckoutBaseUrl.toUri()
             .buildUpon()
             .appendQueryParameter(CHANNEL_PARAM, CHANNEL_VALUE)
             .appendQueryParameter(TOKEN_PARAM, orderId)

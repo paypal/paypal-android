@@ -28,7 +28,7 @@ body:
     placeholder: |
       <!-- Examples -->
       <!-- implementation 'com.paypal.android:card-payments:x.y.z' -->
-      <!-- implementation 'com.paypal.android:paypal-web-payments:x.y.z' -->
+      <!-- implementation 'com.paypal.android:paypal-payments:x.y.z' -->
   validations:
     required: true
 - type: textarea

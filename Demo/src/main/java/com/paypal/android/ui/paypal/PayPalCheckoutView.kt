@@ -1,0 +1,190 @@
+package com.paypal.android.ui.paypal
+
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import com.paypal.android.uishared.state.ActionState
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.paypal.android.R
+import com.paypal.android.uishared.components.ActionButtonColumn
+import com.paypal.android.uishared.components.AmountForm
+import com.paypal.android.uishared.components.CreateOrderForm
+import com.paypal.android.uishared.components.EnumOptionList
+import com.paypal.android.uishared.components.ErrorView
+import com.paypal.android.uishared.components.OrderView
+import com.paypal.android.uishared.components.PayPalUserIdentityForm
+import com.paypal.android.uishared.components.StepHeader
+import com.paypal.android.uishared.components.StoreInVaultOptionForm
+import com.paypal.android.uishared.state.CompletedActionState
+import com.paypal.android.utils.OnLifecycleOwnerResumeEffect
+import com.paypal.android.utils.OnNewIntentEffect
+import com.paypal.android.utils.UIConstants
+import com.paypal.android.utils.getActivityOrNull
+
+@Composable
+fun PayPalCheckoutView(
+    viewModel: PayPalCheckoutViewModel = hiltViewModel()
+) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val scrollState = rememberScrollState()
+    LaunchedEffect(scrollState.maxValue) {
+        // Auto-scroll once the user has started the flow; avoids scrolling on initial render
+        if (uiState.createOrderState !is ActionState.Idle) {
+            scrollState.animateScrollTo(scrollState.maxValue)
+        }
+    }
+
+    val context = LocalContext.current
+    OnLifecycleOwnerResumeEffect {
+        val intent = context.getActivityOrNull()?.intent
+        intent?.let { viewModel.completeAuthChallenge(it) }
+    }
+
+    OnNewIntentEffect { newIntent ->
+        viewModel.completeAuthChallenge(newIntent)
+    }
+
+    val contentPadding = UIConstants.paddingMedium
+    Column(
+        verticalArrangement = UIConstants.spacingLarge,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = contentPadding)
+            .verticalScroll(scrollState)
+    ) {
+        Step1_CreateOrder(uiState, viewModel)
+        if (uiState.isCreateOrderSuccessful) {
+            Step2_StartPayPalCheckout(uiState, viewModel)
+        }
+        if (uiState.isPayPalCheckoutSuccessful) {
+            Step3_CompleteOrder(uiState, viewModel)
+        }
+        Spacer(modifier = Modifier.size(contentPadding))
+    }
+}
+
+@Composable
+private fun Step1_CreateOrder(uiState: PayPalUiState, viewModel: PayPalCheckoutViewModel) {
+    Column(
+        verticalArrangement = UIConstants.spacingMedium,
+    ) {
+        StepHeader(stepNumber = 1, title = "Create an Order")
+        PayPalUserIdentityForm(
+            userIdentity = uiState.userIdentity,
+            onUserIdentityChange = { value -> viewModel.userIdentity = value },
+            modifier = Modifier.fillMaxWidth()
+        )
+        EnumOptionList(
+            title = stringResource(R.string.user_action_title),
+            stringArrayResId = R.array.user_action_options,
+            onSelectedOptionChange = { value -> viewModel.userAction = value },
+            selectedOption = uiState.userAction,
+            modifier = Modifier.fillMaxWidth()
+        )
+        CreateOrderForm(
+            orderIntent = uiState.intentOption,
+            onOrderIntentChange = { value -> viewModel.intentOption = value },
+        )
+        EnumOptionList(
+            title = stringResource(R.string.payment_method_title),
+            stringArrayResId = R.array.pay_pal_funding_source_options,
+            onSelectedOptionChange = { value -> viewModel.paymentMethodOption = value },
+            selectedOption = uiState.paymentMethodOption,
+            modifier = Modifier.fillMaxWidth()
+        )
+        StoreInVaultOptionForm(
+            modifier = Modifier.fillMaxWidth(),
+            shouldVault = uiState.shouldVaultOption,
+            onShouldVaultChanged = { value -> viewModel.shouldVault = value }
+        )
+        AmountForm(
+            amount = uiState.amount,
+            onAmountChange = { value -> viewModel.amount = value },
+            modifier = Modifier.fillMaxWidth()
+        )
+        ActionButtonColumn(
+            defaultTitle = "CREATE ORDER",
+            successTitle = "ORDER CREATED",
+            state = uiState.createOrderState,
+            onClick = { viewModel.createOrder() },
+            modifier = Modifier
+                .fillMaxWidth()
+        ) { state ->
+            when (state) {
+                is CompletedActionState.Failure -> ErrorView(error = state.value)
+                is CompletedActionState.Success -> OrderView(order = state.value)
+            }
+        }
+    }
+}
+
+@Composable
+private fun Step2_StartPayPalCheckout(uiState: PayPalUiState, viewModel: PayPalCheckoutViewModel) {
+    val context = LocalContext.current
+    Column(
+        verticalArrangement = UIConstants.spacingMedium,
+    ) {
+        StepHeader(stepNumber = 2, title = stringResource(R.string.launch_paypal))
+        ActionButtonColumn(
+            defaultTitle = "START CHECKOUT",
+            successTitle = "CHECKOUT COMPLETE",
+            state = uiState.payPalCheckoutState,
+            onClick = { context.getActivityOrNull()?.let { viewModel.startCheckout(it) } },
+            modifier = Modifier.fillMaxWidth()
+        ) { state ->
+            when (state) {
+                is CompletedActionState.Failure -> ErrorView(error = state.value)
+                is CompletedActionState.Success -> state.value.run {
+                    PayPalCheckoutResultView(orderId, payerId)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun Step3_CompleteOrder(uiState: PayPalUiState, viewModel: PayPalCheckoutViewModel) {
+    val context = LocalContext.current
+    Column(
+        verticalArrangement = UIConstants.spacingMedium,
+    ) {
+        StepHeader(stepNumber = 3, title = "Complete Order")
+        ActionButtonColumn(
+            defaultTitle = "COMPLETE ORDER",
+            successTitle = "ORDER COMPLETED",
+            state = uiState.completeOrderState,
+            onClick = { viewModel.completeOrder(context) },
+            modifier = Modifier.fillMaxWidth()
+        ) { state ->
+            when (state) {
+                is CompletedActionState.Failure -> ErrorView(error = state.value)
+                is CompletedActionState.Success -> OrderView(order = state.value)
+            }
+        }
+    }
+}
+
+@Preview
+@Composable
+fun PayPalViewPreview() {
+    MaterialTheme {
+        Surface(modifier = Modifier.fillMaxSize()) {
+            PayPalCheckoutView()
+        }
+    }
+}

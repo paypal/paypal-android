@@ -75,7 +75,7 @@ dependencies {
     dokka project(":CardPayments")
     dokka project(":FraudProtection")
     dokka project(":PaymentButtons")
-    dokka project(":PayPalWebPayments")
+    dokka project(":PayPalPayments")
     dokkaPlugin libs.dokka.android
 }
 
@@ -93,7 +93,7 @@ detekt {
     input = files(
             "CorePayments/src",
             "CardPayments/src",
-            "PayPalWebPayments/src",
+            "PayPalPayments/src",
             "FraudProtection/src",
             "Demo/src"
     )

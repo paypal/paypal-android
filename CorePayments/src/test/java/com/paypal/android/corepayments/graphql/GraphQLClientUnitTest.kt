@@ -1,10 +1,11 @@
 package com.paypal.android.corepayments.graphql
 
 import com.paypal.android.corepayments.CoreConfig
-import com.paypal.android.corepayments.Environment
+import com.paypal.android.corepayments.CoreEnvironment
 import com.paypal.android.corepayments.Http
 import com.paypal.android.corepayments.HttpMethod
 import com.paypal.android.corepayments.HttpRequest
+import com.paypal.android.corepayments.HttpRoundTripTiming
 import com.paypal.android.corepayments.HttpResponse
 import com.paypal.android.corepayments.PayPalSDKErrorCode
 import io.mockk.coEvery
@@ -53,9 +54,9 @@ internal class GraphQLClientUnitTest {
         mockCoreConfig = mockk(relaxed = true)
 
         // Setup mock environment for the CoreConfig
-        val mockEnvironment = mockk<Environment>(relaxed = true)
-        every { mockEnvironment.graphQLEndpoint } returns "https://test-api.paypal.com"
-        every { mockCoreConfig.environment } returns mockEnvironment
+        val mockCoreEnvironment = mockk<CoreEnvironment>(relaxed = true)
+        every { mockCoreEnvironment.graphQLEndpoint } returns "https://test-api.paypal.com"
+        every { mockCoreConfig.coreEnvironment } returns mockCoreEnvironment
 
         // Create the GraphQLClient with mocked dependencies
         graphQLClient = GraphQLClient(mockCoreConfig, mockHttp)
@@ -114,6 +115,27 @@ internal class GraphQLClientUnitTest {
 
         // Verify HTTP send was called
         coVerify(exactly = 1) { mockHttp.send(any()) }
+    }
+
+    @Test
+    fun `test timing is surfaced on the GraphQL result`() = runTest {
+        // Arrange
+        val graphQLRequest = GraphQLRequest(query = testQuery, variables = testVariables)
+        val roundTripTiming = HttpRoundTripTiming(startTime = 1000L, endTime = 1750L)
+        val mockResponse = HttpResponse(
+            status = 200,
+            body = """{"data":{"result":"success"}}""",
+            headers = mapOf(GraphQLClient.PAYPAL_DEBUG_ID to testCorrelationId),
+            roundTripTiming = roundTripTiming
+        )
+        coEvery { mockHttp.send(any()) } returns mockResponse
+
+        // Act
+        val result = graphQLClient.send<TestResponse, TestRequest>(graphQLRequest)
+
+        // Assert
+        assertTrue(result is GraphQLResult.Success)
+        assertEquals(roundTripTiming, (result as GraphQLResult.Success).roundTripTiming)
     }
 
     @OptIn(InternalSerializationApi::class)
@@ -228,11 +250,11 @@ internal class GraphQLClientUnitTest {
     fun `test invalid URL handling`() = runTest {
         // Arrange - setup a situation where creating the URL will fail
         // We'll use a mock environment with an invalid URL format
-        val invalidMockEnvironment = mockk<Environment>(relaxed = true)
-        every { invalidMockEnvironment.graphQLEndpoint } returns "invalid://endpoint"
+        val invalidMockCoreEnvironment = mockk<CoreEnvironment>(relaxed = true)
+        every { invalidMockCoreEnvironment.graphQLEndpoint } returns "invalid://endpoint"
 
         val invalidMockCoreConfig = mockk<CoreConfig>(relaxed = true)
-        every { invalidMockCoreConfig.environment } returns invalidMockEnvironment
+        every { invalidMockCoreConfig.coreEnvironment } returns invalidMockCoreEnvironment
 
         val invalidUrlClient = GraphQLClient(invalidMockCoreConfig, mockHttp)
 

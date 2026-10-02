@@ -84,64 +84,66 @@ class SettingsViewModel @Inject constructor(
         _uiState.update {
             it.copy(
                 settings = it.settings.copy(customMerchantId = value),
-                merchantIdError = null,
                 showSaveSuccess = false
             )
         }
     }
 
     /** Validates URLs (CUSTOM only) then persists to SharedPreferences. */
-    @Suppress("CyclomaticComplexMethod")
     fun saveConfig() {
         val settings = _uiState.value.settings
         if (settings.selectedEnvironment != SelectedEnvironment.CUSTOM) {
             customEnvironmentRepository.saveConfig(settings)
             return
         }
-        val restError = validateUrl(settings.customSdkRestUrl)
-        val graphQLError = validateUrl(settings.customSdkGraphQLUrl)
-        val merchantError = validateUrl(settings.customMerchantBaseUrl)
-        val venmoCheckoutPrefixError = if (settings.customVenmoCheckoutUrlPrefix.isNotBlank()) {
-            validateVenmoCheckoutPrefix(settings.customVenmoCheckoutUrlPrefix)
-        } else {
-            null
-        }
-        val merchantIdError = if (settings.customMerchantId.isNotBlank()) {
-            validateMerchantId(settings.customMerchantId)
-        } else {
-            null
-        }
+        val trimmedSettings = settings.copy(
+            customSdkRestUrl = settings.customSdkRestUrl.trim(),
+            customSdkGraphQLUrl = settings.customSdkGraphQLUrl.trim(),
+            customMerchantBaseUrl = settings.customMerchantBaseUrl.trim(),
+            customVenmoCheckoutUrlPrefix = settings.customVenmoCheckoutUrlPrefix.trim(),
+        )
+        _uiState.update { it.copy(settings = trimmedSettings) }
 
-        val hasErrors = restError != null || graphQLError != null || merchantError != null ||
-                venmoCheckoutPrefixError != null || merchantIdError != null
-        if (hasErrors) {
+        val restError = validateUrl(trimmedSettings.customSdkRestUrl)
+        val graphQLError = validateUrl(trimmedSettings.customSdkGraphQLUrl)
+        val merchantError = validateUrl(trimmedSettings.customMerchantBaseUrl)
+        val venmoCheckoutPrefixError = if (trimmedSettings.customVenmoCheckoutUrlPrefix.isNotBlank()) {
+            validateVenmoCheckoutPrefix(trimmedSettings.customVenmoCheckoutUrlPrefix)
+        } else {
+            null
+        }
+        val hasValidationError = listOfNotNull(
+            restError,
+            graphQLError,
+            merchantError,
+            venmoCheckoutPrefixError
+        ).isNotEmpty()
+        if (hasValidationError) {
             _uiState.update {
                 it.copy(
                     restUrlError = restError,
                     graphQLUrlError = graphQLError,
                     merchantBaseUrlError = merchantError,
-                    venmoCheckoutUrlPrefixError = venmoCheckoutPrefixError,
-                    merchantIdError = merchantIdError
+                    venmoCheckoutUrlPrefixError = venmoCheckoutPrefixError
                 )
             }
             // Persist whichever fields are valid so they survive an environment switch.
             // Invalid fields are saved as empty to avoid persisting bad data.
             customEnvironmentRepository.saveConfig(
-                settings.copy(
-                    customSdkRestUrl = if (restError == null) settings.customSdkRestUrl else "",
-                    customSdkGraphQLUrl = if (graphQLError == null) settings.customSdkGraphQLUrl else "",
-                    customMerchantBaseUrl = if (merchantError == null) settings.customMerchantBaseUrl else "",
+                trimmedSettings.copy(
+                    customSdkRestUrl = if (restError == null) trimmedSettings.customSdkRestUrl else "",
+                    customSdkGraphQLUrl = if (graphQLError == null) trimmedSettings.customSdkGraphQLUrl else "",
+                    customMerchantBaseUrl = if (merchantError == null) trimmedSettings.customMerchantBaseUrl else "",
                     customVenmoCheckoutUrlPrefix = if (venmoCheckoutPrefixError == null) {
-                        settings.customVenmoCheckoutUrlPrefix
+                        trimmedSettings.customVenmoCheckoutUrlPrefix
                     } else {
                         ""
                     },
-                    customMerchantId = if (merchantIdError == null) settings.customMerchantId else "",
                 )
             )
             return
         }
-        customEnvironmentRepository.saveConfig(settings)
+        customEnvironmentRepository.saveConfig(trimmedSettings)
         showSaveSuccessBriefly()
     }
 
@@ -180,19 +182,10 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    private fun validateVenmoCheckoutPrefix(value: String): String? = when {
-        value != value.trim() || value.contains(' ') -> "Prefix must not contain spaces"
-        !value.matches(Regex("[a-zA-Z0-9-]+")) -> "Prefix must contain only alphanumeric characters and hyphens"
-        else -> null
-    }
-
-    private fun validateMerchantId(value: String): String? {
-        @Suppress("MagicNumber")
-        val minimumLength = 3
-        return when {
-            value != value.trim() || value.contains(' ') -> "Merchant ID must not contain spaces"
-            value.length < minimumLength -> "Merchant ID must be at least $minimumLength characters"
-            else -> null
+    private fun validateVenmoCheckoutPrefix(value: String): String? =
+        if (value.matches(Regex("[a-zA-Z0-9.-]+"))) {
+            null
+        } else {
+            "Prefix must contain only alphanumeric characters, periods, and hyphens"
         }
-    }
 }

@@ -5,7 +5,7 @@ import android.content.SharedPreferences
 import androidx.core.content.edit
 import com.paypal.android.api.services.MerchantIntegration
 import com.paypal.android.corepayments.CoreConfig
-import com.paypal.android.corepayments.Environment
+import com.paypal.android.corepayments.CoreEnvironment
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -61,21 +61,16 @@ class CustomEnvironmentRepository @Inject constructor(
         val settings = getConfig()
         val customUrl = settings.customMerchantBaseUrl.trim()
         return if (settings.selectedEnvironment == SelectedEnvironment.CUSTOM && customUrl.isNotBlank()) {
-            normalizeBaseUrl(customUrl)
+            customUrl
         } else {
             MerchantIntegration.DEFAULT.baseUrl
         }
     }
 
-    private fun normalizeBaseUrl(url: String): String {
-        val trimmed = url.trimEnd('/')
-        return "$trimmed/"
-    }
-
     /**
      * Returns a [CoreConfig] for the active environment.
-     * - [SelectedEnvironment.LIVE] / [SelectedEnvironment.SANDBOX] → the corresponding [Environment].
-     * - [SelectedEnvironment.CUSTOM] with URLs configured → [Environment.CUSTOM] with those URLs.
+     * - [SelectedEnvironment.LIVE] / [SelectedEnvironment.SANDBOX] → the corresponding [CoreEnvironment].
+     * - [SelectedEnvironment.CUSTOM] with URLs configured → [CoreEnvironment.CUSTOM] with those URLs.
      * - [SelectedEnvironment.CUSTOM] without URLs → falls back to [fallbackConfig].
      */
     fun getCoreConfig(fallbackConfig: CoreConfig): CoreConfig {
@@ -84,34 +79,26 @@ class CustomEnvironmentRepository @Inject constructor(
             SelectedEnvironment.LIVE ->
                 CoreConfig(
                     clientId = fallbackConfig.clientId,
-                    environment = Environment.LIVE,
-                    merchantId = fallbackConfig.merchantId
+                    fallbackConfig.merchantId,
+                    coreEnvironment = CoreEnvironment.LIVE
                 )
-
             SelectedEnvironment.SANDBOX ->
                 CoreConfig(
                     clientId = fallbackConfig.clientId,
-                    environment = Environment.SANDBOX,
-                    merchantId = fallbackConfig.merchantId
+                    fallbackConfig.merchantId,
+                    coreEnvironment = CoreEnvironment.SANDBOX
                 )
-
             SelectedEnvironment.CUSTOM -> if (settings.isValidEnvironment) {
-                Environment.customRestUrl = settings.customSdkRestUrl.trim().trimEnd('/')
-                Environment.customGraphQLUrl = settings.customSdkGraphQLUrl.trim().trimEnd('/')
+                CoreEnvironment.customRestUrl = settings.customSdkRestUrl.trim().trimEnd('/')
+                CoreEnvironment.customGraphQLUrl = settings.customSdkGraphQLUrl.trim().trimEnd('/')
                 if (settings.customVenmoCheckoutUrlPrefix.isNotBlank()) {
                     val prefix = settings.customVenmoCheckoutUrlPrefix.trim()
-                    Environment.customVenmoCheckoutBaseUrl =
+                    CoreEnvironment.customVenmoCheckoutBaseUrl =
                         "https://account.$prefix.venmo.com/go/web/paypal"
                 }
-                val resolvedClientId =
-                    settings.customClientId.trim().ifBlank { fallbackConfig.clientId }
-                val resolvedMerchantId =
-                    settings.customMerchantId.trim().ifBlank { fallbackConfig.merchantId }
-                CoreConfig(
-                    clientId = resolvedClientId,
-                    environment = Environment.CUSTOM,
-                    merchantId = resolvedMerchantId
-                )
+                val resolvedClientId = settings.customClientId.trim().ifBlank { fallbackConfig.clientId }
+                val resolvedMerchantId = settings.customMerchantId.trim().ifBlank { fallbackConfig.merchantId }
+                CoreConfig(clientId = resolvedClientId, resolvedMerchantId, coreEnvironment = CoreEnvironment.CUSTOM)
             } else {
                 fallbackConfig
             }
