@@ -31,7 +31,6 @@ class CustomEnvironmentRepository @Inject constructor(
         customClientId = (prefs.getString(KEY_CLIENT_ID, "") ?: ""),
         customMerchantBaseUrl = (prefs.getString(KEY_MERCHANT_BASE_URL, "") ?: ""),
         customMerchantId = (prefs.getString(KEY_MERCHANT_ID, "") ?: ""),
-        customBnCode = (prefs.getString(KEY_BN_CODE, "") ?: ""),
     )
 
     /** Persists [settings] to SharedPreferences. */
@@ -43,7 +42,6 @@ class CustomEnvironmentRepository @Inject constructor(
             putString(KEY_CLIENT_ID, settings.customClientId)
             putString(KEY_MERCHANT_BASE_URL, settings.customMerchantBaseUrl)
             putString(KEY_MERCHANT_ID, settings.customMerchantId)
-            putString(KEY_BN_CODE, settings.customBnCode)
         }
     }
 
@@ -75,33 +73,25 @@ class CustomEnvironmentRepository @Inject constructor(
      */
     fun getCoreConfig(fallbackConfig: CoreConfig): CoreConfig {
         val settings = getConfig()
-        val resolvedBnCode = settings.customBnCode.trim().ifBlank { fallbackConfig.bnCode }
         return when (settings.selectedEnvironment) {
             SelectedEnvironment.LIVE ->
                 CoreConfig(
                     clientId = fallbackConfig.clientId,
                     fallbackConfig.merchantId,
-                    coreEnvironment = CoreEnvironment.LIVE,
-                    bnCode = resolvedBnCode,
+                    coreEnvironment = CoreEnvironment.LIVE
                 )
             SelectedEnvironment.SANDBOX ->
                 CoreConfig(
                     clientId = fallbackConfig.clientId,
                     fallbackConfig.merchantId,
-                    coreEnvironment = CoreEnvironment.SANDBOX,
-                    bnCode = resolvedBnCode,
+                    coreEnvironment = CoreEnvironment.SANDBOX
                 )
             SelectedEnvironment.CUSTOM -> if (settings.isValidEnvironment) {
                 CoreEnvironment.customRestUrl = settings.customSdkRestUrl.trim().trimEnd('/')
                 CoreEnvironment.customGraphQLUrl = settings.customSdkGraphQLUrl.trim().trimEnd('/')
                 val resolvedClientId = settings.customClientId.trim().ifBlank { fallbackConfig.clientId }
                 val resolvedMerchantId = settings.customMerchantId.trim().ifBlank { fallbackConfig.merchantId }
-                CoreConfig(
-                    clientId = resolvedClientId,
-                    resolvedMerchantId,
-                    coreEnvironment = CoreEnvironment.CUSTOM,
-                    bnCode = resolvedBnCode,
-                )
+                CoreConfig(clientId = resolvedClientId, resolvedMerchantId, coreEnvironment = CoreEnvironment.CUSTOM)
             } else {
                 fallbackConfig
             }
@@ -122,6 +112,5 @@ class CustomEnvironmentRepository @Inject constructor(
         private const val KEY_CLIENT_ID = "client_id"
         private const val KEY_MERCHANT_BASE_URL = "merchant_base_url"
         private const val KEY_MERCHANT_ID = "merchant_id"
-        private const val KEY_BN_CODE = "bn_code"
     }
 }
