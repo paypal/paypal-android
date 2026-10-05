@@ -441,7 +441,6 @@ class PayPalClient internal constructor(
                 nationalNumber = userIdentity?.phone?.nationalNumber,
                 buyerEmailAddressMerchantPassed = userIdentity?.email,
                 existingPayPalSessionId = userIdentity?.existingPayPalSessionId,
-                bnCode = coreConfig.bnCode,
             ),
         )
 

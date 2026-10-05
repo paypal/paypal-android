@@ -79,15 +79,6 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    fun updateCustomBnCode(value: String) {
-        _uiState.update {
-            it.copy(
-                settings = it.settings.copy(customBnCode = value),
-                showSaveSuccess = false
-            )
-        }
-    }
-
     /** Validates URLs (CUSTOM only) then persists to SharedPreferences. */
     fun saveConfig() {
         val settings = _uiState.value.settings
