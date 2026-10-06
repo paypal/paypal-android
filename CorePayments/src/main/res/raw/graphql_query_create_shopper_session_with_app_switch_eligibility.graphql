@@ -1,0 +1,24 @@
+mutation CreateShopperSessionWithAppSwitchEligibility(
+  $appSwitchEligibilityInput: externalAppSwitchEligibilityInput,
+  $shopperSessionInput: externalShopperSessionInput
+) {
+  external {
+    createShopperSessionWithAppSwitchEligibility(
+      appSwitchEligibilityInput: $appSwitchEligibilityInput
+      shopperSessionInput: $shopperSessionInput
+    ) {
+      appSwitchEligibilityResponse {
+        appSwitchEligible
+        ineligibleReason
+        checkoutUrls {
+          redirectURL
+          checkoutFallbackUrl
+        }
+      }
+      shopperSessionResponse {
+        sessionId
+        expiresAt
+      }
+    }
+  }
+}

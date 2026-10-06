@@ -1,6 +1,7 @@
 package com.paypal.android.corepayments.graphql
 
 import androidx.annotation.RestrictTo
+import com.paypal.android.corepayments.HttpRoundTripTiming
 import com.paypal.android.corepayments.PayPalSDKError
 import kotlinx.serialization.InternalSerializationApi
 
@@ -10,11 +11,22 @@ import kotlinx.serialization.InternalSerializationApi
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 sealed class GraphQLResult<out T> {
 
+    /**
+     * Round-trip timing of the underlying HTTP request, when available. Null when
+     * the request never reached the network (e.g. an invalid URL). Used to emit
+     * API request latency analytics.
+     */
+    abstract val roundTripTiming: HttpRoundTripTiming?
+
     @OptIn(InternalSerializationApi::class)
     data class Success<out T>(
         val response: GraphQLResponse<T>,
-        val correlationId: String? = null
+        val correlationId: String? = null,
+        override val roundTripTiming: HttpRoundTripTiming? = null
     ) : GraphQLResult<T>()
 
-    data class Failure(val error: PayPalSDKError) : GraphQLResult<Nothing>()
+    data class Failure(
+        val error: PayPalSDKError,
+        override val roundTripTiming: HttpRoundTripTiming? = null
+    ) : GraphQLResult<Nothing>()
 }

@@ -34,11 +34,11 @@ private val cardFeatures = listOf(
     Feature.CARD_VAULT
 )
 
-private val payPalWebFeatures = listOf(
-    Feature.PAYPAL_WEB,
+private val payPalFeatures = listOf(
+    Feature.PAYPAL_CHECKOUT,
     Feature.PAYPAL_BUTTONS,
     Feature.PAYPAL_STATIC_BUTTONS,
-    Feature.PAYPAL_WEB_VAULT
+    Feature.PAYPAL_VAULT
 )
 
 private val venmoFeatures = listOf(Feature.PAY_WITH_VENMO)
@@ -64,7 +64,7 @@ fun FeaturesView(
             FeatureGroupHeader("PayPal")
         }
         item {
-            FeatureOptions(payPalWebFeatures, onSelectedFeatureChange = onSelectedFeatureChange)
+            FeatureOptions(payPalFeatures, onSelectedFeatureChange = onSelectedFeatureChange)
         }
         stickyHeader {
             FeatureGroupHeader("Venmo")

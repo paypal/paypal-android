@@ -22,7 +22,7 @@ import org.robolectric.RobolectricTestRunner
 class AnalyticsServiceTest {
 
     private lateinit var sut: AnalyticsService
-    private lateinit var environment: Environment
+    private lateinit var coreEnvironment: CoreEnvironment
 
     private lateinit var trackingEventsAPI: TrackingEventsAPI
     private lateinit var deviceInspector: DeviceInspector
@@ -44,7 +44,7 @@ class AnalyticsServiceTest {
     fun setup() {
         deviceInspector = mockk()
         trackingEventsAPI = mockk(relaxed = true)
-        environment = Environment.SANDBOX
+        coreEnvironment = CoreEnvironment.SANDBOX
 
         every { deviceInspector.inspect() } returns deviceData
     }
@@ -56,8 +56,8 @@ class AnalyticsServiceTest {
             trackingEventsAPI.sendEvent(capture(analyticsEventDataSlot), deviceData)
         } returns httpSuccessResponse
 
-        sut = createAnalyticsService(environment, testScheduler)
-        sut.sendAnalyticsEvent("sample.event.name", "fake-order-id")
+        sut = createAnalyticsService(coreEnvironment, testScheduler)
+        sut.sendAnalyticsEvent("sample.event.name", AnalyticsEventData(orderId = "fake-order-id"))
         advanceUntilIdle()
 
         val analyticsEventData = analyticsEventDataSlot.captured
@@ -71,8 +71,8 @@ class AnalyticsServiceTest {
         } returns httpSuccessResponse
 
         val timeBeforeEventSent = System.currentTimeMillis()
-        sut = createAnalyticsService(environment, testScheduler)
-        sut.sendAnalyticsEvent("sample.event.name", "fake-order-id")
+        sut = createAnalyticsService(coreEnvironment, testScheduler)
+        sut.sendAnalyticsEvent("sample.event.name", AnalyticsEventData(orderId = "fake-order-id"))
         advanceUntilIdle()
 
         val actualTimestamp = analyticsEventDataSlot.captured.timestamp
@@ -87,8 +87,8 @@ class AnalyticsServiceTest {
             trackingEventsAPI.sendEvent(capture(analyticsEventDataSlot), deviceData)
         } returns httpSuccessResponse
 
-        sut = createAnalyticsService(environment, testScheduler)
-        sut.sendAnalyticsEvent("fake-event", "fake-order-id")
+        sut = createAnalyticsService(coreEnvironment, testScheduler)
+        sut.sendAnalyticsEvent("fake-event", AnalyticsEventData(orderId = "fake-order-id"))
         advanceUntilIdle()
 
         val analyticsEventData = analyticsEventDataSlot.captured
@@ -102,16 +102,44 @@ class AnalyticsServiceTest {
             trackingEventsAPI.sendEvent(capture(analyticsEventDataSlot), deviceData)
         } returns httpSuccessResponse
 
-        sut = createAnalyticsService(Environment.LIVE, testScheduler)
-        sut.sendAnalyticsEvent("fake-event", "fake-order-id")
+        sut = createAnalyticsService(CoreEnvironment.LIVE, testScheduler)
+        sut.sendAnalyticsEvent("fake-event", AnalyticsEventData(orderId = "fake-order-id"))
         advanceUntilIdle()
 
         val analyticsEventData = analyticsEventDataSlot.captured
         assertEquals("live", analyticsEventData.environment)
     }
 
+    @Test
+    fun `sendAnalyticsEvent forwards latency params into AnalyticsEventData`() = runTest {
+        val analyticsEventDataSlot = slot<AnalyticsEventData>()
+        coEvery {
+            trackingEventsAPI.sendEvent(capture(analyticsEventDataSlot), deviceData)
+        } returns httpSuccessResponse
+
+        sut = createAnalyticsService(coreEnvironment, testScheduler)
+        sut.sendAnalyticsEvent(
+            name = "paypal-payments:api-request-latency",
+            eventData = AnalyticsEventData(
+                startTime = 1000L,
+                endTime = 1500L,
+                endpoint = "/v2/checkout/orders",
+                presentationType = "app-switch",
+                flow = "checkout"
+            )
+        )
+        advanceUntilIdle()
+
+        val analyticsEventData = analyticsEventDataSlot.captured
+        assertEquals(1000L, analyticsEventData.startTime)
+        assertEquals(1500L, analyticsEventData.endTime)
+        assertEquals("/v2/checkout/orders", analyticsEventData.endpoint)
+        assertEquals("app-switch", analyticsEventData.presentationType)
+        assertEquals("checkout", analyticsEventData.flow)
+    }
+
     private fun createAnalyticsService(
-        environment: Environment,
+        coreEnvironment: CoreEnvironment,
         testScheduler: TestCoroutineScheduler
     ): AnalyticsService {
         val testDispatcher = StandardTestDispatcher(testScheduler)
@@ -120,7 +148,7 @@ class AnalyticsServiceTest {
         // Ref: https://developer.android.com/kotlin/coroutines/test#injecting-test-dispatchers
         return AnalyticsService(
             deviceInspector,
-            environment,
+            coreEnvironment,
             trackingEventsAPI,
             scope
         )

@@ -13,7 +13,6 @@ import com.paypal.android.customenvironment.CustomEnvironmentRepository
 import com.paypal.android.fraudprotection.PayPalDataCollector
 import com.paypal.android.fraudprotection.PayPalDataCollectorRequest
 import com.paypal.android.models.OrderRequest
-import com.paypal.android.uishared.enums.ReturnToAppStrategyOption
 import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.usecase.CompleteOrderUseCase
 import com.paypal.android.usecase.CreateVenmoOrderUseCase
@@ -94,9 +93,7 @@ class PayWithVenmoViewModel @Inject constructor(
             val orderRequest = _uiState.value.run {
                 OrderRequest(
                     intent = OrderIntent.CAPTURE,
-                    shouldVaultOnSuccess = false,
-                    appSwitchWhenEligible = true,
-                    returnToAppStrategy = ReturnToAppStrategyOption.APP_LINKS
+                    shouldVaultOnSuccess = false
                 )
             }
             createOrderState = createOrderUseCase(orderRequest).mapToActionState()

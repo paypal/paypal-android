@@ -1,16 +1,26 @@
-Thank you for your contribution to PayPal. 
+<!--
+PR Title format: (<scope>): <short summary>
 
-> Before submitting this PR, note that we cannot accept language translation PRs. We have a dedicated localization team to provide the translations. If there is an error in a specific translation, you may open an issue and we will escalate it to the localization team.
+Scopes and version bumps:
+  MINOR — new public API, class, method, or capability
+  PATCH — bug fix, behavioral correction, crash fix
+  MAJOR  — removes/renames API, changes signature, drops support
+  NOVERSION — none, changes to demo app, doesn't impact SDK functionality, refactor, docs, tests, chore, CI
 
-### Summary of changes
+### API / Contract Changes
 
- - 
+## New
 
- ### Checklist
+## Modified
 
- - [ ] Added a changelog entry
+## Breaking Changes
 
-### Authors
-> List GitHub usernames for everyone who contributed to this pull request.
+- [ ] No breaking changes
+- [ ] Breaking changes (describe migration steps below)
 
-- 
+##Migration:
+
+### Checklist
+
+- [ ] Added a changelog entry
+

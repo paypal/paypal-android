@@ -34,14 +34,14 @@ class GraphQLClient internal constructor(
 
     private val json = Json { ignoreUnknownKeys = true }
 
-    private val graphQLEndpoint = coreConfig.environment.graphQLEndpoint
+    private val graphQLEndpoint = coreConfig.coreEnvironment.graphQLEndpoint
     private val graphQLURL = "$graphQLEndpoint/graphql"
 
     private val httpRequestHeaders = mutableMapOf(
         "Content-Type" to "application/json",
         "Accept" to "application/json",
         "x-app-name" to "nativecheckout",
-        "Origin" to coreConfig.environment.graphQLEndpoint
+        "Origin" to coreConfig.coreEnvironment.graphQLEndpoint
     )
 
     /**
@@ -61,14 +61,21 @@ class GraphQLClient internal constructor(
 
         val httpResponse = http.send(httpRequest)
         val correlationId = httpResponse.headers[PAYPAL_DEBUG_ID]
+        val roundTripTiming = httpResponse.roundTripTiming
 
         return when {
             httpResponse.status != HTTP_OK -> {
-                GraphQLResult.Failure(APIClientError.serverResponseError(correlationId))
+                GraphQLResult.Failure(
+                    error = APIClientError.serverResponseError(correlationId),
+                    roundTripTiming = roundTripTiming
+                )
             }
 
             httpResponse.body.isNullOrBlank() -> {
-                GraphQLResult.Failure(noResponseData(correlationId))
+                GraphQLResult.Failure(
+                    error = noResponseData(correlationId),
+                    roundTripTiming = roundTripTiming
+                )
             }
 
             else -> runCatching {
@@ -76,9 +83,16 @@ class GraphQLClient internal constructor(
                     deserializer = GraphQLResponse.serializer(responseSerializer),
                     string = httpResponse.body
                 )
-                GraphQLResult.Success(response, correlationId = correlationId)
+                GraphQLResult.Success(
+                    response = response,
+                    correlationId = correlationId,
+                    roundTripTiming = roundTripTiming
+                )
             }.getOrElse { error ->
-                GraphQLResult.Failure(graphQLJSONParseError(correlationId, error))
+                GraphQLResult.Failure(
+                    error = graphQLJSONParseError(correlationId, error),
+                    roundTripTiming = roundTripTiming
+                )
             }
         }
     }

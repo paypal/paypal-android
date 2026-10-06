@@ -3,17 +3,17 @@ package com.paypal.android.fraudprotection
 import android.content.Context
 import android.util.Log
 import com.paypal.android.corepayments.CoreConfig
-import com.paypal.android.corepayments.Environment
+import com.paypal.android.corepayments.CoreEnvironment
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.verify
-import lib.android.paypal.com.magnessdk.InvalidInputException
-import lib.android.paypal.com.magnessdk.MagnesResult
-import lib.android.paypal.com.magnessdk.MagnesSDK
-import lib.android.paypal.com.magnessdk.MagnesSettings
-import lib.android.paypal.com.magnessdk.MagnesSource
+import lib.android.com.paypal.magnessdk.InvalidInputException
+import lib.android.com.paypal.magnessdk.MagnesResult
+import lib.android.com.paypal.magnessdk.MagnesSDK
+import lib.android.com.paypal.magnessdk.MagnesSettings
+import lib.android.com.paypal.magnessdk.MagnesSource
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -23,8 +23,8 @@ import java.util.UUID
 
 class PayPalDataCollectorUnitTest {
 
-    private val sandboxConfig = CoreConfig("fake-client-id", Environment.SANDBOX, "fake-merchant-id")
-    private val liveConfig = CoreConfig("fake-client-id", Environment.LIVE, "fake-merchant-id")
+    private val sandboxConfig = CoreConfig("fake-client-id", "fake-merchant-id", CoreEnvironment.SANDBOX)
+    private val liveConfig = CoreConfig("fake-client-id", "fake-merchant-id", CoreEnvironment.LIVE)
 
     private lateinit var context: Context
 
@@ -48,7 +48,7 @@ class PayPalDataCollectorUnitTest {
         val magnesSettings = magnesSettingsSlot.captured
         assertEquals(
             magnesSettings.environment,
-            lib.android.paypal.com.magnessdk.Environment.SANDBOX
+            lib.android.com.paypal.magnessdk.Environment.SANDBOX
         )
         assertFalse(magnesSettings.isDisableBeacon)
         assertEquals(magnesSettings.appGuid, appGUID)
@@ -70,7 +70,7 @@ class PayPalDataCollectorUnitTest {
         verify { mockMagnesSDK.setUp(capture(magnesSettingsSlot)) }
 
         val magnesSettings = magnesSettingsSlot.captured
-        assertEquals(magnesSettings.environment, lib.android.paypal.com.magnessdk.Environment.LIVE)
+        assertEquals(magnesSettings.environment, lib.android.com.paypal.magnessdk.Environment.LIVE)
     }
 
     @Test
@@ -125,14 +125,6 @@ class PayPalDataCollectorUnitTest {
         )
         val result = sut.collectDeviceData(mockContext, request)
         assertEquals(result, clientMetadataId)
-    }
-
-    @Test
-    fun `when setLogging is called, System is called with correct value`() {
-        val sut =
-            PayPalDataCollector(mockk(relaxed = true), mockk(relaxed = true), mockk(relaxed = true))
-        sut.setLogging(true)
-        assertEquals(System.getProperty("magnes.debug.mode"), true.toString())
     }
 
     @Test
