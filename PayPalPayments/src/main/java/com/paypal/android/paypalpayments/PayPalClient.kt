@@ -286,10 +286,11 @@ class PayPalClient internal constructor(
      */
     fun finishStart(intent: Intent): PayPalFinishStartResult? =
         sessionStore.authState?.let { authState ->
-            analyticsEventParams = analyticsEventParams.copy(
-                appSwitchUrl = intent.data?.toString(),
-                browserSwitchUrl = intent.data?.toString(),
-            )
+            analyticsEventParams = if (appSwitchEnabled) {
+                analyticsEventParams.copy(appSwitchUrl = intent.data?.toString())
+            } else {
+                analyticsEventParams.copy(browserSwitchUrl = intent.data?.toString())
+            }
             analytics.notify(PayPalEvent.HANDLE_RETURN_STARTED, params = analyticsEventParams)
             val result = payPalLauncher.completeCheckoutAuthRequest(intent, authState)
             logCheckoutResult(result)
@@ -309,10 +310,11 @@ class PayPalClient internal constructor(
      */
     fun finishVault(intent: Intent): PayPalFinishVaultResult? =
         sessionStore.authState?.let { authState ->
-            analyticsEventParams = analyticsEventParams.copy(
-                appSwitchUrl = intent.data?.toString(),
-                browserSwitchUrl = intent.data?.toString(),
-            )
+            analyticsEventParams = if (appSwitchEnabled) {
+                analyticsEventParams.copy(appSwitchUrl = intent.data?.toString())
+            } else {
+                analyticsEventParams.copy(browserSwitchUrl = intent.data?.toString())
+            }
             analytics.notify(PayPalEvent.HANDLE_RETURN_STARTED, params = analyticsEventParams)
             val result = payPalLauncher.completeVaultAuthRequest(intent, authState)
             logVaultResult(result)
