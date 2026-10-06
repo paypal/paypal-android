@@ -1,5 +1,12 @@
 # PayPal Android SDK Release Notes
 
+## 3.1.0 (2026-10-05)
+
+* CorePayments
+  * Fixed `TokenType` being inaccessible outside the SDK despite being a required parameter of `PayPalClient.createPayPalSession()`
+* FraudProtection
+  * Update Magnes SDK embedded jar file to avoid symbol collisions with other PayPal SDKs.
+
 ## 3.0.0 (2026-08-18)
 
 * CardPayments
