@@ -16,6 +16,7 @@ data class AnalyticsEventData(
     val shopperSessionExpiration: String? = null,
     val matchedAuthenticationMethods: List<String>? = null,
     val appSwitchUrl: String? = null,
+    val browserSwitchUrl: String? = null,
     val checkoutFallbackUrl: String? = null,
     val errorDescription: String? = null,
     val isCachedSession: Boolean? = null,

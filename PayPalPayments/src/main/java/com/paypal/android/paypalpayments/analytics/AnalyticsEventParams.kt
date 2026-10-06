@@ -45,6 +45,12 @@ internal data class AnalyticsEventParams(
     val appSwitchUrl: String? = null,
 
     /**
+     * The URL used to launch the browser/Custom Tabs auth challenge. Only set when
+     * [appSwitchEnabled] is false.
+     */
+    val browserSwitchUrl: String? = null,
+
+    /**
      * Whether this is a vault (setup token) flow rather than a checkout (order) flow.
      */
     val isVault: Boolean? = null,

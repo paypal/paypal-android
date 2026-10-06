@@ -286,6 +286,10 @@ class PayPalClient internal constructor(
      */
     fun finishStart(intent: Intent): PayPalFinishStartResult? =
         sessionStore.authState?.let { authState ->
+            analyticsEventParams = analyticsEventParams.copy(
+                appSwitchUrl = intent.data?.toString(),
+                browserSwitchUrl = intent.data?.toString(),
+            )
             analytics.notify(PayPalEvent.HANDLE_RETURN_STARTED, params = analyticsEventParams)
             val result = payPalLauncher.completeCheckoutAuthRequest(intent, authState)
             logCheckoutResult(result)
@@ -305,6 +309,10 @@ class PayPalClient internal constructor(
      */
     fun finishVault(intent: Intent): PayPalFinishVaultResult? =
         sessionStore.authState?.let { authState ->
+            analyticsEventParams = analyticsEventParams.copy(
+                appSwitchUrl = intent.data?.toString(),
+                browserSwitchUrl = intent.data?.toString(),
+            )
             analytics.notify(PayPalEvent.HANDLE_RETURN_STARTED, params = analyticsEventParams)
             val result = payPalLauncher.completeVaultAuthRequest(intent, authState)
             logVaultResult(result)
@@ -370,6 +378,7 @@ class PayPalClient internal constructor(
             analyticsEventParams = analyticsEventParams.copy(appSwitchUrl = launchUri.toString())
             analytics.notify(PayPalEvent.APP_SWITCH_STARTED, params = analyticsEventParams)
         } else {
+            analyticsEventParams = analyticsEventParams.copy(browserSwitchUrl = launchUri.toString())
             analytics.notify(PayPalEvent.AUTH_CHALLENGE_PRESENTATION_STARTED, params = analyticsEventParams)
         }
         val endTime = System.currentTimeMillis()

@@ -1576,21 +1576,23 @@ class PayPalClientUnitTest {
             verify {
                 analytics.notify(
                     PayPalEvent.AUTH_CHALLENGE_PRESENTATION_FAILED,
-                    params = AnalyticsEventParams(
-                        orderIdOrSetupTokenId = "fake-order-id",
-                        shopperSession = fakeSessionResponse,
-                        isCachedSession = false,
-                        userActionValue = "CONTINUE",
-                        appSwitchEnabled = false,
-                        isVault = false,
-                        merchantId = "fake-merchant-id",
-                        clientId = "fake-client-id",
-                        paypalInstalled = "false",
-                        returnAppUrl = "https://example.com/paypal-return",
-                        cancelAppUrl = "https://example.com/paypal-cancel",
-                        fallbackSchemeUrl = "com.example.app://paypal",
-                        linkType = LinkType.APP_LINK,
-                    ),
+                    params = match {
+                        it.copy(browserSwitchUrl = null) == AnalyticsEventParams(
+                            orderIdOrSetupTokenId = "fake-order-id",
+                            shopperSession = fakeSessionResponse,
+                            isCachedSession = false,
+                            userActionValue = "CONTINUE",
+                            appSwitchEnabled = false,
+                            isVault = false,
+                            merchantId = "fake-merchant-id",
+                            clientId = "fake-client-id",
+                            paypalInstalled = "false",
+                            returnAppUrl = "https://example.com/paypal-return",
+                            cancelAppUrl = "https://example.com/paypal-cancel",
+                            fallbackSchemeUrl = "com.example.app://paypal",
+                            linkType = LinkType.APP_LINK,
+                        ) && it.browserSwitchUrl != null
+                    },
                     errorDescription = "fake error description",
                 )
             }
@@ -1627,21 +1629,23 @@ class PayPalClientUnitTest {
             verify {
                 analytics.notify(
                     PayPalEvent.AUTH_CHALLENGE_PRESENTATION_FAILED,
-                    params = AnalyticsEventParams(
-                        orderIdOrSetupTokenId = "fake-setup-token-id",
-                        shopperSession = fakeSessionResponse,
-                        isCachedSession = false,
-                        userActionValue = "CONTINUE",
-                        appSwitchEnabled = false,
-                        isVault = true,
-                        merchantId = "fake-merchant-id",
-                        clientId = "fake-client-id",
-                        paypalInstalled = "false",
-                        returnAppUrl = "https://example.com/paypal-return",
-                        cancelAppUrl = "https://example.com/paypal-cancel",
-                        fallbackSchemeUrl = "com.example.app://paypal",
-                        linkType = LinkType.APP_LINK,
-                    ),
+                    params = match {
+                        it.copy(browserSwitchUrl = null) == AnalyticsEventParams(
+                            orderIdOrSetupTokenId = "fake-setup-token-id",
+                            shopperSession = fakeSessionResponse,
+                            isCachedSession = false,
+                            userActionValue = "CONTINUE",
+                            appSwitchEnabled = false,
+                            isVault = true,
+                            merchantId = "fake-merchant-id",
+                            clientId = "fake-client-id",
+                            paypalInstalled = "false",
+                            returnAppUrl = "https://example.com/paypal-return",
+                            cancelAppUrl = "https://example.com/paypal-cancel",
+                            fallbackSchemeUrl = "com.example.app://paypal",
+                            linkType = LinkType.APP_LINK,
+                        ) && it.browserSwitchUrl != null
+                    },
                     errorDescription = "fake error description",
                 )
             }

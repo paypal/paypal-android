@@ -69,6 +69,8 @@ internal data class TrackingEventParams(
     val matchedAuthenticationMethods: List<String>? = null,
     @SerialName("app_switch_url")
     val appSwitchUrl: String? = null,
+    @SerialName("browser_switch_url")
+    val browserSwitchUrl: String? = null,
     @SerialName("checkout_fallback_url")
     val fallbackUrl: String? = null,
     @SerialName("error_desc")

@@ -49,6 +49,7 @@ internal class TrackingEventsAPI constructor(
             shopperSessionExpirationAt = event.shopperSessionExpiration,
             matchedAuthenticationMethods = event.matchedAuthenticationMethods,
             appSwitchUrl = event.appSwitchUrl,
+            browserSwitchUrl = event.browserSwitchUrl,
             fallbackUrl = event.checkoutFallbackUrl,
             errorDescription = event.errorDescription,
             isCachedSession = event.isCachedSession,
