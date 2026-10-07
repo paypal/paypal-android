@@ -286,11 +286,7 @@ class PayPalClient internal constructor(
      */
     fun finishStart(intent: Intent): PayPalFinishStartResult? =
         sessionStore.authState?.let { authState ->
-            analyticsEventParams = if (appSwitchEnabled) {
-                analyticsEventParams.copy(appSwitchUrl = intent.data?.toString())
-            } else {
-                analyticsEventParams.copy(browserSwitchUrl = intent.data?.toString())
-            }
+            analyticsEventParams = analyticsEventParams.copy(url = intent.data?.toString())
             analytics.notify(PayPalEvent.HANDLE_RETURN_STARTED, params = analyticsEventParams)
             val result = payPalLauncher.completeCheckoutAuthRequest(intent, authState)
             logCheckoutResult(result)
@@ -310,11 +306,7 @@ class PayPalClient internal constructor(
      */
     fun finishVault(intent: Intent): PayPalFinishVaultResult? =
         sessionStore.authState?.let { authState ->
-            analyticsEventParams = if (appSwitchEnabled) {
-                analyticsEventParams.copy(appSwitchUrl = intent.data?.toString())
-            } else {
-                analyticsEventParams.copy(browserSwitchUrl = intent.data?.toString())
-            }
+            analyticsEventParams = analyticsEventParams.copy(url = intent.data?.toString())
             analytics.notify(PayPalEvent.HANDLE_RETURN_STARTED, params = analyticsEventParams)
             val result = payPalLauncher.completeVaultAuthRequest(intent, authState)
             logVaultResult(result)
@@ -376,11 +368,10 @@ class PayPalClient internal constructor(
             linkType = returnToAppStrategy.linkType,
         )
         val launchUri = shopperSession.getLaunchUri(token)
+        analyticsEventParams = analyticsEventParams.copy(url = launchUri.toString())
         if (appSwitchEnabled) {
-            analyticsEventParams = analyticsEventParams.copy(appSwitchUrl = launchUri.toString())
             analytics.notify(PayPalEvent.APP_SWITCH_STARTED, params = analyticsEventParams)
         } else {
-            analyticsEventParams = analyticsEventParams.copy(browserSwitchUrl = launchUri.toString())
             analytics.notify(PayPalEvent.AUTH_CHALLENGE_PRESENTATION_STARTED, params = analyticsEventParams)
         }
         val endTime = System.currentTimeMillis()

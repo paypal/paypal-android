@@ -1582,7 +1582,7 @@ class PayPalClientUnitTest {
                 )
             }
             val actualParams = paramsSlot.captured
-            assertNotNull(actualParams.browserSwitchUrl)
+            assertNotNull(actualParams.url)
             assertEquals(
                 AnalyticsEventParams(
                     orderIdOrSetupTokenId = "fake-order-id",
@@ -1598,7 +1598,7 @@ class PayPalClientUnitTest {
                     cancelAppUrl = "https://example.com/paypal-cancel",
                     fallbackSchemeUrl = "com.example.app://paypal",
                     linkType = LinkType.APP_LINK,
-                    browserSwitchUrl = actualParams.browserSwitchUrl,
+                    url = actualParams.url,
                 ),
                 actualParams
             )
@@ -1641,7 +1641,7 @@ class PayPalClientUnitTest {
                 )
             }
             val actualParams = paramsSlot.captured
-            assertNotNull(actualParams.browserSwitchUrl)
+            assertNotNull(actualParams.url)
             assertEquals(
                 AnalyticsEventParams(
                     orderIdOrSetupTokenId = "fake-setup-token-id",
@@ -1657,7 +1657,7 @@ class PayPalClientUnitTest {
                     cancelAppUrl = "https://example.com/paypal-cancel",
                     fallbackSchemeUrl = "com.example.app://paypal",
                     linkType = LinkType.APP_LINK,
-                    browserSwitchUrl = actualParams.browserSwitchUrl,
+                    url = actualParams.url,
                 ),
                 actualParams
             )
