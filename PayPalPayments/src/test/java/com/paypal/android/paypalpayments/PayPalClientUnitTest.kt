@@ -1581,6 +1581,8 @@ class PayPalClientUnitTest {
                     errorDescription = "fake error description",
                 )
             }
+            val actualParams = paramsSlot.captured
+            assertNotNull(actualParams.browserSwitchUrl)
             assertEquals(
                 AnalyticsEventParams(
                     orderIdOrSetupTokenId = "fake-order-id",
@@ -1596,10 +1598,10 @@ class PayPalClientUnitTest {
                     cancelAppUrl = "https://example.com/paypal-cancel",
                     fallbackSchemeUrl = "com.example.app://paypal",
                     linkType = LinkType.APP_LINK,
+                    browserSwitchUrl = actualParams.browserSwitchUrl,
                 ),
-                paramsSlot.captured.copy(browserSwitchUrl = null)
+                actualParams
             )
-            assertNotNull(paramsSlot.captured.browserSwitchUrl)
             verify {
                 callback.onPayPalResult(match {
                     it is PayPalPresentAuthChallengeResult.Failure && it.error === sdkError
@@ -1638,6 +1640,8 @@ class PayPalClientUnitTest {
                     errorDescription = "fake error description",
                 )
             }
+            val actualParams = paramsSlot.captured
+            assertNotNull(actualParams.browserSwitchUrl)
             assertEquals(
                 AnalyticsEventParams(
                     orderIdOrSetupTokenId = "fake-setup-token-id",
@@ -1653,10 +1657,10 @@ class PayPalClientUnitTest {
                     cancelAppUrl = "https://example.com/paypal-cancel",
                     fallbackSchemeUrl = "com.example.app://paypal",
                     linkType = LinkType.APP_LINK,
+                    browserSwitchUrl = actualParams.browserSwitchUrl,
                 ),
-                paramsSlot.captured.copy(browserSwitchUrl = null)
+                actualParams
             )
-            assertNotNull(paramsSlot.captured.browserSwitchUrl)
             verify {
                 callback.onPayPalResult(match {
                     it is PayPalPresentAuthChallengeResult.Failure && it.error === sdkError
