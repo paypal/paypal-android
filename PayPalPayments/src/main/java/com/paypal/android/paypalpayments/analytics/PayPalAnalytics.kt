@@ -76,7 +76,7 @@ private fun AnalyticsEventParams.toAnalyticsEventData(
     shopperSessionId = shopperSession?.shopperSessionConfig?.id,
     shopperSessionExpiration = shopperSession?.shopperSessionConfig?.expiresAt,
     matchedAuthenticationMethods = shopperSession?.matchedAuthenticationMethods,
-    appSwitchUrl = appSwitchUrl,
+    url = url,
     checkoutFallbackUrl = shopperSession?.checkoutFallbackUrl,
     errorDescription = errorDescription,
     isCachedSession = isCachedSession,

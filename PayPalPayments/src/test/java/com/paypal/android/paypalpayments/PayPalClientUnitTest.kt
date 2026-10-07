@@ -1573,27 +1573,35 @@ class PayPalClientUnitTest {
             sutV3.start(activity, "fake-order-id", callback)
             testDispatcher.scheduler.advanceUntilIdle()
 
+            val paramsSlot = slot<AnalyticsEventParams>()
             verify {
                 analytics.notify(
                     PayPalEvent.AUTH_CHALLENGE_PRESENTATION_FAILED,
-                    params = AnalyticsEventParams(
-                        orderIdOrSetupTokenId = "fake-order-id",
-                        shopperSession = fakeSessionResponse,
-                        isCachedSession = false,
-                        userActionValue = "CONTINUE",
-                        appSwitchEnabled = false,
-                        isVault = false,
-                        merchantId = "fake-merchant-id",
-                        clientId = "fake-client-id",
-                        paypalInstalled = "false",
-                        returnAppUrl = "https://example.com/paypal-return",
-                        cancelAppUrl = "https://example.com/paypal-cancel",
-                        fallbackSchemeUrl = "com.example.app://paypal",
-                        linkType = LinkType.APP_LINK,
-                    ),
+                    params = capture(paramsSlot),
                     errorDescription = "fake error description",
                 )
             }
+            val actualParams = paramsSlot.captured
+            assertNotNull(actualParams.url)
+            assertEquals(
+                AnalyticsEventParams(
+                    orderIdOrSetupTokenId = "fake-order-id",
+                    shopperSession = fakeSessionResponse,
+                    isCachedSession = false,
+                    userActionValue = "CONTINUE",
+                    appSwitchEnabled = false,
+                    isVault = false,
+                    merchantId = "fake-merchant-id",
+                    clientId = "fake-client-id",
+                    paypalInstalled = "false",
+                    returnAppUrl = "https://example.com/paypal-return",
+                    cancelAppUrl = "https://example.com/paypal-cancel",
+                    fallbackSchemeUrl = "com.example.app://paypal",
+                    linkType = LinkType.APP_LINK,
+                    url = actualParams.url,
+                ),
+                actualParams
+            )
             verify {
                 callback.onPayPalResult(match {
                     it is PayPalPresentAuthChallengeResult.Failure && it.error === sdkError
@@ -1624,27 +1632,35 @@ class PayPalClientUnitTest {
             sutV3.vault(activity, "fake-setup-token-id", callback)
             testDispatcher.scheduler.advanceUntilIdle()
 
+            val paramsSlot = slot<AnalyticsEventParams>()
             verify {
                 analytics.notify(
                     PayPalEvent.AUTH_CHALLENGE_PRESENTATION_FAILED,
-                    params = AnalyticsEventParams(
-                        orderIdOrSetupTokenId = "fake-setup-token-id",
-                        shopperSession = fakeSessionResponse,
-                        isCachedSession = false,
-                        userActionValue = "CONTINUE",
-                        appSwitchEnabled = false,
-                        isVault = true,
-                        merchantId = "fake-merchant-id",
-                        clientId = "fake-client-id",
-                        paypalInstalled = "false",
-                        returnAppUrl = "https://example.com/paypal-return",
-                        cancelAppUrl = "https://example.com/paypal-cancel",
-                        fallbackSchemeUrl = "com.example.app://paypal",
-                        linkType = LinkType.APP_LINK,
-                    ),
+                    params = capture(paramsSlot),
                     errorDescription = "fake error description",
                 )
             }
+            val actualParams = paramsSlot.captured
+            assertNotNull(actualParams.url)
+            assertEquals(
+                AnalyticsEventParams(
+                    orderIdOrSetupTokenId = "fake-setup-token-id",
+                    shopperSession = fakeSessionResponse,
+                    isCachedSession = false,
+                    userActionValue = "CONTINUE",
+                    appSwitchEnabled = false,
+                    isVault = true,
+                    merchantId = "fake-merchant-id",
+                    clientId = "fake-client-id",
+                    paypalInstalled = "false",
+                    returnAppUrl = "https://example.com/paypal-return",
+                    cancelAppUrl = "https://example.com/paypal-cancel",
+                    fallbackSchemeUrl = "com.example.app://paypal",
+                    linkType = LinkType.APP_LINK,
+                    url = actualParams.url,
+                ),
+                actualParams
+            )
             verify {
                 callback.onPayPalResult(match {
                     it is PayPalPresentAuthChallengeResult.Failure && it.error === sdkError

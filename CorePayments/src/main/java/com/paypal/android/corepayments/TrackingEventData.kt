@@ -67,8 +67,8 @@ internal data class TrackingEventParams(
     val shopperSessionExpirationAt: String? = null,
     @SerialName("matched_authentication_methods")
     val matchedAuthenticationMethods: List<String>? = null,
-    @SerialName("app_switch_url")
-    val appSwitchUrl: String? = null,
+    @SerialName("url")
+    val url: String? = null,
     @SerialName("checkout_fallback_url")
     val fallbackUrl: String? = null,
     @SerialName("error_desc")

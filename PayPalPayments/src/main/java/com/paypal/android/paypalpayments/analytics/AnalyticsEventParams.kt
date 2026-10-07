@@ -40,9 +40,11 @@ internal data class AnalyticsEventParams(
     val appSwitchEnabled: Boolean = false,
 
     /**
-     * The URL used to attempt the app switch launch. Only set when [appSwitchEnabled] is true.
+     * The URL used in an intent — the app-switch URL when [appSwitchEnabled] is true,
+     * or the browser/Custom Tabs URL otherwise. Refreshed with the return intent's URL when
+     * [PayPalClient.finishStart]/[PayPalClient.finishVault] are called.
      */
-    val appSwitchUrl: String? = null,
+    val url: String? = null,
 
     /**
      * Whether this is a vault (setup token) flow rather than a checkout (order) flow.
