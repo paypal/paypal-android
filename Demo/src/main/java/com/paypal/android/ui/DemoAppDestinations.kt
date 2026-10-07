@@ -20,7 +20,7 @@ object DemoAppDestinations {
         PAYPAL_STATIC_BUTTONS -> "PayPal Static Buttons"
         SELECT_TEST_CARD -> "Select a Test Card"
         PAYPAL_VAULT -> "Paypal Vault"
-        SETTINGS -> "Environment Settings"
+        SETTINGS -> "Settings"
         else -> "Demo"
     }
 }

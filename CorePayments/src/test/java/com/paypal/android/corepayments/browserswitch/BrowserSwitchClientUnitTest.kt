@@ -1,5 +1,6 @@
 package com.paypal.android.corepayments.browserswitch
 
+import android.app.Activity
 import android.content.Context
 import androidx.activity.ComponentActivity
 import androidx.core.net.toUri
@@ -31,14 +32,16 @@ class BrowserSwitchClientUnitTest {
     )
 
     private lateinit var chromeCustomTabsClient: ChromeCustomTabsClient
+    private lateinit var authTabClient: AuthTabClient
     private lateinit var deviceInspector: DeviceInspector
     private lateinit var sut: BrowserSwitchClient
 
     @Before
     fun beforeEach() {
         chromeCustomTabsClient = mockk(relaxed = true)
+        authTabClient = mockk(relaxed = true)
         deviceInspector = mockk(relaxed = true)
-        sut = BrowserSwitchClient(chromeCustomTabsClient, deviceInspector)
+        sut = BrowserSwitchClient(chromeCustomTabsClient, authTabClient, deviceInspector)
     }
 
     @Test
@@ -56,6 +59,59 @@ class BrowserSwitchClientUnitTest {
 
         assertTrue(result is BrowserSwitchStartResult.Success)
         verify { chromeCustomTabsClient.launch(appContext, expectedCCTOptions) }
+    }
+
+    @Test
+    fun `it should launch an auth tab for auth tab options`() {
+        val activity = Robolectric.buildActivity(ComponentActivity::class.java).get()
+        val authTabOptions = browserSwitchOptions.copy(
+            launchMode = BrowserSwitchLaunchMode.AUTH_TAB,
+        )
+        every {
+            deviceInspector.isDeepLinkConfiguredInManifest("example.return.url.scheme")
+        } returns true
+        every { authTabClient.launch(activity, authTabOptions) } returns LaunchAuthTabResult.Success
+
+        val result = sut.start(activity, authTabOptions)
+
+        assertTrue(result is BrowserSwitchStartResult.Success)
+        verify { authTabClient.launch(activity, authTabOptions) }
+        verify(exactly = 0) { chromeCustomTabsClient.launch(any(), any()) }
+    }
+
+    @Test
+    fun `it should reject auth tab launch without an activity`() {
+        val authTabOptions = browserSwitchOptions.copy(launchMode = BrowserSwitchLaunchMode.AUTH_TAB)
+        every {
+            deviceInspector.isDeepLinkConfiguredInManifest("example.return.url.scheme")
+        } returns true
+
+        val result = sut.start(appContext, authTabOptions)
+
+        assertTrue(result is BrowserSwitchStartResult.Failure)
+        val message = (result as BrowserSwitchStartResult.Failure).error.message
+        assertEquals("Unable to launch Auth Tab without a source Activity.", message)
+        verify(exactly = 0) { authTabClient.launch(any(), any()) }
+    }
+
+    @Test
+    fun `it should fall back to a chrome custom tab for auth tab options from a plain Activity`() {
+        val activity = Robolectric.buildActivity(Activity::class.java).setup().get()
+        val authTabOptions = browserSwitchOptions.copy(launchMode = BrowserSwitchLaunchMode.AUTH_TAB)
+        every {
+            deviceInspector.isDeepLinkConfiguredInManifest("example.return.url.scheme")
+        } returns true
+        every {
+            chromeCustomTabsClient.launch(any(), any())
+        } returns LaunchChromeCustomTabResult.Success
+
+        val result = sut.start(activity, authTabOptions)
+        val expectedCCTOptions =
+            ChromeCustomTabOptions(launchUri = "https://example.com/uri".toUri())
+
+        assertTrue(result is BrowserSwitchStartResult.Success)
+        verify { chromeCustomTabsClient.launch(activity, expectedCCTOptions) }
+        verify(exactly = 0) { authTabClient.launch(any(), any()) }
     }
 
     @Test
@@ -98,6 +154,29 @@ class BrowserSwitchClientUnitTest {
         val message = (result as BrowserSwitchStartResult.Failure).error.message
         val expected = "This app is not correctly configured to handle deep links from the return url scheme provided."
         assertEquals(expected, message)
+    }
+
+    @Test
+    fun `it should reject auth tab launch when the App Link receiver is not configured`() {
+        val activity = Robolectric.buildActivity(ComponentActivity::class.java).get()
+        val authTabOptions = browserSwitchOptions.copy(
+            returnUrlScheme = null,
+            appLinkUrl = "https://merchant.example/return",
+            launchMode = BrowserSwitchLaunchMode.AUTH_TAB,
+        )
+        every {
+            deviceInspector.isAppLinkConfiguredInManifest("https://merchant.example/return")
+        } returns false
+
+        val result = sut.start(activity, authTabOptions)
+
+        assertTrue(result is BrowserSwitchStartResult.Failure)
+        val message = (result as BrowserSwitchStartResult.Failure).error.message
+        assertEquals(
+            "This app is not correctly configured to handle the provided App Link return URL.",
+            message,
+        )
+        verify(exactly = 0) { authTabClient.launch(any(), any()) }
     }
 
     @Test
