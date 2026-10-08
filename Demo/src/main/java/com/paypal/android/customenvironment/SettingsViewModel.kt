@@ -169,7 +169,6 @@ class SettingsViewModel @Inject constructor(
      */
     private fun validateUrl(url: String, optional: Boolean = false): String? = when {
         url.isBlank() -> if (optional) null else "URL is required"
-        url != url.trim() || url.contains(' ') -> "URL must not contain spaces"
         else -> try {
             val uri = URI(url)
             when {
