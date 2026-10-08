@@ -8,6 +8,7 @@ import com.paypal.android.corepayments.CaptureDeepLinkResult
 import com.paypal.android.corepayments.DeepLink
 import com.paypal.android.corepayments.ReturnToAppStrategy
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchClient
+import com.paypal.android.corepayments.browserswitch.BrowserSwitchLaunchMode
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchOptions
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchPendingState
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchStartResult
@@ -36,6 +37,7 @@ internal class PayPalLauncher(
         token: String,
         tokenType: TokenType,
         returnToAppStrategy: ReturnToAppStrategy,
+        launchMode: BrowserSwitchLaunchMode = BrowserSwitchLaunchMode.AUTH_TAB,
     ): PayPalPresentAuthChallengeResult {
         val metadata = getMetadata(token, tokenType)
         val options = BrowserSwitchOptions(
@@ -43,7 +45,8 @@ internal class PayPalLauncher(
             requestCode = getRequestCode(tokenType),
             returnUrlScheme = (returnToAppStrategy as? ReturnToAppStrategy.CustomUrlScheme)?.urlScheme,
             appLinkUrl = (returnToAppStrategy as? ReturnToAppStrategy.AppLink)?.appLinkUrl,
-            metadata = metadata
+            metadata = metadata,
+            launchMode = launchMode,
         )
         return launchBrowserSwitch(context, options)
     }
@@ -93,6 +96,10 @@ internal class PayPalLauncher(
             is CaptureDeepLinkResult.Failure ->
                 PayPalFinishStartResult.Failure(result.reason, orderId = null)
 
+            is CaptureDeepLinkResult.Canceled -> PayPalFinishStartResult.Canceled(
+                result.originalOptions.metadata?.optString(METADATA_KEY_ORDER_ID)
+            )
+
             is CaptureDeepLinkResult.Ignore -> PayPalFinishStartResult.NoResult
         }
     }
@@ -106,6 +113,8 @@ internal class PayPalLauncher(
             is CaptureDeepLinkResult.Success -> parseVaultSuccessResult(result.deepLink)
             is CaptureDeepLinkResult.Failure ->
                 PayPalFinishVaultResult.Failure(result.reason)
+
+            is CaptureDeepLinkResult.Canceled -> PayPalFinishVaultResult.Canceled
 
             is CaptureDeepLinkResult.Ignore -> PayPalFinishVaultResult.NoResult
         }

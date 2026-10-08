@@ -33,6 +33,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.paypal.android.DemoActivityType
 
 private val successGreen = Color(color = 0xff007f5f)
 
@@ -50,11 +51,19 @@ private data class SettingsCallbacks(
 
 @Composable
 fun SettingsView(
-    viewModel: SettingsViewModel = hiltViewModel()
+    activityType: DemoActivityType,
+    onSwitchActivityType: () -> Unit,
+    viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
     SettingsContent(
-        uiState = uiState,
+        contentState = SettingsContentState(
+            uiState = uiState,
+            activityTypeSettings = ActivityTypeSettings(
+                type = activityType,
+                onSwitch = onSwitchActivityType,
+            ),
+        ),
         callbacks = SettingsCallbacks(
             onEnvironmentChange = viewModel::updateSelectedEnvironment,
             onCustomSdkRestUrlChange = viewModel::updateCustomSdkRestUrl,
@@ -71,9 +80,10 @@ fun SettingsView(
 
 @Composable
 private fun SettingsContent(
-    uiState: SettingsUiState,
+    contentState: SettingsContentState,
     callbacks: SettingsCallbacks
 ) {
+    val uiState = contentState.uiState
     val scrollState = rememberScrollState()
     Column(
         modifier = Modifier
@@ -82,6 +92,11 @@ private fun SettingsContent(
             .padding(horizontal = 16.dp, vertical = 24.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
+        ActivityTypeSection(
+            activityType = contentState.activityTypeSettings.type,
+            onSwitchActivityType = contentState.activityTypeSettings.onSwitch,
+        )
+        Spacer(modifier = Modifier.height(16.dp))
         BnCodeField(
             value = uiState.settings.customBnCode,
             onValueChange = callbacks.onCustomBnCodeChange,
@@ -115,6 +130,28 @@ private fun SettingsContent(
                 modifier = Modifier.fillMaxWidth()
             )
         }
+    }
+}
+
+@Composable
+private fun ActivityTypeSection(
+    activityType: DemoActivityType,
+    onSwitchActivityType: () -> Unit,
+) {
+    Text(
+        text = "Activity Type",
+        style = MaterialTheme.typography.titleLarge,
+    )
+    Text(
+        text = activityType.description,
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+    OutlinedButton(
+        onClick = onSwitchActivityType,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Text(activityType.switchActionLabel)
     }
 }
 
@@ -185,7 +222,7 @@ private fun BnCodeField(
 @Composable
 private fun SettingsHeader() {
     Text(
-        text = "Custom Environment",
+        text = "Environment Settings",
         style = MaterialTheme.typography.titleLarge
     )
     Text(
@@ -285,19 +322,25 @@ private fun SettingsViewPreview() {
     MaterialTheme {
         Surface {
             SettingsContent(
-                uiState = SettingsUiState(
-                    settings = DemoEnvironmentSettings(
-                        selectedEnvironment = SelectedEnvironment.CUSTOM,
-                        customSdkRestUrl = "not-a-valid-url",
-                        customSdkGraphQLUrl = "",
-                        customClientId = "client-id-entered-at-runtime",
-                        customMerchantBaseUrl = "bad merchant url",
-                        customMerchantId = "merchant-id-entered-at-runtime",
-                        customBnCode = "bn-code-entered-at-runtime",
+                contentState = SettingsContentState(
+                    uiState = SettingsUiState(
+                        settings = DemoEnvironmentSettings(
+                            selectedEnvironment = SelectedEnvironment.CUSTOM,
+                            customSdkRestUrl = "not-a-valid-url",
+                            customSdkGraphQLUrl = "",
+                            customClientId = "client-id-entered-at-runtime",
+                            customMerchantBaseUrl = "bad merchant url",
+                            customMerchantId = "merchant-id-entered-at-runtime",
+                            customBnCode = "bn-code-entered-at-runtime",
+                        ),
+                        restUrlError = "URL must start with https://",
+                        graphQLUrlError = "URL is required",
+                        merchantBaseUrlError = "URL must not contain spaces"
                     ),
-                    restUrlError = "URL must start with https://",
-                    graphQLUrlError = "URL is required",
-                    merchantBaseUrlError = "URL must not contain spaces"
+                    activityTypeSettings = ActivityTypeSettings(
+                        type = DemoActivityType.COMPONENT_ACTIVITY,
+                        onSwitch = {},
+                    ),
                 ),
                 callbacks = SettingsCallbacks(
                     onEnvironmentChange = {},
