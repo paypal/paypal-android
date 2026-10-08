@@ -5,6 +5,7 @@ import android.content.res.TypedArray
 import android.util.AttributeSet
 import android.view.View
 import androidx.core.content.res.use
+import com.paypal.android.corepayments.analytics.AnalyticsEventData
 import com.paypal.android.ui.R
 
 
@@ -70,8 +71,7 @@ class PayLaterButton @JvmOverloads constructor(
         updateLabel(PayPalButtonLabel.PAY_LATER)
         analyticsService.sendAnalyticsEvent(
             "payment-button:initialized",
-            orderId = null,
-            buttonType = PaymentButtonFundingType.PAY_LATER.buttonType
+            AnalyticsEventData(buttonType = PaymentButtonFundingType.PAY_LATER.buttonType)
         )
     }
 

@@ -15,6 +15,7 @@ import com.paypal.android.corepayments.browserswitch.ChromeCustomTabOptions
 import com.paypal.android.corepayments.browserswitch.ChromeCustomTabsClient
 import com.paypal.android.corepayments.browserswitch.LaunchChromeCustomTabResult
 import com.paypal.android.corepayments.model.APIResult
+import com.paypal.android.corepayments.model.FundingSource
 import com.paypal.android.venmo.analytics.VenmoAnalytics
 import com.paypal.android.venmo.analytics.VenmoCheckoutEvent
 import kotlinx.coroutines.CoroutineScope
@@ -34,7 +35,6 @@ class VenmoClient internal constructor(
 ) {
 
     companion object {
-        private const val VENMO = "VENMO"
         private const val CHANNEL_PARAM = "channel"
         private const val CHANNEL_VALUE = "in-app"
         private const val TOKEN_PARAM = "token"
@@ -64,7 +64,7 @@ class VenmoClient internal constructor(
             val eligibilityResult = getFundingEligibility(
                 context = this.context,
                 clientId = coreConfig.clientId,
-                fundingSources = listOf(VENMO),
+                fundingSources = listOf(FundingSource.VENMO.name),
                 merchantIds = listOf(coreConfig.merchantId),
                 buyerCountry = buyerCountry
             )
@@ -100,10 +100,10 @@ class VenmoClient internal constructor(
         // Update client config; ignore result as transaction should proceed regardless
         ccoAPI.updateClientConfig(
             tokenId = orderId,
-            fundingSource = VENMO
+            fundingSource = FundingSource.VENMO.name
         )
 
-        val appSwitchUri = coreConfig.environment.venmoCheckoutBaseUrl.toUri()
+        val appSwitchUri = coreConfig.coreEnvironment.venmoCheckoutBaseUrl.toUri()
             .buildUpon()
             .appendQueryParameter(CHANNEL_PARAM, CHANNEL_VALUE)
             .appendQueryParameter(TOKEN_PARAM, orderId)

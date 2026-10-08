@@ -7,12 +7,7 @@ public final class com/paypal/android/fraudprotection/BuildConfig {
 
 public final class com/paypal/android/fraudprotection/PayPalDataCollector {
 	public fun <init> (Lcom/paypal/android/corepayments/CoreConfig;)V
-	public final fun collectDeviceData (Landroid/content/Context;)Ljava/lang/String;
 	public final fun collectDeviceData (Landroid/content/Context;Lcom/paypal/android/fraudprotection/PayPalDataCollectorRequest;)Ljava/lang/String;
-	public final fun collectDeviceData (Landroid/content/Context;Ljava/lang/String;)Ljava/lang/String;
-	public final fun collectDeviceData (Landroid/content/Context;Ljava/lang/String;Ljava/util/HashMap;)Ljava/lang/String;
-	public static synthetic fun collectDeviceData$default (Lcom/paypal/android/fraudprotection/PayPalDataCollector;Landroid/content/Context;Ljava/lang/String;Ljava/util/HashMap;ILjava/lang/Object;)Ljava/lang/String;
-	public final fun setLogging (Z)V
 }
 
 public final class com/paypal/android/fraudprotection/PayPalDataCollectorRequest {

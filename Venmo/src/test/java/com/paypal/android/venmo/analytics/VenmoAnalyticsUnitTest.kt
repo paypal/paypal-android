@@ -1,5 +1,6 @@
 package com.paypal.android.venmo.analytics
 
+import com.paypal.android.corepayments.analytics.AnalyticsEventData
 import com.paypal.android.corepayments.analytics.AnalyticsService
 import io.mockk.mockk
 import io.mockk.verify
@@ -25,8 +26,7 @@ class VenmoAnalyticsUnitTest {
         verify {
             analyticsService.sendAnalyticsEvent(
                 name = "venmo:checkout:start",
-                orderId = orderId,
-                appSwitchEnabled = true
+                eventData = AnalyticsEventData(orderId = orderId, appSwitchEnabled = true)
             )
         }
     }
@@ -40,8 +40,7 @@ class VenmoAnalyticsUnitTest {
         verify {
             analyticsService.sendAnalyticsEvent(
                 name = "venmo:checkout:success",
-                orderId = orderId,
-                appSwitchEnabled = true
+                eventData = AnalyticsEventData(orderId = orderId, appSwitchEnabled = true)
             )
         }
     }
@@ -55,8 +54,7 @@ class VenmoAnalyticsUnitTest {
         verify {
             analyticsService.sendAnalyticsEvent(
                 name = "venmo:checkout:fail",
-                orderId = orderId,
-                appSwitchEnabled = true
+                eventData = AnalyticsEventData(orderId = orderId, appSwitchEnabled = true)
             )
         }
     }
@@ -70,8 +68,7 @@ class VenmoAnalyticsUnitTest {
         verify {
             analyticsService.sendAnalyticsEvent(
                 name = "venmo:checkout:canceled",
-                orderId = orderId,
-                appSwitchEnabled = true
+                eventData = AnalyticsEventData(orderId = orderId, appSwitchEnabled = true)
             )
         }
     }
@@ -85,8 +82,7 @@ class VenmoAnalyticsUnitTest {
         verify {
             analyticsService.sendAnalyticsEvent(
                 name = "venmo:checkout:launched:success",
-                orderId = orderId,
-                appSwitchEnabled = true
+                eventData = AnalyticsEventData(orderId = orderId, appSwitchEnabled = true)
             )
         }
     }
@@ -100,8 +96,7 @@ class VenmoAnalyticsUnitTest {
         verify {
             analyticsService.sendAnalyticsEvent(
                 name = "venmo:checkout:launched:failed",
-                orderId = orderId,
-                appSwitchEnabled = true
+                eventData = AnalyticsEventData(orderId = orderId, appSwitchEnabled = true)
             )
         }
     }
@@ -113,8 +108,7 @@ class VenmoAnalyticsUnitTest {
         verify {
             analyticsService.sendAnalyticsEvent(
                 name = "venmo:checkout:start",
-                orderId = null,
-                appSwitchEnabled = true
+                eventData = AnalyticsEventData(orderId = null, appSwitchEnabled = true)
             )
         }
     }
@@ -126,8 +120,7 @@ class VenmoAnalyticsUnitTest {
         verify {
             analyticsService.sendAnalyticsEvent(
                 name = "venmo:checkout:success",
-                orderId = "order-123",
-                appSwitchEnabled = true
+                eventData = AnalyticsEventData(orderId = "order-123", appSwitchEnabled = true)
             )
         }
     }

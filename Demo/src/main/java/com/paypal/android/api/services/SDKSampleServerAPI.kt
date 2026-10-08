@@ -87,12 +87,11 @@ class SDKSampleServerAPI(
     init {
         val serviceMap = mutableMapOf<MerchantIntegration, RetrofitService>()
         for (merchant in MerchantIntegration.entries) {
-            val baseUrl =
-                if (merchant == MerchantIntegration.DEFAULT && !customMerchantBaseUrl.isNullOrBlank()) {
-                    customMerchantBaseUrl
-                } else {
-                    merchant.baseUrl
-                }
+            val baseUrl = if (merchant == MerchantIntegration.DEFAULT && !customMerchantBaseUrl.isNullOrBlank()) {
+                customMerchantBaseUrl
+            } else {
+                merchant.baseUrl
+            }
             serviceMap[merchant] = createService(baseUrl)
         }
         this.serviceMap = serviceMap

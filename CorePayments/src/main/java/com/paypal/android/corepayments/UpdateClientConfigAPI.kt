@@ -47,19 +47,31 @@ class UpdateClientConfigAPI(
                     graphQLClient.send<UpdateClientConfigResponse, UpdateClientConfigVariables>(
                         graphQLRequest = graphQLRequest
                     )
+                val roundTripTiming = graphQLResponse.roundTripTiming
                 when (graphQLResponse) {
                     is GraphQLResult.Success -> {
-                        UpdateClientConfigResult.Success
+                        val correlationId = graphQLResponse.correlationId
+                        graphQLResponse.response.data?.let {
+                            UpdateClientConfigResult.Success(roundTripTiming = roundTripTiming)
+                        } ?: UpdateClientConfigResult.Failure(
+                            error = APIClientError.noResponseData(correlationId),
+                            roundTripTiming = roundTripTiming
+                        )
                     }
 
                     is GraphQLResult.Failure -> {
-                        UpdateClientConfigResult.Failure(graphQLResponse.error)
+                        UpdateClientConfigResult.Failure(
+                            error = graphQLResponse.error,
+                            roundTripTiming = roundTripTiming
+                        )
                     }
                 }
             }
 
             is LoadRawResourceResult.Failure -> {
-                UpdateClientConfigResult.Failure(result.error)
+                UpdateClientConfigResult.Failure(
+                    PayPalSDKError(0, "Failed to load GraphQL query resource")
+                )
             }
         }
     }
@@ -103,11 +115,18 @@ data class UpdateClientConfigVariables(
 @OptIn(InternalSerializationApi::class)
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class UpdateClientConfigResponse(
-    val data: String? = null
+    val updateClientConfig: String
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 sealed class UpdateClientConfigResult {
-    data object Success : UpdateClientConfigResult()
-    data class Failure(val error: PayPalSDKError) : UpdateClientConfigResult()
+
+    /** Round-trip timing of the underlying GraphQL request, when available. */
+    abstract val roundTripTiming: HttpRoundTripTiming?
+
+    data class Success(override val roundTripTiming: HttpRoundTripTiming? = null) : UpdateClientConfigResult()
+    data class Failure(
+        val error: PayPalSDKError,
+        override val roundTripTiming: HttpRoundTripTiming? = null
+    ) : UpdateClientConfigResult()
 }
