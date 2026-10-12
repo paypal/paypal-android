@@ -34,6 +34,9 @@ class VenmoClient internal constructor(
         private const val CHANNEL_PARAM = "channel"
         private const val CHANNEL_VALUE = "in-app"
         private const val TOKEN_PARAM = "token"
+        private const val VAULT_TOKEN_PARAM = "vault_token"
+        private const val APPROVAL_TOKEN_ID_PARAM = "approval_token_id"
+        private const val APPROVAL_SESSION_ID_PARAM = "approval_session_id"
 
         private const val INELIGIBLE_MESSAGE = "Venmo is not eligible for this transaction"
 
@@ -87,7 +90,7 @@ class VenmoClient internal constructor(
     suspend fun start(
         activity: Activity,
         orderId: String
-    ): VenmoStartResult {
+    ): VenmoPresentAuthChallengeResult {
         require(orderId.isNotBlank()) { "Order ID cannot be blank" }
 
         // Update client config; ignore result as transaction should proceed regardless
@@ -105,13 +108,13 @@ class VenmoClient internal constructor(
         return try {
             val cctOptions = ChromeCustomTabOptions(launchUri = appSwitchUri)
             when (chromeCustomTabsClient.launch(activity, cctOptions)) {
-                LaunchChromeCustomTabResult.Success -> VenmoStartResult.Success
+                LaunchChromeCustomTabResult.Success -> VenmoPresentAuthChallengeResult.Success
                 LaunchChromeCustomTabResult.ActivityNotFound -> {
                     val error = PayPalSDKError(
                         code = PayPalSDKErrorCode.CHECKOUT_ERROR.ordinal,
                         errorDescription = "Unable to launch Venmo app or web browser"
                     )
-                    VenmoStartResult.Failure(error)
+                    VenmoPresentAuthChallengeResult.Failure(error)
                 }
             }
         } catch (e: Exception) {
@@ -119,7 +122,57 @@ class VenmoClient internal constructor(
                 code = PayPalSDKErrorCode.CHECKOUT_ERROR.ordinal,
                 errorDescription = e.message ?: "Failed to launch Venmo"
             )
-            VenmoStartResult.Failure(error)
+            VenmoPresentAuthChallengeResult.Failure(error)
+        }
+    }
+
+    suspend fun vault(
+        activity: Activity,
+        setupTokenId: String
+    ): VenmoPresentAuthChallengeResult {
+        require(setupTokenId.isNotBlank()) { "Setup token ID cannot be blank" }
+
+        val appSwitchUri = coreConfig.coreEnvironment.venmoCheckoutBaseUrl.toUri()
+            .buildUpon()
+            .appendQueryParameter(CHANNEL_PARAM, CHANNEL_VALUE)
+            .appendQueryParameter(VAULT_TOKEN_PARAM, setupTokenId)
+            .build()
+
+        return try {
+            val cctOptions = ChromeCustomTabOptions(launchUri = appSwitchUri)
+            when (chromeCustomTabsClient.launch(activity, cctOptions)) {
+                LaunchChromeCustomTabResult.Success -> VenmoPresentAuthChallengeResult.Success
+                LaunchChromeCustomTabResult.ActivityNotFound -> {
+                    val error = PayPalSDKError(
+                        code = PayPalSDKErrorCode.CHECKOUT_ERROR.ordinal,
+                        errorDescription = "Unable to launch Venmo app or web browser"
+                    )
+                    VenmoPresentAuthChallengeResult.Failure(error)
+                }
+            }
+        } catch (e: Exception) {
+            val error = PayPalSDKError(
+                code = PayPalSDKErrorCode.CHECKOUT_ERROR.ordinal,
+                errorDescription = e.message ?: "Failed to launch Venmo"
+            )
+            VenmoPresentAuthChallengeResult.Failure(error)
+        }
+    }
+
+    fun finishVault(intent: Intent): VenmoFinishVaultResult {
+        val deepLinkUri = intent.data ?: return VenmoFinishVaultResult.NoResult
+        val approvalTokenId = deepLinkUri.getQueryParameter(APPROVAL_TOKEN_ID_PARAM)
+
+        return if (approvalTokenId.isNullOrEmpty()) {
+            VenmoFinishVaultResult.Failure(
+                PayPalSDKError(
+                    code = PayPalSDKErrorCode.DATA_PARSING_ERROR.ordinal,
+                    errorDescription = "Result did not contain the expected data. Approval token ID is null."
+                )
+            )
+        } else {
+            val approvalSessionId = deepLinkUri.getQueryParameter(APPROVAL_SESSION_ID_PARAM)
+            VenmoFinishVaultResult.Success(approvalTokenId, approvalSessionId)
         }
     }
 
@@ -188,12 +241,32 @@ class VenmoClient internal constructor(
     fun start(
         activity: Activity,
         orderId: String,
-        callback: VenmoStartCallback
+        callback: VenmoResultCallback
     ) {
         applicationScope.launch {
             val result = start(activity, orderId)
             withContext(Dispatchers.Main) {
-                callback.onVenmoStartResult(result)
+                callback.onVenmoResult(result)
+            }
+        }
+    }
+
+    /**
+     * Initiate Venmo vault with callback.
+     *
+     * @param activity the activity to launch Venmo from
+     * @param setupTokenId the setup token ID associated with the vault approval
+     * @param callback callback to receive the vault result
+     */
+    fun vault(
+        activity: Activity,
+        setupTokenId: String,
+        callback: VenmoResultCallback
+    ) {
+        applicationScope.launch {
+            val result = vault(activity, setupTokenId)
+            withContext(Dispatchers.Main) {
+                callback.onVenmoResult(result)
             }
         }
     }

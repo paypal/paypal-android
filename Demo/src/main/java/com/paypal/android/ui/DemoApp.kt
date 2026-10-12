@@ -35,6 +35,7 @@ import com.paypal.android.ui.selectcard.SelectCardView
 import com.paypal.android.ui.vaultcard.VaultCardView
 import com.paypal.android.ui.vaultcard.VaultCardViewModel
 import com.paypal.android.ui.venmo.PayWithVenmoView
+import com.paypal.android.ui.venmovault.VenmoVaultView
 import com.paypal.android.uishared.components.DemoAppTopBar
 import com.paypal.android.uishared.effects.NavDestinationChangeDisposableEffect
 import com.paypal.android.utils.UIConstants
@@ -136,6 +137,9 @@ fun DemoApp() {
                 }
                 composable(DemoAppDestinations.PAY_WITH_VENMO) {
                     PayWithVenmoView()
+                }
+                composable(DemoAppDestinations.VENMO_VAULT) {
+                    VenmoVaultView()
                 }
                 if (BuildConfig.DEBUG) {
                     composable(DemoAppDestinations.SETTINGS) {
