@@ -60,7 +60,7 @@ class VenmoClientUnitTest {
 
         val result = venmoClient.start(activity, orderId)
 
-        assertTrue(result is VenmoStartResult.Success)
+        assertTrue(result is VenmoPresentAuthChallengeResult.Success)
         verify {
             analytics.notify(VenmoCheckoutEvent.STARTED, orderId)
             analytics.notify(VenmoCheckoutEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED, orderId)
@@ -75,8 +75,8 @@ class VenmoClientUnitTest {
 
         val result = venmoClient.start(activity, orderId)
 
-        assertTrue(result is VenmoStartResult.Failure)
-        assertEquals("Unable to launch Venmo app or web browser", (result as VenmoStartResult.Failure).error.errorDescription)
+        assertTrue(result is VenmoPresentAuthChallengeResult.Failure)
+        assertEquals("Unable to launch Venmo app or web browser", (result as VenmoPresentAuthChallengeResult.Failure).error.errorDescription)
         verify {
             analytics.notify(VenmoCheckoutEvent.STARTED, orderId)
             analytics.notify(VenmoCheckoutEvent.AUTH_CHALLENGE_PRESENTATION_FAILED, orderId)
@@ -92,8 +92,8 @@ class VenmoClientUnitTest {
 
         val result = venmoClient.start(activity, orderId)
 
-        assertTrue(result is VenmoStartResult.Failure)
-        assertEquals(exceptionMessage, (result as VenmoStartResult.Failure).error.errorDescription)
+        assertTrue(result is VenmoPresentAuthChallengeResult.Failure)
+        assertEquals(exceptionMessage, (result as VenmoPresentAuthChallengeResult.Failure).error.errorDescription)
         verify {
             analytics.notify(VenmoCheckoutEvent.STARTED, orderId)
             analytics.notify(VenmoCheckoutEvent.AUTH_CHALLENGE_PRESENTATION_FAILED, orderId)
@@ -106,8 +106,8 @@ class VenmoClientUnitTest {
 
         val result = venmoClient.start(activity, "")
 
-        assertTrue(result is VenmoStartResult.Failure)
-        assertEquals("Order ID cannot be blank", (result as VenmoStartResult.Failure).error.errorDescription)
+        assertTrue(result is VenmoPresentAuthChallengeResult.Failure)
+        assertEquals("Order ID cannot be blank", (result as VenmoPresentAuthChallengeResult.Failure).error.errorDescription)
         verify {
             analytics.notify(VenmoCheckoutEvent.STARTED, "")
             analytics.notify(VenmoCheckoutEvent.FAILED, "")

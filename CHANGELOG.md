@@ -1,5 +1,11 @@
 # PayPal Android SDK Release Notes
 
+## unreleased
+
+* Venmo
+  * Add `VenmoResultCallback` with a single `onVenmoResult(result: VenmoPresentAuthChallengeResult)` method, shared by both `start()` and `vault()`
+  * Renamed `VenmoStartResult` to `VenmoPresentAuthChallengeResult`, shared by both `start()` and `vault()`
+
 ## 3.2.0 (2026-11-03)
 
 * Venmo
