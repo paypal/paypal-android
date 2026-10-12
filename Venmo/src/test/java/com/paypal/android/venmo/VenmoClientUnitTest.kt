@@ -414,8 +414,8 @@ class VenmoClientUnitTest {
         assertEquals("venmo.com", uri?.host)
         assertEquals("/checkout", uri?.path)
         assertEquals(setupTokenId, uri?.getQueryParameter("vault_token"))
+        assertEquals("in-app", uri?.getQueryParameter("channel"))
         assertNull(uri?.getQueryParameter("token"))
-        assertNull(uri?.getQueryParameter("channel"))
     }
 
     @Test

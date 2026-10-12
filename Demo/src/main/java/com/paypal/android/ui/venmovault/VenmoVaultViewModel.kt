@@ -128,7 +128,12 @@ class VenmoVaultViewModel @Inject constructor(
                 vaultVenmoState = ActionState.Failure(Exception("USER CANCELED"))
 
             VenmoFinishVaultResult.NoResult -> {
-                // no result; re-enable Venmo button so user can retry
+                // Resume can deliver a stale intent (no deep-link data) right after a real
+                // deep-link intent already resolved this flow; only reset if still pending,
+                // so we don't clobber a Success/Failure state that was just set.
+                if (vaultVenmoState is ActionState.Loading) {
+                    vaultVenmoState = ActionState.Idle
+                }
             }
         }
     }
