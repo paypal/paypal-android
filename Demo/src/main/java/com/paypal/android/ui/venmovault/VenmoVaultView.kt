@@ -26,6 +26,7 @@ import com.paypal.android.utils.OnLifecycleOwnerResumeEffect
 import com.paypal.android.utils.OnNewIntentEffect
 import com.paypal.android.utils.UIConstants
 import com.paypal.android.utils.getActivityOrNull
+import com.paypal.android.venmo.VenmoEligibilityResult
 import com.paypal.android.venmo.VenmoFinishVaultResult
 
 @Composable
@@ -58,26 +59,71 @@ fun VenmoVaultView(viewModel: VenmoVaultViewModel = hiltViewModel()) {
             .padding(horizontal = contentPadding)
             .verticalScroll(scrollState)
     ) {
-        Step1_CreateSetupToken(uiState, viewModel)
-        if (uiState.isCreateSetupTokenSuccessful) {
-            Step2_VaultVenmo(uiState, viewModel)
-        }
-        if (uiState.isVaultVenmoSuccessful) {
-            Step3_CreatePaymentToken(uiState, viewModel)
+        Step1_CheckEligibility(uiState, viewModel)
+        if (uiState.isEligibilityCheckSuccessful) {
+            Step2_CreateSetupToken(uiState, viewModel)
+            if (uiState.isCreateSetupTokenSuccessful) {
+                Step3_VaultVenmo(uiState, viewModel)
+            }
+            if (uiState.isVaultVenmoSuccessful) {
+                Step4_CreatePaymentToken(uiState, viewModel)
+            }
         }
         Spacer(modifier = Modifier.size(contentPadding))
     }
 }
 
 @Composable
-private fun Step1_CreateSetupToken(
+private fun Step1_CheckEligibility(
     uiState: VenmoVaultUiState,
     viewModel: VenmoVaultViewModel
 ) {
     Column(
         verticalArrangement = UIConstants.spacingMedium,
     ) {
-        StepHeader(stepNumber = 1, title = "Create Setup Token")
+        StepHeader(stepNumber = 1, title = "Check Eligibility")
+
+        // Map eligibility result to failure state if not eligible
+        val displayState = when (val checkState = uiState.checkEligibilityState) {
+            is ActionState.Success -> {
+                val result = checkState.value
+                if (result is VenmoEligibilityResult.Eligible) {
+                    checkState
+                } else {
+                    val errorMessage = when (result) {
+                        is VenmoEligibilityResult.Ineligible -> result.reason
+                        is VenmoEligibilityResult.Error -> result.error.errorDescription
+                        else -> "Venmo is not eligible"
+                    }
+                    ActionState.Failure(Exception(errorMessage))
+                }
+            }
+            else -> checkState
+        }
+
+        ActionButtonColumn(
+            defaultTitle = "CHECK ELIGIBILITY",
+            successTitle = "ELIGIBILITY CHECKED",
+            state = displayState,
+            onClick = { viewModel.checkEligibility() }
+        ) { state ->
+            when (state) {
+                is CompletedActionState.Failure -> ErrorView(error = state.value)
+                is CompletedActionState.Success -> VenmoVaultEligibilityResultView(result = state.value)
+            }
+        }
+    }
+}
+
+@Composable
+private fun Step2_CreateSetupToken(
+    uiState: VenmoVaultUiState,
+    viewModel: VenmoVaultViewModel
+) {
+    Column(
+        verticalArrangement = UIConstants.spacingMedium,
+    ) {
+        StepHeader(stepNumber = 2, title = "Create Setup Token")
         ActionButtonColumn(
             defaultTitle = "CREATE SETUP TOKEN",
             successTitle = "SETUP TOKEN CREATED",
@@ -93,7 +139,7 @@ private fun Step1_CreateSetupToken(
 }
 
 @Composable
-private fun Step2_VaultVenmo(
+private fun Step3_VaultVenmo(
     uiState: VenmoVaultUiState,
     viewModel: VenmoVaultViewModel
 ) {
@@ -101,7 +147,7 @@ private fun Step2_VaultVenmo(
     Column(
         verticalArrangement = UIConstants.spacingMedium,
     ) {
-        StepHeader(stepNumber = 2, title = "Vault Venmo")
+        StepHeader(stepNumber = 3, title = "Vault Venmo")
         ActionButtonColumn(
             defaultTitle = "VAULT VENMO",
             successTitle = "VENMO VAULTED",
@@ -121,14 +167,14 @@ private fun Step2_VaultVenmo(
 }
 
 @Composable
-private fun Step3_CreatePaymentToken(
+private fun Step4_CreatePaymentToken(
     uiState: VenmoVaultUiState,
     viewModel: VenmoVaultViewModel
 ) {
     Column(
         verticalArrangement = UIConstants.spacingMedium,
     ) {
-        StepHeader(stepNumber = 3, title = "Create Payment Token")
+        StepHeader(stepNumber = 4, title = "Create Payment Token")
         ActionButtonColumn(
             defaultTitle = "CREATE PAYMENT TOKEN",
             successTitle = "PAYMENT TOKEN CREATED",
@@ -144,12 +190,36 @@ private fun Step3_CreatePaymentToken(
 }
 
 @Composable
+fun VenmoVaultEligibilityResultView(result: VenmoEligibilityResult) {
+    Column(
+        verticalArrangement = UIConstants.spacingMedium,
+        modifier = Modifier.padding(UIConstants.paddingMedium)
+    ) {
+        when (result) {
+            VenmoEligibilityResult.Eligible -> {
+                PropertyView(name = "Status", value = "Venmo is eligible")
+            }
+            is VenmoEligibilityResult.Ineligible -> {
+                PropertyView(name = "Status", value = "Not Eligible")
+                PropertyView(name = "Reason", value = result.reason)
+            }
+            is VenmoEligibilityResult.Error -> {
+                PropertyView(name = "Status", value = "Error")
+                PropertyView(name = "Error", value = result.error.errorDescription)
+            }
+        }
+    }
+}
+
+@Composable
 fun VenmoVaultResultView(result: VenmoFinishVaultResult.Success) {
     Column(
         verticalArrangement = UIConstants.spacingMedium,
         modifier = Modifier.padding(UIConstants.paddingMedium)
     ) {
-        PropertyView(name = "Setup Token ID", value = result.setupTokenId)
-        PropertyView(name = "Payer ID", value = result.payerId)
+        PropertyView(
+            name = "Approval Session ID",
+            value = result.approvalSessionId ?: result.approvalTokenId
+        )
     }
 }

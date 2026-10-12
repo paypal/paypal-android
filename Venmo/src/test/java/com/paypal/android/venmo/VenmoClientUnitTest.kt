@@ -18,7 +18,16 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
+import io.mockk.verify
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -27,6 +36,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
+@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class VenmoClientUnitTest {
 
@@ -40,6 +50,8 @@ class VenmoClientUnitTest {
 
     @Before
     fun setUp() {
+        Dispatchers.setMain(UnconfinedTestDispatcher())
+
         every { coreConfig.clientId } returns "test-client-id"
         every { coreConfig.merchantId } returns "test-merchant-id"
         every { coreConfig.coreEnvironment.venmoCheckoutBaseUrl } returns "https://venmo.com/checkout"
@@ -49,8 +61,14 @@ class VenmoClientUnitTest {
             coreConfig = coreConfig,
             ccoAPI = ccoAPI,
             getFundingEligibility = getFundingEligibility,
-            chromeCustomTabsClient = chromeCustomTabsClient
+            chromeCustomTabsClient = chromeCustomTabsClient,
+            applicationScope = CoroutineScope(UnconfinedTestDispatcher())
         )
+    }
+
+    @After
+    fun tearDown() {
+        Dispatchers.resetMain()
     }
 
     // ============ isEligible Tests ============
@@ -330,5 +348,228 @@ class VenmoClientUnitTest {
         val result = venmoClient.finishStart(intent)
 
         assertTrue(result is VenmoFinishStartResult.Failure)
+    }
+
+    // ============ vault Tests ============
+
+    @Test
+    fun vault_withSuccessfulLaunch_returnsSuccess() = runTest {
+        val activity = mockk<Activity>(relaxed = true)
+        val setupTokenId = "setup-token-123"
+        every { chromeCustomTabsClient.launch(any(), any()) } returns LaunchChromeCustomTabResult.Success
+
+        val result = venmoClient.vault(activity, setupTokenId)
+
+        assertTrue(result is VenmoPresentAuthChallengeResult.Success)
+    }
+
+    @Test
+    fun vault_withActivityNotFound_returnsFailure() = runTest {
+        val activity = mockk<Activity>(relaxed = true)
+        val setupTokenId = "setup-token-123"
+        every { chromeCustomTabsClient.launch(any(), any()) } returns LaunchChromeCustomTabResult.ActivityNotFound
+
+        val result = venmoClient.vault(activity, setupTokenId)
+
+        assertTrue(result is VenmoPresentAuthChallengeResult.Failure)
+        assertEquals(
+            "Unable to launch Venmo app or web browser",
+            (result as VenmoPresentAuthChallengeResult.Failure).error.errorDescription
+        )
+    }
+
+    @Test
+    fun vault_withException_returnsFailure() = runTest {
+        val activity = mockk<Activity>(relaxed = true)
+        val setupTokenId = "setup-token-123"
+        val exceptionMessage = "Launch failed"
+        every { chromeCustomTabsClient.launch(any(), any()) } throws Exception(exceptionMessage)
+
+        val result = venmoClient.vault(activity, setupTokenId)
+
+        assertTrue(result is VenmoPresentAuthChallengeResult.Failure)
+        assertEquals(exceptionMessage, (result as VenmoPresentAuthChallengeResult.Failure).error.errorDescription)
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun vault_withBlankSetupTokenId_throwsException() = runTest {
+        val activity = mockk<Activity>(relaxed = true)
+        venmoClient.vault(activity, "")
+    }
+
+    @Test
+    fun vault_buildsCorrectUriWithQueryParams() = runTest {
+        val activity = mockk<Activity>(relaxed = true)
+        val setupTokenId = "setup-token-456"
+        var capturedOptions: ChromeCustomTabOptions? = null
+        every { chromeCustomTabsClient.launch(activity, any()) } answers {
+            capturedOptions = secondArg()
+            LaunchChromeCustomTabResult.Success
+        }
+
+        venmoClient.vault(activity, setupTokenId)
+
+        val uri = capturedOptions?.launchUri
+        assertEquals("https", uri?.scheme)
+        assertEquals("venmo.com", uri?.host)
+        assertEquals("/checkout", uri?.path)
+        assertEquals(setupTokenId, uri?.getQueryParameter("vault_token"))
+        assertNull(uri?.getQueryParameter("token"))
+        assertNull(uri?.getQueryParameter("channel"))
+    }
+
+    @Test
+    fun vault_doesNotCallUpdateClientConfig() = runTest {
+        val activity = mockk<Activity>(relaxed = true)
+        val setupTokenId = "setup-token-123"
+        every { chromeCustomTabsClient.launch(any(), any()) } returns LaunchChromeCustomTabResult.Success
+
+        venmoClient.vault(activity, setupTokenId)
+
+        coVerify(exactly = 0) { ccoAPI.updateClientConfig(any(), any()) }
+    }
+
+    // ============ finishVault Tests ============
+
+    @Test
+    fun finishVault_withNoIntentData_returnsNoResult() {
+        val intent = Intent()
+
+        val result = venmoClient.finishVault(intent)
+
+        assertTrue(result is VenmoFinishVaultResult.NoResult)
+    }
+
+    @Test
+    fun finishVault_withApprovalTokenIdAndSessionId_returnsSuccess() {
+        val approvalTokenId = "approval-token-123"
+        val approvalSessionId = "approval-session-456"
+        val uri = Uri.parse("app://return")
+            .buildUpon()
+            .appendQueryParameter("approval_token_id", approvalTokenId)
+            .appendQueryParameter("approval_session_id", approvalSessionId)
+            .build()
+        val intent = Intent().apply { data = uri }
+
+        val result = venmoClient.finishVault(intent)
+
+        assertTrue(result is VenmoFinishVaultResult.Success)
+        val successResult = result as VenmoFinishVaultResult.Success
+        assertEquals(approvalTokenId, successResult.approvalTokenId)
+        assertEquals(approvalSessionId, successResult.approvalSessionId)
+    }
+
+    @Test
+    fun finishVault_withApprovalTokenIdAndNoSessionId_returnsSuccessWithNullSessionId() {
+        val approvalTokenId = "approval-token-123"
+        val uri = Uri.parse("app://return")
+            .buildUpon()
+            .appendQueryParameter("approval_token_id", approvalTokenId)
+            .build()
+        val intent = Intent().apply { data = uri }
+
+        val result = venmoClient.finishVault(intent)
+
+        assertTrue(result is VenmoFinishVaultResult.Success)
+        val successResult = result as VenmoFinishVaultResult.Success
+        assertEquals(approvalTokenId, successResult.approvalTokenId)
+        assertNull(successResult.approvalSessionId)
+    }
+
+    @Test
+    fun finishVault_withMissingApprovalTokenId_returnsFailure() {
+        val uri = Uri.parse("app://return")
+            .buildUpon()
+            .appendQueryParameter("approval_session_id", "approval-session-456")
+            .build()
+        val intent = Intent().apply { data = uri }
+
+        val result = venmoClient.finishVault(intent)
+
+        assertTrue(result is VenmoFinishVaultResult.Failure)
+        val failureResult = result as VenmoFinishVaultResult.Failure
+        assertEquals(PayPalSDKErrorCode.DATA_PARSING_ERROR.ordinal, failureResult.error.code)
+        assertTrue(failureResult.error.errorDescription.contains("Approval token ID"))
+    }
+
+    @Test
+    fun finishVault_withBlankApprovalTokenId_returnsFailure() {
+        val uri = Uri.parse("app://return")
+            .buildUpon()
+            .appendQueryParameter("approval_token_id", "")
+            .build()
+        val intent = Intent().apply { data = uri }
+
+        val result = venmoClient.finishVault(intent)
+
+        assertTrue(result is VenmoFinishVaultResult.Failure)
+    }
+
+    @Test
+    fun finishVault_withNoQueryParams_returnsFailure() {
+        val uri = Uri.parse("app://return")
+        val intent = Intent().apply { data = uri }
+
+        val result = venmoClient.finishVault(intent)
+
+        assertTrue(result is VenmoFinishVaultResult.Failure)
+    }
+
+    // ============ callback-based start/vault Tests ============
+
+    @Test
+    fun start_withCallback_notifiesSuccess() {
+        val activity = mockk<Activity>(relaxed = true)
+        val orderId = "order-123"
+        every { chromeCustomTabsClient.launch(any(), any()) } returns LaunchChromeCustomTabResult.Success
+        val callback = mockk<VenmoResultCallback>(relaxed = true)
+
+        venmoClient.start(activity, orderId, callback)
+
+        val resultSlot = slot<VenmoPresentAuthChallengeResult>()
+        verify(exactly = 1) { callback.onVenmoResult(capture(resultSlot)) }
+        assertTrue(resultSlot.captured is VenmoPresentAuthChallengeResult.Success)
+    }
+
+    @Test
+    fun start_withCallback_notifiesFailure() {
+        val activity = mockk<Activity>(relaxed = true)
+        val orderId = "order-123"
+        every { chromeCustomTabsClient.launch(any(), any()) } returns LaunchChromeCustomTabResult.ActivityNotFound
+        val callback = mockk<VenmoResultCallback>(relaxed = true)
+
+        venmoClient.start(activity, orderId, callback)
+
+        val resultSlot = slot<VenmoPresentAuthChallengeResult>()
+        verify(exactly = 1) { callback.onVenmoResult(capture(resultSlot)) }
+        assertTrue(resultSlot.captured is VenmoPresentAuthChallengeResult.Failure)
+    }
+
+    @Test
+    fun vault_withCallback_notifiesSuccess() {
+        val activity = mockk<Activity>(relaxed = true)
+        val setupTokenId = "setup-token-123"
+        every { chromeCustomTabsClient.launch(any(), any()) } returns LaunchChromeCustomTabResult.Success
+        val callback = mockk<VenmoResultCallback>(relaxed = true)
+
+        venmoClient.vault(activity, setupTokenId, callback)
+
+        val resultSlot = slot<VenmoPresentAuthChallengeResult>()
+        verify(exactly = 1) { callback.onVenmoResult(capture(resultSlot)) }
+        assertTrue(resultSlot.captured is VenmoPresentAuthChallengeResult.Success)
+    }
+
+    @Test
+    fun vault_withCallback_notifiesFailure() {
+        val activity = mockk<Activity>(relaxed = true)
+        val setupTokenId = "setup-token-123"
+        every { chromeCustomTabsClient.launch(any(), any()) } returns LaunchChromeCustomTabResult.ActivityNotFound
+        val callback = mockk<VenmoResultCallback>(relaxed = true)
+
+        venmoClient.vault(activity, setupTokenId, callback)
+
+        val resultSlot = slot<VenmoPresentAuthChallengeResult>()
+        verify(exactly = 1) { callback.onVenmoResult(capture(resultSlot)) }
+        assertTrue(resultSlot.captured is VenmoPresentAuthChallengeResult.Failure)
     }
 }

@@ -4,9 +4,8 @@ import com.paypal.android.corepayments.PayPalSDKError
 
 sealed class VenmoFinishVaultResult {
     data class Success(
-        val setupTokenId: String,
-        val payerId: String,
-        val approved: Boolean
+        val approvalTokenId: String,
+        val approvalSessionId: String?
     ) : VenmoFinishVaultResult()
 
     data class Canceled(

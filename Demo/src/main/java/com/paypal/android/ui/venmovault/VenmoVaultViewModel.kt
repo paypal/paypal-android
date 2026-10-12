@@ -41,6 +41,12 @@ class VenmoVaultViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(VenmoVaultUiState())
     val uiState = _uiState.asStateFlow()
 
+    private var checkEligibilityState
+        get() = _uiState.value.checkEligibilityState
+        set(value) {
+            _uiState.update { it.copy(checkEligibilityState = value) }
+        }
+
     private var createSetupTokenState
         get() = _uiState.value.createSetupTokenState
         set(value) {
@@ -58,6 +64,16 @@ class VenmoVaultViewModel @Inject constructor(
         set(value) {
             _uiState.update { it.copy(createPaymentTokenState = value) }
         }
+
+    fun checkEligibility() {
+        checkEligibilityState = ActionState.Loading
+        venmoClient.isEligible(
+            buyerCountry = "US",
+            callback = { result ->
+                checkEligibilityState = ActionState.Success(result)
+            }
+        )
+    }
 
     fun createSetupToken() {
         viewModelScope.launch {
