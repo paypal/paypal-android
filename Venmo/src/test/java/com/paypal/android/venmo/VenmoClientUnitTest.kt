@@ -155,7 +155,7 @@ class VenmoClientUnitTest {
 
         val result = venmoClient.start(activity, orderId)
 
-        assertTrue(result is VenmoStartResult.Success)
+        assertTrue(result is VenmoPresentAuthChallengeResult.Success)
     }
 
     @Test
@@ -166,8 +166,8 @@ class VenmoClientUnitTest {
 
         val result = venmoClient.start(activity, orderId)
 
-        assertTrue(result is VenmoStartResult.Failure)
-        assertEquals("Unable to launch Venmo app or web browser", (result as VenmoStartResult.Failure).error.errorDescription)
+        assertTrue(result is VenmoPresentAuthChallengeResult.Failure)
+        assertEquals("Unable to launch Venmo app or web browser", (result as VenmoPresentAuthChallengeResult.Failure).error.errorDescription)
     }
 
     @Test
@@ -179,8 +179,8 @@ class VenmoClientUnitTest {
 
         val result = venmoClient.start(activity, orderId)
 
-        assertTrue(result is VenmoStartResult.Failure)
-        assertEquals(exceptionMessage, (result as VenmoStartResult.Failure).error.errorDescription)
+        assertTrue(result is VenmoPresentAuthChallengeResult.Failure)
+        assertEquals(exceptionMessage, (result as VenmoPresentAuthChallengeResult.Failure).error.errorDescription)
     }
 
     @Test(expected = IllegalArgumentException::class)

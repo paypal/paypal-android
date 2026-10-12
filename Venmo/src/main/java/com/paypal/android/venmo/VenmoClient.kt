@@ -87,7 +87,7 @@ class VenmoClient internal constructor(
     suspend fun start(
         activity: Activity,
         orderId: String
-    ): VenmoStartResult {
+    ): VenmoPresentAuthChallengeResult {
         require(orderId.isNotBlank()) { "Order ID cannot be blank" }
 
         // Update client config; ignore result as transaction should proceed regardless
@@ -105,13 +105,13 @@ class VenmoClient internal constructor(
         return try {
             val cctOptions = ChromeCustomTabOptions(launchUri = appSwitchUri)
             when (chromeCustomTabsClient.launch(activity, cctOptions)) {
-                LaunchChromeCustomTabResult.Success -> VenmoStartResult.Success
+                LaunchChromeCustomTabResult.Success -> VenmoPresentAuthChallengeResult.Success
                 LaunchChromeCustomTabResult.ActivityNotFound -> {
                     val error = PayPalSDKError(
                         code = PayPalSDKErrorCode.CHECKOUT_ERROR.ordinal,
                         errorDescription = "Unable to launch Venmo app or web browser"
                     )
-                    VenmoStartResult.Failure(error)
+                    VenmoPresentAuthChallengeResult.Failure(error)
                 }
             }
         } catch (e: Exception) {
@@ -119,8 +119,21 @@ class VenmoClient internal constructor(
                 code = PayPalSDKErrorCode.CHECKOUT_ERROR.ordinal,
                 errorDescription = e.message ?: "Failed to launch Venmo"
             )
-            VenmoStartResult.Failure(error)
+            VenmoPresentAuthChallengeResult.Failure(error)
         }
+    }
+
+    suspend fun vault(
+        activity: Activity,
+        setupTokenId: String
+    ): VenmoPresentAuthChallengeResult {
+        // TODO: implement Venmo vault launch
+        TODO("Venmo vault is not yet implemented")
+    }
+
+    fun finishVault(intent: Intent): VenmoFinishVaultResult {
+        // TODO: implement Venmo vault return handling
+        return VenmoFinishVaultResult.NoResult
     }
 
     fun finishStart(intent: Intent): VenmoFinishStartResult {
@@ -188,12 +201,32 @@ class VenmoClient internal constructor(
     fun start(
         activity: Activity,
         orderId: String,
-        callback: VenmoStartCallback
+        callback: VenmoResultCallback
     ) {
         applicationScope.launch {
             val result = start(activity, orderId)
             withContext(Dispatchers.Main) {
-                callback.onVenmoStartResult(result)
+                callback.onVenmoResult(result)
+            }
+        }
+    }
+
+    /**
+     * Initiate Venmo vault with callback.
+     *
+     * @param activity the activity to launch Venmo from
+     * @param setupTokenId the setup token ID associated with the vault approval
+     * @param callback callback to receive the vault result
+     */
+    fun vault(
+        activity: Activity,
+        setupTokenId: String,
+        callback: VenmoResultCallback
+    ) {
+        applicationScope.launch {
+            val result = vault(activity, setupTokenId)
+            withContext(Dispatchers.Main) {
+                callback.onVenmoResult(result)
             }
         }
     }

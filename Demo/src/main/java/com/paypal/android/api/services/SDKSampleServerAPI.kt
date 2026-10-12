@@ -2,6 +2,7 @@ package com.paypal.android.api.services
 
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.PayPalSetupToken
+import com.paypal.android.api.model.VenmoSetupToken
 import com.paypal.android.api.model.serialization.CardSetupRequest
 import com.paypal.android.api.model.serialization.OrderRequestBody
 import com.paypal.android.api.model.serialization.OrderResponse
@@ -9,10 +10,12 @@ import com.paypal.android.api.model.serialization.PayPalSetupRequestBody
 import com.paypal.android.api.model.serialization.PaymentTokenResponse
 import com.paypal.android.api.model.serialization.SetupTokenResponse
 import com.paypal.android.api.model.serialization.TokenRequest
+import com.paypal.android.api.model.serialization.VenmoSetupRequestBody
 import com.paypal.android.api.model.serialization.toCardPaymentToken
 import com.paypal.android.api.model.serialization.toCardSetupToken
 import com.paypal.android.api.model.serialization.toOrder
 import com.paypal.android.api.model.serialization.toPayPalPaymentToken
+import com.paypal.android.api.model.serialization.toVenmoPaymentToken
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -72,6 +75,9 @@ class SDKSampleServerAPI(
 
         @POST("/setup-tokens")
         suspend fun createPayPalSetupToken(@Body setupRequest: PayPalSetupRequestBody): SetupTokenResponse
+
+        @POST("/setup-tokens")
+        suspend fun createVenmoSetupToken(@Body setupRequest: VenmoSetupRequestBody): SetupTokenResponse
 
         @POST("/payment-tokens")
         suspend fun createPaymentToken(@Body tokenRequest: TokenRequest): PaymentTokenResponse
@@ -195,6 +201,27 @@ class SDKSampleServerAPI(
             customerId = setupTokenResponse.customer.id,
             status = setupTokenResponse.status
         )
+    }
+
+    suspend fun createVenmoSetupToken(
+        setupRequest: VenmoSetupRequestBody,
+        merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
+    ) = safeApiCall {
+        val setupTokenResponse =
+            findService(merchantIntegration).createVenmoSetupToken(setupRequest)
+        VenmoSetupToken(
+            id = setupTokenResponse.id,
+            customerId = setupTokenResponse.customer.id,
+            status = setupTokenResponse.status
+        )
+    }
+
+    suspend fun createVenmoPaymentToken(
+        tokenRequest: TokenRequest,
+        merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
+    ) = safeApiCall {
+        val paymentTokenResponse = findService(merchantIntegration).createPaymentToken(tokenRequest)
+        paymentTokenResponse.toVenmoPaymentToken()
     }
 
     // Ref: https://medium.com/@douglas.iacovelli/how-to-handle-errors-with-retrofit-and-coroutines-33e7492a912

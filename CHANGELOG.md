@@ -11,7 +11,8 @@
     `VenmoEligibilityResult.Ineligible(reason: String)`, or `VenmoEligibilityResult.Error(error: PayPalSDKError)`
   * Add `VenmoClient.isEligible(buyerCountry: String, callback: VenmoEligibilityCallback)` callback-based method for Java compatibility
   * Add `VenmoClient.start(activity: Activity, orderId: String)` suspend function to initiate Venmo checkout
-  * Add `VenmoClient.start(activity: Activity, orderId: String, callback: VenmoStartCallback)` callback-based method for Java compatibility
+  * Add `VenmoClient.start(activity: Activity, orderId: String, callback: VenmoResultCallback)` callback-based method for Java compatibility
+  * Add `VenmoResultCallback` with a single `onVenmoResult(result: VenmoPresentAuthChallengeResult)` method, shared by both `start()` and `vault()` since the callbacks were identical aside from their name
   * Enhance `VenmoClient.finishStart(intent: Intent)` to return type-safe results:
     * `VenmoFinishStartResult.Success` for successful payments
     * `VenmoFinishStartResult.Canceled` when user cancels payment

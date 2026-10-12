@@ -4,6 +4,7 @@ import com.paypal.android.api.model.CardPaymentToken
 import com.paypal.android.api.model.CardSetupToken
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.PayPalPaymentToken
+import com.paypal.android.api.model.VenmoPaymentToken
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -101,6 +102,13 @@ fun PaymentTokenResponse.toCardPaymentToken(): CardPaymentToken {
 
 fun PaymentTokenResponse.toPayPalPaymentToken(): PayPalPaymentToken {
     return PayPalPaymentToken(
+        id = id,
+        customerId = customer.id
+    )
+}
+
+fun PaymentTokenResponse.toVenmoPaymentToken(): VenmoPaymentToken {
+    return VenmoPaymentToken(
         id = id,
         customerId = customer.id
     )

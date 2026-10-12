@@ -18,7 +18,7 @@ import com.paypal.android.usecase.CompleteOrderUseCase
 import com.paypal.android.usecase.CreateVenmoOrderUseCase
 import com.paypal.android.venmo.VenmoClient
 import com.paypal.android.venmo.VenmoFinishStartResult
-import com.paypal.android.venmo.VenmoStartResult
+import com.paypal.android.venmo.VenmoPresentAuthChallengeResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -112,10 +112,10 @@ class PayWithVenmoViewModel @Inject constructor(
             orderId = orderId,
             callback = { result ->
                 when (result) {
-                    is VenmoStartResult.Success -> {
+                    is VenmoPresentAuthChallengeResult.Success -> {
                         // App switch initiated successfully, waiting for callback
                     }
-                    is VenmoStartResult.Failure -> {
+                    is VenmoPresentAuthChallengeResult.Failure -> {
                         payWithVenmoState = ActionState.Failure(result.error)
                     }
                 }
