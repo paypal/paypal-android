@@ -18,6 +18,7 @@ constraintLayout = "2.1.0"
 daggerHilt = "2.51.1"
 detektVersion = "1.22.0"
 binaryCompatibilityValidator = "0.16.3"
+firebaseAppDistribution = "5.1.1"
 googleMaterial = "1.4.0"
 gradleNexusPublishPlugin = "1.1.0"
 gradlePlayPublisher = "3.8.4"
@@ -98,6 +99,7 @@ android-library = { id = "com.android.library", version.ref = "androidGradlePlug
 dagger-hilt = { id = "com.google.dagger.hilt.android", version.ref = "daggerHilt" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detektVersion" }
 nexus-publishPlugin = { id = "io.github.gradle-nexus.publish-plugin", version.ref = "gradleNexusPublishPlugin" }
+firebaseAppDistribution = { id = "com.google.firebase.appdistribution", version.ref = "firebaseAppDistribution" }
 gradlePlayPublisher = { id = "com.github.triplet.play", version.ref = "gradlePlayPublisher" }
 kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlinVersion" }
 kotlinKapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlinVersion" }

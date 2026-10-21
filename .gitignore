@@ -82,6 +82,7 @@ lint/tmp/
 
 # PayPal
 paypal.properties
+firebase.properties
 
 # vim
 *.swp
