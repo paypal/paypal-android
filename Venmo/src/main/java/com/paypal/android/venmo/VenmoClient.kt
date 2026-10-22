@@ -4,17 +4,14 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import androidx.core.net.toUri
-import com.paypal.android.corepayments.APIClientError
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.PayPalSDKErrorCode
 import com.paypal.android.corepayments.UpdateClientConfigAPI
 import com.paypal.android.corepayments.analytics.AnalyticsService
-import com.paypal.android.corepayments.api.GetFundingEligibility
 import com.paypal.android.corepayments.browserswitch.ChromeCustomTabOptions
 import com.paypal.android.corepayments.browserswitch.ChromeCustomTabsClient
 import com.paypal.android.corepayments.browserswitch.LaunchChromeCustomTabResult
-import com.paypal.android.corepayments.model.APIResult
 import com.paypal.android.corepayments.model.FundingSource
 import com.paypal.android.venmo.analytics.VenmoAnalytics
 import com.paypal.android.venmo.analytics.VenmoCheckoutEvent
@@ -25,10 +22,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class VenmoClient internal constructor(
-    private val context: Context,
     private val coreConfig: CoreConfig,
     private val ccoAPI: UpdateClientConfigAPI,
-    private val getFundingEligibility: GetFundingEligibility,
     private val chromeCustomTabsClient: ChromeCustomTabsClient,
     private val analytics: VenmoAnalytics,
     private val applicationScope: CoroutineScope = CoroutineScope(SupervisorJob())
@@ -39,8 +34,6 @@ class VenmoClient internal constructor(
         private const val CHANNEL_VALUE = "in-app"
         private const val TOKEN_PARAM = "token"
 
-        private const val INELIGIBLE_MESSAGE = "Venmo is not eligible for this transaction"
-
         private const val PAYER_ID_PARAM = "PayerID"
         private const val APPROVED_PARAM = "approved"
         private const val CANCELED_PARAM = "canceled"
@@ -48,46 +41,11 @@ class VenmoClient internal constructor(
     }
 
     constructor(context: Context, config: CoreConfig) : this(
-        context = context,
         coreConfig = config,
         ccoAPI = UpdateClientConfigAPI(context, config),
-        getFundingEligibility = GetFundingEligibility(config),
         analytics = VenmoAnalytics(AnalyticsService(context, config)),
         chromeCustomTabsClient = ChromeCustomTabsClient()
     )
-
-    suspend fun isEligible(buyerCountry: String): VenmoEligibilityResult {
-        require(coreConfig.clientId.isNotBlank()) { "Client ID cannot be blank" }
-        require(buyerCountry.isNotBlank()) { "Buyer country cannot be blank" }
-
-        return try {
-            val eligibilityResult = getFundingEligibility(
-                context = this.context,
-                clientId = coreConfig.clientId,
-                fundingSources = listOf(FundingSource.VENMO.name),
-                merchantIds = listOf(coreConfig.merchantId),
-                buyerCountry = buyerCountry
-            )
-
-            when (eligibilityResult) {
-                is APIResult.Success -> {
-                    if (eligibilityResult.data.venmoEligible) {
-                        VenmoEligibilityResult.Eligible
-                    } else {
-                        VenmoEligibilityResult.Ineligible(INELIGIBLE_MESSAGE)
-                    }
-                }
-
-                is APIResult.Failure -> {
-                    VenmoEligibilityResult.Error(eligibilityResult.error)
-                }
-            }
-        } catch (e: Exception) {
-            VenmoEligibilityResult.Error(
-                APIClientError.unknownError(throwable = e)
-            )
-        }
-    }
 
     suspend fun start(
         activity: Activity,
@@ -173,24 +131,6 @@ class VenmoClient internal constructor(
                         errorDescription = "Result did not contain valid approval or cancellation status."
                     )
                 )
-            }
-        }
-    }
-
-    /**
-     * Check Venmo payment eligibility with callback.
-     *
-     * @param buyerCountry the buyer's country for eligibility determination
-     * @param callback callback to receive the eligibility result
-     */
-    fun isEligible(
-        buyerCountry: String,
-        callback: VenmoEligibilityCallback
-    ) {
-        applicationScope.launch {
-            val result = isEligible(buyerCountry)
-            withContext(Dispatchers.Main) {
-                callback.onVenmoEligibilityResult(result)
             }
         }
     }

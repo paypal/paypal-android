@@ -3,17 +3,12 @@ package com.paypal.android.venmo
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
-import androidx.test.core.app.ApplicationProvider
 import com.paypal.android.corepayments.CoreConfig
-import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.PayPalSDKErrorCode
 import com.paypal.android.corepayments.UpdateClientConfigAPI
-import com.paypal.android.corepayments.api.GetFundingEligibility
 import com.paypal.android.corepayments.browserswitch.ChromeCustomTabOptions
 import com.paypal.android.corepayments.browserswitch.ChromeCustomTabsClient
 import com.paypal.android.corepayments.browserswitch.LaunchChromeCustomTabResult
-import com.paypal.android.corepayments.model.APIResult
-import com.paypal.android.corepayments.model.FundingEligibility
 import com.paypal.android.venmo.analytics.VenmoAnalytics
 import com.paypal.android.venmo.analytics.VenmoCheckoutEvent
 import io.mockk.coEvery
@@ -33,10 +28,8 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class VenmoClientUnitTest {
 
-    private val context = ApplicationProvider.getApplicationContext<android.app.Application>()
     private val coreConfig = mockk<CoreConfig>(relaxed = true)
     private val ccoAPI = mockk<UpdateClientConfigAPI>(relaxed = true)
-    private val getFundingEligibility = mockk<GetFundingEligibility>(relaxed = true)
     private val chromeCustomTabsClient = mockk<ChromeCustomTabsClient>(relaxed = true)
     private val analytics = mockk<VenmoAnalytics>(relaxed = true)
 
@@ -49,105 +42,11 @@ class VenmoClientUnitTest {
         every { coreConfig.coreEnvironment.venmoCheckoutBaseUrl } returns "https://venmo.com/checkout"
 
         venmoClient = VenmoClient(
-            context = context,
             coreConfig = coreConfig,
             ccoAPI = ccoAPI,
-            getFundingEligibility = getFundingEligibility,
             chromeCustomTabsClient = chromeCustomTabsClient,
             analytics = analytics
         )
-    }
-
-    // ============ isEligible Tests ============
-
-    @Test
-    fun isEligible_withEligibleVenmo_returnsEligible() = runTest {
-        val buyerCountry = "US"
-        val fundingEligibility = mockk<FundingEligibility> {
-            every { venmoEligible } returns true
-        }
-        coEvery { getFundingEligibility(any(), any(), any(), any(), any()) } returns
-                APIResult.Success(fundingEligibility)
-
-        val result = venmoClient.isEligible(buyerCountry)
-
-        assertTrue(result is VenmoEligibilityResult.Eligible)
-    }
-
-    @Test
-    fun isEligible_withIneligibleVenmo_returnsIneligible() = runTest {
-        val buyerCountry = "US"
-        val fundingEligibility = mockk<FundingEligibility> {
-            every { venmoEligible } returns false
-        }
-        coEvery { getFundingEligibility(any(), any(), any(), any(), any()) } returns
-                APIResult.Success(fundingEligibility)
-
-        val result = venmoClient.isEligible(buyerCountry)
-
-        assertTrue(result is VenmoEligibilityResult.Ineligible)
-        assertEquals("Venmo is not eligible for this transaction", (result as VenmoEligibilityResult.Ineligible).reason)
-    }
-
-    @Test
-    fun isEligible_withAPIFailure_returnsError() = runTest {
-        val buyerCountry = "US"
-        val error = PayPalSDKError(
-            code = PayPalSDKErrorCode.UNKNOWN.ordinal,
-            errorDescription = "API Error"
-        )
-        coEvery { getFundingEligibility(any(), any(), any(), any(), any()) } returns
-                APIResult.Failure(error)
-
-        val result = venmoClient.isEligible(buyerCountry)
-
-        assertTrue(result is VenmoEligibilityResult.Error)
-        assertEquals(error, (result as VenmoEligibilityResult.Error).error)
-    }
-
-    @Test
-    fun isEligible_withException_returnsError() = runTest {
-        val buyerCountry = "US"
-        coEvery { getFundingEligibility(any(), any(), any(), any(), any()) } throws
-                Exception("Network error")
-
-        val result = venmoClient.isEligible(buyerCountry)
-
-        assertTrue(result is VenmoEligibilityResult.Error)
-        assertEquals(PayPalSDKErrorCode.UNKNOWN.ordinal, (result as VenmoEligibilityResult.Error).error.code)
-    }
-
-    @Test(expected = IllegalArgumentException::class)
-    fun isEligible_withBlankBuyerCountry_throwsException() = runTest {
-        venmoClient.isEligible("")
-    }
-
-    @Test(expected = IllegalArgumentException::class)
-    fun isEligible_withBlankClientId_throwsException() = runTest {
-        every { coreConfig.clientId } returns ""
-        venmoClient.isEligible("US")
-    }
-
-    @Test
-    fun isEligible_callsGetFundingEligibilityWithCorrectParams() = runTest {
-        val buyerCountry = "CA"
-        val fundingEligibility = mockk<FundingEligibility> {
-            every { venmoEligible } returns true
-        }
-        coEvery { getFundingEligibility(context, "test-client-id", listOf("VENMO"), listOf("test-merchant-id"), buyerCountry) } returns
-                APIResult.Success(fundingEligibility)
-
-        venmoClient.isEligible(buyerCountry)
-
-        coVerify {
-            getFundingEligibility(
-                context = context,
-                clientId = "test-client-id",
-                fundingSources = listOf("VENMO"),
-                merchantIds = listOf("test-merchant-id"),
-                buyerCountry = buyerCountry
-            )
-        }
     }
 
     // ============ start Tests ============
