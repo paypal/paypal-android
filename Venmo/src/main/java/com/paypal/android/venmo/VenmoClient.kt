@@ -127,7 +127,7 @@ class VenmoClient internal constructor(
                 }
             }
         } catch (e: Exception) {
-            analytics.notify(VenmoCheckoutEvent.LAUNCH_FAILED, orderId)
+            analytics.notify(VenmoCheckoutEvent.LAUNCH_FAILED, orderId.takeIf { it.isNotEmpty() })
             val error = PayPalSDKError(
                 code = PayPalSDKErrorCode.CHECKOUT_ERROR.ordinal,
                 errorDescription = e.message ?: "Failed to launch Venmo"
