@@ -14,10 +14,13 @@ import com.paypal.android.corepayments.browserswitch.ChromeCustomTabsClient
 import com.paypal.android.corepayments.browserswitch.LaunchChromeCustomTabResult
 import com.paypal.android.corepayments.model.APIResult
 import com.paypal.android.corepayments.model.FundingEligibility
+import com.paypal.android.venmo.analytics.VenmoAnalytics
+import com.paypal.android.venmo.analytics.VenmoCheckoutEvent
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -35,6 +38,7 @@ class VenmoClientUnitTest {
     private val ccoAPI = mockk<UpdateClientConfigAPI>(relaxed = true)
     private val getFundingEligibility = mockk<GetFundingEligibility>(relaxed = true)
     private val chromeCustomTabsClient = mockk<ChromeCustomTabsClient>(relaxed = true)
+    private val analytics = mockk<VenmoAnalytics>(relaxed = true)
 
     private lateinit var venmoClient: VenmoClient
 
@@ -49,7 +53,8 @@ class VenmoClientUnitTest {
             coreConfig = coreConfig,
             ccoAPI = ccoAPI,
             getFundingEligibility = getFundingEligibility,
-            chromeCustomTabsClient = chromeCustomTabsClient
+            chromeCustomTabsClient = chromeCustomTabsClient,
+            analytics = analytics
         )
     }
 
@@ -156,6 +161,10 @@ class VenmoClientUnitTest {
         val result = venmoClient.start(activity, orderId)
 
         assertTrue(result is VenmoStartResult.Success)
+        verify {
+            analytics.notify(VenmoCheckoutEvent.START, orderId)
+            analytics.notify(VenmoCheckoutEvent.LAUNCH_SUCCESS, orderId)
+        }
     }
 
     @Test
@@ -168,6 +177,10 @@ class VenmoClientUnitTest {
 
         assertTrue(result is VenmoStartResult.Failure)
         assertEquals("Unable to launch Venmo app or web browser", (result as VenmoStartResult.Failure).error.errorDescription)
+        verify {
+            analytics.notify(VenmoCheckoutEvent.START, orderId)
+            analytics.notify(VenmoCheckoutEvent.LAUNCH_FAILED, orderId)
+        }
     }
 
     @Test
@@ -181,6 +194,10 @@ class VenmoClientUnitTest {
 
         assertTrue(result is VenmoStartResult.Failure)
         assertEquals(exceptionMessage, (result as VenmoStartResult.Failure).error.errorDescription)
+        verify {
+            analytics.notify(VenmoCheckoutEvent.START, orderId)
+            analytics.notify(VenmoCheckoutEvent.LAUNCH_FAILED, orderId)
+        }
     }
 
     @Test(expected = IllegalArgumentException::class)
@@ -252,6 +269,9 @@ class VenmoClientUnitTest {
 
         assertTrue(result is VenmoFinishStartResult.Canceled)
         assertEquals(orderId, (result as VenmoFinishStartResult.Canceled).orderId)
+        verify {
+            analytics.notify(VenmoCheckoutEvent.CANCELED, orderId)
+        }
     }
 
     @Test
@@ -266,6 +286,9 @@ class VenmoClientUnitTest {
 
         assertTrue(result is VenmoFinishStartResult.Canceled)
         assertNull((result as VenmoFinishStartResult.Canceled).orderId)
+        verify {
+            analytics.notify(VenmoCheckoutEvent.CANCELED, null)
+        }
     }
 
     @Test
@@ -287,6 +310,9 @@ class VenmoClientUnitTest {
         assertEquals(orderId, successResult.token)
         assertEquals(payerId, successResult.payerId)
         assertEquals(true, successResult.approved)
+        verify {
+            analytics.notify(VenmoCheckoutEvent.SUCCESS, orderId)
+        }
     }
 
     @Test
@@ -305,6 +331,9 @@ class VenmoClientUnitTest {
         val failureResult = result as VenmoFinishStartResult.Failure
         assertEquals(PayPalSDKErrorCode.DATA_PARSING_ERROR.ordinal, failureResult.error.code)
         assertTrue(failureResult.error.errorDescription.contains("Payer ID"))
+        verify {
+            analytics.notify(VenmoCheckoutEvent.FAIL, orderId)
+        }
     }
 
     @Test
@@ -320,6 +349,9 @@ class VenmoClientUnitTest {
         assertTrue(result is VenmoFinishStartResult.Failure)
         val failureResult = result as VenmoFinishStartResult.Failure
         assertEquals(PayPalSDKErrorCode.DATA_PARSING_ERROR.ordinal, failureResult.error.code)
+        verify {
+            analytics.notify(VenmoCheckoutEvent.FAIL, null)
+        }
     }
 
     @Test
@@ -330,5 +362,8 @@ class VenmoClientUnitTest {
         val result = venmoClient.finishStart(intent)
 
         assertTrue(result is VenmoFinishStartResult.Failure)
+        verify {
+            analytics.notify(VenmoCheckoutEvent.FAIL, null)
+        }
     }
 }
