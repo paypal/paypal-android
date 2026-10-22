@@ -7,9 +7,6 @@
 * FraudProtection
   * Update Magnes SDK embedded jar file to avoid symbol collisions with other PayPal SDKs.
 * Venmo
-  * Add `VenmoClient.isEligible(buyerCountry: String)` suspend function to check Venmo payment eligibility. Returns `VenmoEligibilityResult.Eligible`,
-    `VenmoEligibilityResult.Ineligible(reason: String)`, or `VenmoEligibilityResult.Error(error: PayPalSDKError)`
-  * Add `VenmoClient.isEligible(buyerCountry: String, callback: VenmoEligibilityCallback)` callback-based method for Java compatibility
   * Add `VenmoClient.start(activity: Activity, orderId: String)` suspend function to initiate Venmo checkout
   * Add `VenmoClient.start(activity: Activity, orderId: String, callback: VenmoStartCallback)` callback-based method for Java compatibility
   * Enhance `VenmoClient.finishStart(intent: Intent)` to return type-safe results:

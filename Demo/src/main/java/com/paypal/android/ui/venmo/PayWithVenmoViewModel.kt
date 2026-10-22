@@ -50,12 +50,6 @@ class PayWithVenmoViewModel @Inject constructor(
     private val payPalDataCollector by lazy { PayPalDataCollector(coreConfig) }
     private val venmoClient by lazy { VenmoClient(applicationContext, coreConfig) }
 
-    private var checkEligibilityState
-        get() = _uiState.value.checkEligibilityState
-        set(value) {
-            _uiState.update { it.copy(checkEligibilityState = value) }
-        }
-
     private var createOrderState
         get() = _uiState.value.createOrderState
         set(value) {
@@ -76,16 +70,6 @@ class PayWithVenmoViewModel @Inject constructor(
 
     private val createdOrder: Order?
         get() = (createOrderState as? ActionState.Success)?.value
-
-    fun checkEligibility() {
-        checkEligibilityState = ActionState.Loading
-        venmoClient.isEligible(
-            buyerCountry = "US",
-            callback = { result ->
-                checkEligibilityState = ActionState.Success(result)
-            }
-        )
-    }
 
     fun createOrder() {
         viewModelScope.launch {
