@@ -117,7 +117,7 @@ class VenmoClientUnitTest {
         coVerify {
             ccoAPI.updateClientConfig(
                 tokenId = orderId,
-                fundingSource = "VENMO"
+                fundingSource = "venmo"
             )
         }
     }

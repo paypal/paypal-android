@@ -58,7 +58,7 @@ class VenmoClient internal constructor(
         // Update client config; ignore result as transaction should proceed regardless
         ccoAPI.updateClientConfig(
             tokenId = orderId,
-            fundingSource = FundingSource.VENMO.name
+            fundingSource = FundingSource.VENMO.name.lowercase()
         )
 
         val appSwitchUri = coreConfig.coreEnvironment.venmoCheckoutBaseUrl.toUri()
