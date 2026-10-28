@@ -53,7 +53,7 @@ class VenmoClient internal constructor(
     ): VenmoStartResult {
         require(orderId.isNotBlank()) { "Order ID cannot be blank" }
 
-        analytics.notify(VenmoCheckoutEvent.START, orderId)
+        analytics.notify(VenmoCheckoutEvent.STARTED, orderId)
 
         // Update client config; ignore result as transaction should proceed regardless
         ccoAPI.updateClientConfig(
@@ -71,12 +71,12 @@ class VenmoClient internal constructor(
             val cctOptions = ChromeCustomTabOptions(launchUri = appSwitchUri)
             when (chromeCustomTabsClient.launch(activity, cctOptions)) {
                 LaunchChromeCustomTabResult.Success -> {
-                    analytics.notify(VenmoCheckoutEvent.LAUNCH_SUCCESS, orderId)
+                    analytics.notify(VenmoCheckoutEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED, orderId)
                     VenmoStartResult.Success
                 }
 
                 LaunchChromeCustomTabResult.ActivityNotFound -> {
-                    analytics.notify(VenmoCheckoutEvent.LAUNCH_FAILED, orderId)
+                    analytics.notify(VenmoCheckoutEvent.AUTH_CHALLENGE_PRESENTATION_FAILED, orderId)
                     val error = PayPalSDKError(
                         code = PayPalSDKErrorCode.CHECKOUT_ERROR.ordinal,
                         errorDescription = "Unable to launch Venmo app or web browser"
@@ -85,7 +85,7 @@ class VenmoClient internal constructor(
                 }
             }
         } catch (e: Exception) {
-            analytics.notify(VenmoCheckoutEvent.LAUNCH_FAILED, orderId.takeIf { it.isNotEmpty() })
+            analytics.notify(VenmoCheckoutEvent.AUTH_CHALLENGE_PRESENTATION_FAILED, orderId.takeIf { it.isNotEmpty() })
             val error = PayPalSDKError(
                 code = PayPalSDKErrorCode.CHECKOUT_ERROR.ordinal,
                 errorDescription = e.message ?: "Failed to launch Venmo"
@@ -110,7 +110,7 @@ class VenmoClient internal constructor(
             approved -> {
                 val payerId = deepLinkUri.getQueryParameter(PAYER_ID_PARAM)
                 if (payerId.isNullOrEmpty()) {
-                    analytics.notify(VenmoCheckoutEvent.FAIL, orderId.takeIf { it.isNotEmpty() })
+                    analytics.notify(VenmoCheckoutEvent.FAILED, orderId.takeIf { it.isNotEmpty() })
                     VenmoFinishStartResult.Failure(
                         PayPalSDKError(
                             code = PayPalSDKErrorCode.DATA_PARSING_ERROR.ordinal,
@@ -118,13 +118,13 @@ class VenmoClient internal constructor(
                         )
                     )
                 } else {
-                    analytics.notify(VenmoCheckoutEvent.SUCCESS, orderId)
+                    analytics.notify(VenmoCheckoutEvent.SUCCEEDED, orderId)
                     VenmoFinishStartResult.Success(orderId, payerId, true)
                 }
             }
 
             else -> {
-                analytics.notify(VenmoCheckoutEvent.FAIL, orderId.takeIf { it.isNotEmpty() })
+                analytics.notify(VenmoCheckoutEvent.FAILED, orderId.takeIf { it.isNotEmpty() })
                 VenmoFinishStartResult.Failure(
                     PayPalSDKError(
                         code = PayPalSDKErrorCode.DATA_PARSING_ERROR.ordinal,
