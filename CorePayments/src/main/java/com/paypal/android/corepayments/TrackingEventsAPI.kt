@@ -65,6 +65,7 @@ internal class TrackingEventsAPI constructor(
             eventClientId = event.clientId,
             userAction = event.userAction,
             paypalInstalled = event.paypalInstalled,
+            venmoInstalled = event.venmoInstalled,
             returnAppUrl = event.returnAppUrl,
             cancelAppUrl = event.cancelAppUrl,
             fallbackSchemeUrl = event.fallbackSchemeUrl,

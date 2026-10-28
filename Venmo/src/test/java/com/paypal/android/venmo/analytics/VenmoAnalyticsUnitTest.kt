@@ -2,6 +2,8 @@ package com.paypal.android.venmo.analytics
 
 import com.paypal.android.corepayments.analytics.AnalyticsEventData
 import com.paypal.android.corepayments.analytics.AnalyticsService
+import com.paypal.android.corepayments.common.DeviceInspector
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.Before
@@ -10,11 +12,12 @@ import org.junit.Test
 class VenmoAnalyticsUnitTest {
 
     private val analyticsService = mockk<AnalyticsService>(relaxed = true)
+    private val deviceInspector = mockk<DeviceInspector> { every { isVenmoInstalled } returns true }
     private lateinit var venmoAnalytics: VenmoAnalytics
 
     @Before
     fun setUp() {
-        venmoAnalytics = VenmoAnalytics(analyticsService)
+        venmoAnalytics = VenmoAnalytics(analyticsService, deviceInspector)
     }
 
     @Test
@@ -26,7 +29,7 @@ class VenmoAnalyticsUnitTest {
         verify {
             analyticsService.sendAnalyticsEvent(
                 name = "venmo:checkout:start",
-                eventData = AnalyticsEventData(orderId = orderId, appSwitchEnabled = true)
+                eventData = AnalyticsEventData(orderId = orderId, appSwitchEnabled = true, venmoInstalled = "true")
             )
         }
     }
@@ -40,7 +43,7 @@ class VenmoAnalyticsUnitTest {
         verify {
             analyticsService.sendAnalyticsEvent(
                 name = "venmo:checkout:success",
-                eventData = AnalyticsEventData(orderId = orderId, appSwitchEnabled = true)
+                eventData = AnalyticsEventData(orderId = orderId, appSwitchEnabled = true, venmoInstalled = "true")
             )
         }
     }
@@ -54,7 +57,7 @@ class VenmoAnalyticsUnitTest {
         verify {
             analyticsService.sendAnalyticsEvent(
                 name = "venmo:checkout:fail",
-                eventData = AnalyticsEventData(orderId = orderId, appSwitchEnabled = true)
+                eventData = AnalyticsEventData(orderId = orderId, appSwitchEnabled = true, venmoInstalled = "true")
             )
         }
     }
@@ -68,7 +71,7 @@ class VenmoAnalyticsUnitTest {
         verify {
             analyticsService.sendAnalyticsEvent(
                 name = "venmo:checkout:canceled",
-                eventData = AnalyticsEventData(orderId = orderId, appSwitchEnabled = true)
+                eventData = AnalyticsEventData(orderId = orderId, appSwitchEnabled = true, venmoInstalled = "true")
             )
         }
     }
@@ -82,7 +85,7 @@ class VenmoAnalyticsUnitTest {
         verify {
             analyticsService.sendAnalyticsEvent(
                 name = "venmo:checkout:launched:success",
-                eventData = AnalyticsEventData(orderId = orderId, appSwitchEnabled = true)
+                eventData = AnalyticsEventData(orderId = orderId, appSwitchEnabled = true, venmoInstalled = "true")
             )
         }
     }
@@ -96,7 +99,7 @@ class VenmoAnalyticsUnitTest {
         verify {
             analyticsService.sendAnalyticsEvent(
                 name = "venmo:checkout:launched:failed",
-                eventData = AnalyticsEventData(orderId = orderId, appSwitchEnabled = true)
+                eventData = AnalyticsEventData(orderId = orderId, appSwitchEnabled = true, venmoInstalled = "true")
             )
         }
     }
@@ -108,7 +111,7 @@ class VenmoAnalyticsUnitTest {
         verify {
             analyticsService.sendAnalyticsEvent(
                 name = "venmo:checkout:start",
-                eventData = AnalyticsEventData(orderId = null, appSwitchEnabled = true)
+                eventData = AnalyticsEventData(orderId = null, appSwitchEnabled = true, venmoInstalled = "true")
             )
         }
     }
@@ -120,7 +123,7 @@ class VenmoAnalyticsUnitTest {
         verify {
             analyticsService.sendAnalyticsEvent(
                 name = "venmo:checkout:success",
-                eventData = AnalyticsEventData(orderId = "order-123", appSwitchEnabled = true)
+                eventData = AnalyticsEventData(orderId = "order-123", appSwitchEnabled = true, venmoInstalled = "true")
             )
         }
     }

@@ -12,6 +12,7 @@ import com.paypal.android.corepayments.analytics.AnalyticsService
 import com.paypal.android.corepayments.browserswitch.ChromeCustomTabOptions
 import com.paypal.android.corepayments.browserswitch.ChromeCustomTabsClient
 import com.paypal.android.corepayments.browserswitch.LaunchChromeCustomTabResult
+import com.paypal.android.corepayments.common.DeviceInspector
 import com.paypal.android.corepayments.model.FundingSource
 import com.paypal.android.venmo.analytics.VenmoAnalytics
 import com.paypal.android.venmo.analytics.VenmoCheckoutEvent
@@ -43,7 +44,7 @@ class VenmoClient internal constructor(
     constructor(context: Context, config: CoreConfig) : this(
         coreConfig = config,
         ccoAPI = UpdateClientConfigAPI(context, config),
-        analytics = VenmoAnalytics(AnalyticsService(context, config)),
+        analytics = VenmoAnalytics(AnalyticsService(context, config), DeviceInspector(context)),
         chromeCustomTabsClient = ChromeCustomTabsClient()
     )
 

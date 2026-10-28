@@ -14,6 +14,9 @@ class DeviceInspector(private val context: Context) {
     val isPayPalInstalled: Boolean
         get() = isAppInstalled(PAYPAL_APP_PACKAGE)
 
+    val isVenmoInstalled: Boolean
+        get() = isAppInstalled(VENMO_APP_PACKAGE)
+
     /**
      * The installed PayPal app's version code (build number), or `null` if the app isn't
      * installed or its version can't be read. Uses [android.content.pm.PackageInfo.longVersionCode]
@@ -70,6 +73,7 @@ class DeviceInspector(private val context: Context) {
 
     companion object {
         const val PAYPAL_APP_PACKAGE = "com.paypal.android.p2pmobile"
+        const val VENMO_APP_PACKAGE = "com.venmo"
         private const val PAYPAL_APP_SWITCH_URL = "https://www.paypal.com/app-switch-checkout"
         private const val MIN_APP_SWITCH_COMPATIBLE_PAYPAL_VERSION_CODE = 1_160_090_132L
         private val DEFAULT_APP_SWITCH_URI: Uri
