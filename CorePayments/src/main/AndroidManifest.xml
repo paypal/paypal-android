@@ -6,6 +6,7 @@
 
     <queries>
         <package android:name="com.paypal.android.p2pmobile" />
+        <package android:name="com.venmo" />
 
         <!-- Needed on Android 11+ so GetReturnToAppStrategyUseCase can resolve the default
              browser and check whether it supports App Links. -->

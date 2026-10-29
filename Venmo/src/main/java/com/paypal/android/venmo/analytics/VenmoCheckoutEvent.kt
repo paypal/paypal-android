@@ -4,12 +4,12 @@ package com.paypal.android.venmo.analytics
 
 internal enum class VenmoCheckoutEvent(val value: String) {
     // @formatter:off
-    START(         "venmo:checkout:start"),
-    SUCCESS(       "venmo:checkout:success"),
-    FAIL(          "venmo:checkout:fail"),
-    CANCELED(      "venmo:checkout:canceled"),
+    STARTED(  "venmo-payments:checkout:started"),
+    SUCCEEDED("venmo-payments:checkout:succeeded"),
+    FAILED(   "venmo-payments:checkout:failed"),
+    CANCELED( "venmo-payments:checkout:canceled"),
 
-    LAUNCH_SUCCESS("venmo:checkout:launched:success"),
-    LAUNCH_FAILED( "venmo:checkout:launched:failed"),
+    AUTH_CHALLENGE_PRESENTATION_SUCCEEDED("venmo-payments:checkout:auth-challenge-presentation:succeeded"),
+    AUTH_CHALLENGE_PRESENTATION_FAILED(   "venmo-payments:checkout:auth-challenge-presentation:failed"),
     // @formatter:on
 }
