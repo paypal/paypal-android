@@ -60,3 +60,10 @@ dependencies {
     androidTestImplementation libs.androidx.test.junit
     androidTestImplementation libs.androidx.test.espresso
 }
+
+project.ext.name = "venmo-payments"
+project.ext.version = rootProject.version
+project.ext.pom_name = "PayPal SDK - VenmoPayments"
+project.ext.pom_desc = "Library for Venmo payments"
+
+apply from: rootProject.file("gradle/gradle-publish.gradle")
