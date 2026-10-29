@@ -96,9 +96,3 @@ data class VenmoExperienceContext(
 data class VenmoAppSwitchContext(
     val source: String
 )
-
-@Serializable
-data class VenmoApplicationContext(
-    val returnUrl: String? = null,
-    val cancelUrl: String? = null
-)
