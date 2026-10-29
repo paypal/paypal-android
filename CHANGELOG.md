@@ -1,6 +1,6 @@
 # PayPal Android SDK Release Notes
 
-## unreleased
+## 3.1.0 (2026-10-05)
 
 * CorePayments
   * Fixed `TokenType` being inaccessible outside the SDK despite being a required parameter of `PayPalClient.createPayPalSession()`
