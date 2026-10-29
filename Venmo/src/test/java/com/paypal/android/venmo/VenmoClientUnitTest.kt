@@ -236,6 +236,26 @@ class VenmoClientUnitTest {
     }
 
     @Test
+    fun finishStart_withApprovedButMissingOrderId_returnsFailure() {
+        val uri = Uri.parse("app://return")
+            .buildUpon()
+            .appendQueryParameter("approved", "true")
+            .appendQueryParameter("PayerID", "payer-456")
+            .build()
+        val intent = Intent().apply { data = uri }
+
+        val result = venmoClient.finishStart(intent)
+
+        assertTrue(result is VenmoFinishStartResult.Failure)
+        val failureResult = result as VenmoFinishStartResult.Failure
+        assertEquals(PayPalSDKErrorCode.DATA_PARSING_ERROR.ordinal, failureResult.error.code)
+        assertTrue(failureResult.error.errorDescription.contains("Order ID"))
+        verify {
+            analytics.notify(VenmoCheckoutEvent.FAILED, null)
+        }
+    }
+
+    @Test
     fun finishStart_withNeither_CanceledNor_ApprovedTrue_returnsFailure() {
         val uri = Uri.parse("app://return")
             .buildUpon()

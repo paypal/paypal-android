@@ -101,6 +101,8 @@ internal data class TrackingEventParams(
     val userAction: String? = null,
     @SerialName("paypal_installed")
     val paypalInstalled: String? = null,
+    @SerialName("venmo_installed")
+    val venmoInstalled: String? = null,
     @SerialName("return_app_url")
     val returnAppUrl: String? = null,
     @SerialName("cancel_app_url")

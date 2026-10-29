@@ -12,6 +12,7 @@ import com.paypal.android.corepayments.analytics.AnalyticsService
 import com.paypal.android.corepayments.browserswitch.ChromeCustomTabOptions
 import com.paypal.android.corepayments.browserswitch.ChromeCustomTabsClient
 import com.paypal.android.corepayments.browserswitch.LaunchChromeCustomTabResult
+import com.paypal.android.corepayments.common.DeviceInspector
 import com.paypal.android.corepayments.model.FundingSource
 import com.paypal.android.venmo.analytics.VenmoAnalytics
 import com.paypal.android.venmo.analytics.VenmoCheckoutEvent
@@ -43,7 +44,7 @@ class VenmoClient internal constructor(
     constructor(context: Context, config: CoreConfig) : this(
         coreConfig = config,
         ccoAPI = UpdateClientConfigAPI(context, config),
-        analytics = VenmoAnalytics(AnalyticsService(context, config)),
+        analytics = VenmoAnalytics(AnalyticsService(context, config), DeviceInspector(context)),
         chromeCustomTabsClient = ChromeCustomTabsClient()
     )
 
@@ -109,12 +110,13 @@ class VenmoClient internal constructor(
 
             approved -> {
                 val payerId = deepLinkUri.getQueryParameter(PAYER_ID_PARAM)
-                if (payerId.isNullOrEmpty()) {
+                if (orderId.isEmpty() || payerId.isNullOrEmpty()) {
                     analytics.notify(VenmoCheckoutEvent.FAILED, orderId.takeIf { it.isNotEmpty() })
+                    val missing = if (orderId.isEmpty()) "Order ID" else "Payer ID"
                     VenmoFinishStartResult.Failure(
                         PayPalSDKError(
                             code = PayPalSDKErrorCode.DATA_PARSING_ERROR.ordinal,
-                            errorDescription = "Result did not contain the expected data. Payer ID is null."
+                            errorDescription = "Result did not contain the expected data. $missing is null."
                         )
                     )
                 } else {

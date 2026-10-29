@@ -32,6 +32,7 @@ data class AnalyticsEventData(
     val clientId: String? = null,
     val userAction: String? = null,
     val paypalInstalled: String? = null,
+    val venmoInstalled: String? = null,
     val returnAppUrl: String? = null,
     val cancelAppUrl: String? = null,
     val fallbackSchemeUrl: String? = null,
