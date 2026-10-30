@@ -114,7 +114,7 @@ class VenmoClient internal constructor(
         return when {
             canceled -> {
                 analytics.notify(VenmoCheckoutEvent.CANCELED, orderId)
-                VenmoFinishStartResult.Canceled(orderId.takeIf { it.isNotEmpty() })
+                VenmoFinishStartResult.Canceled(orderId)
             }
 
             approved -> {

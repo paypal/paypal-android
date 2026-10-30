@@ -184,7 +184,7 @@ class VenmoClientUnitTest {
     }
 
     @Test
-    fun finishStart_withCanceledAndNoOrderId_returnsCanceledWithNull() {
+    fun finishStart_withCanceledAndNoOrderId_returnsCanceledWithEmptyOrderId() {
         val uri = Uri.parse("app://return")
             .buildUpon()
             .appendQueryParameter("canceled", "true")
@@ -194,7 +194,7 @@ class VenmoClientUnitTest {
         val result = venmoClient.finishStart(intent)
 
         assertTrue(result is VenmoFinishStartResult.Canceled)
-        assertNull((result as VenmoFinishStartResult.Canceled).orderId)
+        assertEquals("", (result as VenmoFinishStartResult.Canceled).orderId)
         verify {
             analytics.notify(VenmoCheckoutEvent.CANCELED, "")
         }
