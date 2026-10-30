@@ -80,7 +80,8 @@ class ApproveOrderViewModel @Inject constructor(
     private fun approveOrderWithId(activity: ComponentActivity, orderId: String) {
         approveOrderState = ActionState.Loading
 
-        val cardClient = CardClient(applicationContext, buildCoreConfig()).also { this.cardClient = it }
+        val cardClient =
+            CardClient(applicationContext, buildCoreConfig()).also { this.cardClient = it }
 
         val cardRequest = uiState.value.run {
             // expiration date in UI State needs to be formatted because it uses a visual transformation

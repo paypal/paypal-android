@@ -44,12 +44,26 @@ android {
 }
 
 dependencies {
+    api project(':CorePayments')
+
     implementation libs.androidx.coreKtx
     implementation libs.androidx.appcompat
     implementation libs.android.material
+    implementation libs.kotlinx.coroutinesAndroid
 
     testImplementation libs.junit
+    testImplementation libs.mockk
+    testImplementation libs.kotlinx.coroutinesTest
+    testImplementation libs.robolectric
+    testImplementation libs.androidx.test.core
 
     androidTestImplementation libs.androidx.test.junit
     androidTestImplementation libs.androidx.test.espresso
 }
+
+project.ext.name = "venmo-payments"
+project.ext.version = rootProject.version
+project.ext.pom_name = "PayPal SDK - VenmoPayments"
+project.ext.pom_desc = "Library for Venmo payments"
+
+apply from: rootProject.file("gradle/gradle-publish.gradle")
