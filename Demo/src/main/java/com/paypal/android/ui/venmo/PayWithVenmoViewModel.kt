@@ -134,7 +134,6 @@ class PayWithVenmoViewModel @Inject constructor(
                 val dataCollectorRequest =
                     PayPalDataCollectorRequest(hasUserLocationConsent = false)
                 val cmid = payPalDataCollector.collectDeviceData(context, dataCollectorRequest)
-                // TODO: allow order intent to be configurable
                 completeOrderState =
                     completeOrderUseCase(orderId, OrderIntent.CAPTURE, cmid).mapToActionState()
             }

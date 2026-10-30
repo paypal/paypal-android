@@ -13,7 +13,7 @@ internal class VenmoAnalytics(
         analyticsService.sendAnalyticsEvent(
             name = event.value,
             eventData = AnalyticsEventData(
-                orderId = orderId,
+                orderId = orderId?.takeIf { it.isNotEmpty() },
                 appSwitchEnabled = true,
                 venmoInstalled = deviceInspector.isVenmoInstalled.toString()
             )

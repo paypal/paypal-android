@@ -17,6 +17,6 @@ enum class CoreEnvironment(internal val url: String, internal val graphQLEndpoin
     val venmoCheckoutBaseUrl: String
         get() = when (this) {
             LIVE -> "https://account.venmo.com/go/web/paypal"
-            SANDBOX -> "https://account.ext.live.venmo.com/go/web/paypal" // ToDo: update new url after fixed in sandbox
+            SANDBOX -> "https://account.ext.live.venmo.com/go/web/paypal"
         }
 }

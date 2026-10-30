@@ -142,11 +142,6 @@ fun DemoApp() {
                         SettingsView()
                     }
                 }
-                if (BuildConfig.DEBUG) {
-                    composable(DemoAppDestinations.SETTINGS) {
-                        SettingsView()
-                    }
-                }
             }
         }
     }

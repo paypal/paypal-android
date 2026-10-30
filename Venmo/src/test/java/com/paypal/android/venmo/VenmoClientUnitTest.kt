@@ -4,13 +4,14 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import com.paypal.android.corepayments.CoreConfig
-import com.paypal.android.corepayments.PayPalSDKErrorCode
 import com.paypal.android.corepayments.UpdateClientConfigAPI
 import com.paypal.android.corepayments.browserswitch.ChromeCustomTabOptions
 import com.paypal.android.corepayments.browserswitch.ChromeCustomTabsClient
 import com.paypal.android.corepayments.browserswitch.LaunchChromeCustomTabResult
 import com.paypal.android.venmo.analytics.VenmoAnalytics
 import com.paypal.android.venmo.analytics.VenmoCheckoutEvent
+import com.paypal.android.venmo.errors.VenmoError
+import com.paypal.android.venmo.errors.VenmoErrorCode
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -99,10 +100,19 @@ class VenmoClientUnitTest {
         }
     }
 
-    @Test(expected = IllegalArgumentException::class)
-    fun start_withBlankOrderId_throwsException() = runTest {
+    @Test
+    fun start_withBlankOrderId_returnsFailure() = runTest {
         val activity = mockk<Activity>(relaxed = true)
-        venmoClient.start(activity, "")
+
+        val result = venmoClient.start(activity, "")
+
+        assertTrue(result is VenmoStartResult.Failure)
+        assertEquals("Order ID cannot be blank", (result as VenmoStartResult.Failure).error.errorDescription)
+        verify {
+            analytics.notify(VenmoCheckoutEvent.STARTED, "")
+            analytics.notify(VenmoCheckoutEvent.FAILED, "")
+        }
+        verify(exactly = 0) { chromeCustomTabsClient.launch(any(), any()) }
     }
 
     @Test
@@ -186,7 +196,7 @@ class VenmoClientUnitTest {
         assertTrue(result is VenmoFinishStartResult.Canceled)
         assertNull((result as VenmoFinishStartResult.Canceled).orderId)
         verify {
-            analytics.notify(VenmoCheckoutEvent.CANCELED, null)
+            analytics.notify(VenmoCheckoutEvent.CANCELED, "")
         }
     }
 
@@ -228,8 +238,8 @@ class VenmoClientUnitTest {
 
         assertTrue(result is VenmoFinishStartResult.Failure)
         val failureResult = result as VenmoFinishStartResult.Failure
-        assertEquals(PayPalSDKErrorCode.DATA_PARSING_ERROR.ordinal, failureResult.error.code)
-        assertTrue(failureResult.error.errorDescription.contains("Payer ID"))
+        assertEquals(VenmoErrorCode.MALFORMED_RESULT.ordinal, failureResult.error.code)
+        assertEquals(VenmoError.malformedResultError.errorDescription, failureResult.error.errorDescription)
         verify {
             analytics.notify(VenmoCheckoutEvent.FAILED, orderId)
         }
@@ -248,10 +258,10 @@ class VenmoClientUnitTest {
 
         assertTrue(result is VenmoFinishStartResult.Failure)
         val failureResult = result as VenmoFinishStartResult.Failure
-        assertEquals(PayPalSDKErrorCode.DATA_PARSING_ERROR.ordinal, failureResult.error.code)
-        assertTrue(failureResult.error.errorDescription.contains("Order ID"))
+        assertEquals(VenmoErrorCode.MALFORMED_RESULT.ordinal, failureResult.error.code)
+        assertEquals(VenmoError.malformedResultError.errorDescription, failureResult.error.errorDescription)
         verify {
-            analytics.notify(VenmoCheckoutEvent.FAILED, null)
+            analytics.notify(VenmoCheckoutEvent.FAILED, "")
         }
     }
 
@@ -267,9 +277,9 @@ class VenmoClientUnitTest {
 
         assertTrue(result is VenmoFinishStartResult.Failure)
         val failureResult = result as VenmoFinishStartResult.Failure
-        assertEquals(PayPalSDKErrorCode.DATA_PARSING_ERROR.ordinal, failureResult.error.code)
+        assertEquals(VenmoErrorCode.MALFORMED_RESULT.ordinal, failureResult.error.code)
         verify {
-            analytics.notify(VenmoCheckoutEvent.FAILED, null)
+            analytics.notify(VenmoCheckoutEvent.FAILED, "")
         }
     }
 
@@ -282,7 +292,7 @@ class VenmoClientUnitTest {
 
         assertTrue(result is VenmoFinishStartResult.Failure)
         verify {
-            analytics.notify(VenmoCheckoutEvent.FAILED, null)
+            analytics.notify(VenmoCheckoutEvent.FAILED, "")
         }
     }
 }
