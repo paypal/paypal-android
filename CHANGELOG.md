@@ -1,6 +1,6 @@
 # PayPal Android SDK Release Notes
 
-## Unreleased
+## 3.2.0 (2026-11-03)
 
 * Venmo
   * Add `VenmoClient.start(activity: Activity, orderId: String)` suspend function to initiate Venmo checkout
