@@ -12,6 +12,7 @@ plugins {
 
 def paypalProperties = loadPropertiesFromFile("paypal.properties")
 
+def sdkVersion = modules.sdkVersionName // change this to test on specific version
 android {
     namespace 'com.paypal.android'
     java {
@@ -122,11 +123,17 @@ kapt {
 }
 
 dependencies {
-    implementation project(':CardPayments')
-    implementation project(':FraudProtection')
-    implementation project(':PayPalPayments')
-    implementation project(':PaymentButtons')
-    implementation project(':Venmo')
+    debugImplementation project(':CardPayments')
+    debugImplementation project(':FraudProtection')
+    debugImplementation project(':PayPalPayments')
+    debugImplementation project(':PaymentButtons')
+    debugImplementation project(':Venmo')
+
+    releaseImplementation(libs.paypal.cardPayments) { version { strictly sdkVersion } }
+    releaseImplementation(libs.paypal.fraudProtection) { version { strictly sdkVersion } }
+    releaseImplementation(libs.paypal.paypalPayments) { version { strictly sdkVersion } }
+    releaseImplementation(libs.paypal.paymentButtons) { version { strictly sdkVersion } }
+    releaseImplementation(libs.paypal.venmoPayments) { version { strictly sdkVersion } }
 
     implementation libs.kotlin.stdLib
     implementation libs.androidx.coreKtx
