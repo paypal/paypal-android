@@ -70,6 +70,16 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    fun updateCustomVenmoCheckoutUrlPrefix(value: String) {
+        _uiState.update {
+            it.copy(
+                settings = it.settings.copy(customVenmoCheckoutUrlPrefix = value),
+                venmoCheckoutUrlPrefixError = null,
+                showSaveSuccess = false
+            )
+        }
+    }
+
     fun updateCustomMerchantId(value: String) {
         _uiState.update {
             it.copy(
@@ -99,18 +109,31 @@ class SettingsViewModel @Inject constructor(
             customSdkRestUrl = settings.customSdkRestUrl.trim(),
             customSdkGraphQLUrl = settings.customSdkGraphQLUrl.trim(),
             customMerchantBaseUrl = settings.customMerchantBaseUrl.trim(),
+            customVenmoCheckoutUrlPrefix = settings.customVenmoCheckoutUrlPrefix.trim(),
         )
         _uiState.update { it.copy(settings = trimmedSettings) }
 
         val restError = validateUrl(trimmedSettings.customSdkRestUrl)
         val graphQLError = validateUrl(trimmedSettings.customSdkGraphQLUrl)
         val merchantError = validateUrl(trimmedSettings.customMerchantBaseUrl)
-        if (restError != null || graphQLError != null || merchantError != null) {
+        val venmoCheckoutPrefixError = if (trimmedSettings.customVenmoCheckoutUrlPrefix.isNotBlank()) {
+            validateVenmoCheckoutPrefix(trimmedSettings.customVenmoCheckoutUrlPrefix)
+        } else {
+            null
+        }
+        val hasValidationError = listOfNotNull(
+            restError,
+            graphQLError,
+            merchantError,
+            venmoCheckoutPrefixError
+        ).isNotEmpty()
+        if (hasValidationError) {
             _uiState.update {
                 it.copy(
                     restUrlError = restError,
                     graphQLUrlError = graphQLError,
-                    merchantBaseUrlError = merchantError
+                    merchantBaseUrlError = merchantError,
+                    venmoCheckoutUrlPrefixError = venmoCheckoutPrefixError
                 )
             }
             // Persist whichever fields are valid so they survive an environment switch.
@@ -120,6 +143,11 @@ class SettingsViewModel @Inject constructor(
                     customSdkRestUrl = if (restError == null) trimmedSettings.customSdkRestUrl else "",
                     customSdkGraphQLUrl = if (graphQLError == null) trimmedSettings.customSdkGraphQLUrl else "",
                     customMerchantBaseUrl = if (merchantError == null) trimmedSettings.customMerchantBaseUrl else "",
+                    customVenmoCheckoutUrlPrefix = if (venmoCheckoutPrefixError == null) {
+                        trimmedSettings.customVenmoCheckoutUrlPrefix
+                    } else {
+                        ""
+                    },
                 )
             )
             return
@@ -150,7 +178,6 @@ class SettingsViewModel @Inject constructor(
      */
     private fun validateUrl(url: String, optional: Boolean = false): String? = when {
         url.isBlank() -> if (optional) null else "URL is required"
-        url != url.trim() || url.contains(' ') -> "URL must not contain spaces"
         else -> try {
             val uri = URI(url)
             when {
@@ -162,4 +189,11 @@ class SettingsViewModel @Inject constructor(
             "Enter a valid URL (e.g. https://api.example.com)"
         }
     }
+
+    private fun validateVenmoCheckoutPrefix(value: String): String? =
+        if (value.matches(Regex("[a-zA-Z0-9.-]+"))) {
+            null
+        } else {
+            "Prefix must contain only alphanumeric characters, periods, and hyphens"
+        }
 }

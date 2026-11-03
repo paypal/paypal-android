@@ -115,7 +115,7 @@ data class UpdateClientConfigVariables(
 @OptIn(InternalSerializationApi::class)
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class UpdateClientConfigResponse(
-    val updateClientConfig: String
+    val updateClientConfig: String? = null
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
