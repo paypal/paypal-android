@@ -60,7 +60,7 @@ curl -X POST https://api-m.sandbox.paypal.com/v2/checkout/orders \
 
 ## Integrate Venmo
 
-> **Eligibility and button rendering are yours.** The SDK does not check Venmo eligibility or render a Venmo button. Decide when Venmo is available to a buyer (for example, by country or your own business rules) and show or hide your own Venmo button accordingly.
+> **You must render the Venmo button correctly.** The SDK does not check Venmo eligibility or render a Venmo button, so showing it only to eligible buyers is your responsibility. Show the Venmo button only to US buyers paying in USD to US merchants.
 
 ### Step 1: Start Venmo checkout
 
