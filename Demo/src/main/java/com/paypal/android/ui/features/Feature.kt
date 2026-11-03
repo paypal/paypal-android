@@ -14,4 +14,5 @@ enum class Feature(@StringRes val stringRes: Int, val routeName: String) {
         R.string.feature_paypal_static_buttons,
         DemoAppDestinations.PAYPAL_STATIC_BUTTONS
     ),
+    PAY_WITH_VENMO(R.string.feature_pay_with_venmo, DemoAppDestinations.PAY_WITH_VENMO)
 }

@@ -42,6 +42,7 @@ private data class SettingsCallbacks(
     val onCustomSdkGraphQLUrlChange: (String) -> Unit,
     val onCustomClientIdChange: (String) -> Unit,
     val onCustomMerchantBaseUrlChange: (String) -> Unit,
+    val onCustomVenmoCheckoutUrlPrefixChange: (String) -> Unit,
     val onCustomMerchantIdChange: (String) -> Unit,
     val onCustomBnCodeChange: (String) -> Unit,
     val onSaveClick: () -> Unit,
@@ -61,6 +62,7 @@ fun SettingsView(
             onCustomSdkGraphQLUrlChange = viewModel::updateCustomSdkGraphQLUrl,
             onCustomClientIdChange = viewModel::updateCustomClientId,
             onCustomMerchantBaseUrlChange = viewModel::updateCustomMerchantBaseUrl,
+            onCustomVenmoCheckoutUrlPrefixChange = viewModel::updateCustomVenmoCheckoutUrlPrefix,
             onCustomMerchantIdChange = viewModel::updateCustomMerchantId,
             onCustomBnCodeChange = viewModel::updateCustomBnCode,
             onSaveClick = viewModel::saveConfig,
@@ -69,6 +71,7 @@ fun SettingsView(
     )
 }
 
+@Suppress("LongParameterList")
 @Composable
 private fun SettingsContent(
     uiState: SettingsUiState,
@@ -82,9 +85,12 @@ private fun SettingsContent(
             .padding(horizontal = 16.dp, vertical = 24.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        BnCodeField(
+        SettingsTextField(
+            label = "BN Code",
+            placeholder = "Enter BN Code (optional)",
             value = uiState.settings.customBnCode,
             onValueChange = callbacks.onCustomBnCodeChange,
+            imeAction = ImeAction.Done,
         )
         Spacer(modifier = Modifier.height(8.dp))
         SettingsHeader()
@@ -99,6 +105,7 @@ private fun SettingsContent(
                 onCustomSdkGraphQLUrlChange = callbacks.onCustomSdkGraphQLUrlChange,
                 onCustomMerchantBaseUrlChange = callbacks.onCustomMerchantBaseUrlChange,
                 onCustomClientIdChange = callbacks.onCustomClientIdChange,
+                onCustomVenmoCheckoutUrlPrefixChange = callbacks.onCustomVenmoCheckoutUrlPrefixChange,
                 onCustomMerchantIdChange = callbacks.onCustomMerchantIdChange,
             )
         }
@@ -118,6 +125,7 @@ private fun SettingsContent(
     }
 }
 
+@Suppress("LongParameterList")
 @Composable
 private fun CustomEnvironmentFields(
     uiState: SettingsUiState,
@@ -125,6 +133,7 @@ private fun CustomEnvironmentFields(
     onCustomSdkGraphQLUrlChange: (String) -> Unit,
     onCustomMerchantBaseUrlChange: (String) -> Unit,
     onCustomClientIdChange: (String) -> Unit,
+    onCustomVenmoCheckoutUrlPrefixChange: (String) -> Unit,
     onCustomMerchantIdChange: (String) -> Unit,
 ) {
     UrlField(
@@ -148,37 +157,25 @@ private fun CustomEnvironmentFields(
         onValueChange = onCustomMerchantBaseUrlChange,
         error = uiState.merchantBaseUrlError
     )
-    UrlField(
+    SettingsTextField(
         label = "Client ID",
         placeholder = "Enter PayPal client ID (optional)",
         value = uiState.settings.customClientId,
         onValueChange = onCustomClientIdChange,
     )
-    UrlField(
+    SettingsTextField(
+        label = "Venmo Checkout URL Prefix (Optional)",
+        placeholder = "e.g., qa, staging, ext.live (formats as https://account.\$prefix.venmo.com/go/web/paypal)",
+        value = uiState.settings.customVenmoCheckoutUrlPrefix,
+        onValueChange = onCustomVenmoCheckoutUrlPrefixChange,
+        error = uiState.venmoCheckoutUrlPrefixError
+    )
+    SettingsTextField(
         label = "Merchant ID",
         placeholder = "Enter PayPal merchant ID (optional)",
         value = uiState.settings.customMerchantId,
         onValueChange = onCustomMerchantIdChange,
         imeAction = ImeAction.Done,
-    )
-}
-
-@Composable
-private fun BnCodeField(
-    value: String,
-    onValueChange: (String) -> Unit,
-) {
-    OutlinedTextField(
-        value = value,
-        onValueChange = onValueChange,
-        label = { Text("BN Code") },
-        placeholder = { Text("Enter BN Code (optional)", style = MaterialTheme.typography.bodySmall) },
-        modifier = Modifier.fillMaxWidth(),
-        singleLine = true,
-        keyboardOptions = KeyboardOptions(
-            keyboardType = KeyboardType.Ascii,
-            imeAction = ImeAction.Done
-        )
     )
 }
 
@@ -278,6 +275,31 @@ private fun UrlField(
     )
 }
 
+@Composable
+private fun SettingsTextField(
+    label: String,
+    placeholder: String,
+    value: String,
+    onValueChange: (String) -> Unit,
+    imeAction: ImeAction = ImeAction.Next,
+    error: String? = null,
+) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = { Text(label) },
+        placeholder = { Text(placeholder, style = MaterialTheme.typography.bodySmall) },
+        modifier = Modifier.fillMaxWidth(),
+        singleLine = true,
+        isError = error != null,
+        supportingText = error?.let { msg -> { Text(msg) } },
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Ascii,
+            imeAction = imeAction
+        )
+    )
+}
+
 @Suppress("UnusedPrivateMember")
 @Preview(showBackground = true)
 @Composable
@@ -305,6 +327,7 @@ private fun SettingsViewPreview() {
                     onCustomSdkGraphQLUrlChange = {},
                     onCustomClientIdChange = {},
                     onCustomMerchantBaseUrlChange = {},
+                    onCustomVenmoCheckoutUrlPrefixChange = {},
                     onCustomMerchantIdChange = {},
                     onCustomBnCodeChange = {},
                     onSaveClick = {},

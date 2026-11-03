@@ -286,6 +286,7 @@ class PayPalClient internal constructor(
      */
     fun finishStart(intent: Intent): PayPalFinishStartResult? =
         sessionStore.authState?.let { authState ->
+            analyticsEventParams = analyticsEventParams.copy(url = intent.data?.toString())
             analytics.notify(PayPalEvent.HANDLE_RETURN_STARTED, params = analyticsEventParams)
             val result = payPalLauncher.completeCheckoutAuthRequest(intent, authState)
             logCheckoutResult(result)
@@ -305,6 +306,7 @@ class PayPalClient internal constructor(
      */
     fun finishVault(intent: Intent): PayPalFinishVaultResult? =
         sessionStore.authState?.let { authState ->
+            analyticsEventParams = analyticsEventParams.copy(url = intent.data?.toString())
             analytics.notify(PayPalEvent.HANDLE_RETURN_STARTED, params = analyticsEventParams)
             val result = payPalLauncher.completeVaultAuthRequest(intent, authState)
             logVaultResult(result)
@@ -366,8 +368,8 @@ class PayPalClient internal constructor(
             linkType = returnToAppStrategy.linkType,
         )
         val launchUri = shopperSession.getLaunchUri(token)
+        analyticsEventParams = analyticsEventParams.copy(url = launchUri.toString())
         if (appSwitchEnabled) {
-            analyticsEventParams = analyticsEventParams.copy(appSwitchUrl = launchUri.toString())
             analytics.notify(PayPalEvent.APP_SWITCH_STARTED, params = analyticsEventParams)
         } else {
             analytics.notify(PayPalEvent.AUTH_CHALLENGE_PRESENTATION_STARTED, params = analyticsEventParams)

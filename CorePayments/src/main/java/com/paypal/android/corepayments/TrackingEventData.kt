@@ -67,8 +67,8 @@ internal data class TrackingEventParams(
     val shopperSessionExpirationAt: String? = null,
     @SerialName("matched_authentication_methods")
     val matchedAuthenticationMethods: List<String>? = null,
-    @SerialName("app_switch_url")
-    val appSwitchUrl: String? = null,
+    @SerialName("url")
+    val url: String? = null,
     @SerialName("checkout_fallback_url")
     val fallbackUrl: String? = null,
     @SerialName("error_desc")
@@ -101,6 +101,8 @@ internal data class TrackingEventParams(
     val userAction: String? = null,
     @SerialName("paypal_installed")
     val paypalInstalled: String? = null,
+    @SerialName("venmo_installed")
+    val venmoInstalled: String? = null,
     @SerialName("return_app_url")
     val returnAppUrl: String? = null,
     @SerialName("cancel_app_url")
