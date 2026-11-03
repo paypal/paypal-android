@@ -127,11 +127,14 @@ Follow the same physical-device approach as PayPal App Switch, with two differen
 
 ### Go live
 
+> **Production requirement:** SDK app switch requires Venmo app version 26.26.0 or later.
+
 - [ ] Confirm the `com.paypal.android:venmo` module is included in your SDK dependency.
 - [ ] Show the Venmo button only when your own eligibility logic allows it (the SDK does not check or render it).
 - [ ] Switch `CoreEnvironment.SANDBOX` to `CoreEnvironment.LIVE` and use your live client ID and merchant ID.
 - [ ] Verify the App Link return works in a release build; confirm your order's `return_url`/`cancel_url` share the same host and path prefix as that App Link.
 - [ ] Confirm all `VenmoFinishStartResult` cases (Success, Canceled, Failure, NoResult) are handled.
+- [ ] Confirm buyers have Venmo app version 26.26.0 or later. In production, SDK app switch requires it.
 - [ ] Contact your PayPal account team to enable Venmo for production traffic.
 
 ## Related
