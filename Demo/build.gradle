@@ -3,6 +3,7 @@ import com.github.triplet.gradle.androidpublisher.ReleaseStatus
 plugins {
     alias libs.plugins.android.application
     alias libs.plugins.dagger.hilt
+    alias libs.plugins.firebaseAppDistribution
     alias libs.plugins.gradlePlayPublisher
     alias libs.plugins.kotlinAndroid
     alias libs.plugins.kotlinKapt
@@ -11,6 +12,9 @@ plugins {
 }
 
 def paypalProperties = loadPropertiesFromFile("paypal.properties")
+def firebaseProperties = loadPropertiesFromFile("firebase.properties")
+def firebaseAppId = System.getenv("FIREBASE_APP_ID") ?: firebaseProperties["FIREBASE_APP_ID"]
+def firebaseServiceAccountFile = System.getenv("FIREBASE_SERVICE_ACCOUNT_FILE") ?: firebaseProperties["FIREBASE_SERVICE_ACCOUNT_FILE"]
 
 android {
     namespace 'com.paypal.android'
@@ -50,6 +54,18 @@ android {
     }
 
     buildTypes {
+        debug {
+            firebaseAppDistribution {
+                artifactType = "APK"
+                if (firebaseAppId) {
+                    appId = firebaseAppId
+                }
+                // Without a credentials file, the plugin falls back to `firebase login` / GOOGLE_APPLICATION_CREDENTIALS
+                if (firebaseServiceAccountFile) {
+                    serviceCredentialsFile = firebaseServiceAccountFile
+                }
+            }
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
