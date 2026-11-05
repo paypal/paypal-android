@@ -18,7 +18,7 @@ dependencies {
     // Add the module(s) for the method(s) you integrate:
     implementation 'com.paypal.android:paypal-payments:X.Y.Z'       // PayPal Checkout + Vault
     implementation 'com.paypal.android:payment-buttons:X.Y.Z'       // PayPal buttons
-    // implementation 'com.paypal.android:venmo:X.Y.Z'             // Venmo Checkout
+    // implementation 'com.paypal.android:venmo-payments:X.Y.Z'   // Venmo Checkout
     // implementation 'com.paypal.android:card-payments:X.Y.Z'     // Card (ACDC)
 }
 ```

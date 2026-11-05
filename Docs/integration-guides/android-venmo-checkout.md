@@ -1,4 +1,4 @@
-This guide shows you how to accept a **Venmo payment** (One-Time Checkout) in your Android app with PayPal Mobile SDK V3.2.0. Venmo checkout uses its own client, `VenmoClient`, and returns to your app via the same App Link you registered in Install & Setup. When the buyer taps your Venmo button, checkout opens the Venmo app if it is installed; otherwise it falls back to a Chrome Custom Tab automatically. **Venmo supports One-Time Checkout only** — vault flows are not supported for Venmo.
+This guide shows you how to accept a **Venmo payment** (One-Time Checkout) in your Android app with the Venmo Payments SDK (`venmo-payments`) V3.2.0. Venmo checkout uses its own client, `VenmoClient`, and returns to your app via the same App Link you registered in Install & Setup. When the buyer taps your Venmo button, checkout opens the Venmo app if it is installed; otherwise it falls back to a Chrome Custom Tab automatically. **Venmo supports One-Time Checkout only** — vault flows are not supported for Venmo.
 
 > **Before you start:** complete [Install & Setup (Android)](../getting-started/android-install-and-setup.md).
 
@@ -29,7 +29,7 @@ sequenceDiagram
 
 Complete [Install & Setup (Android)](../getting-started/android-install-and-setup.md). For Venmo specifically:
 
-* Add the `com.paypal.android:venmo` module.
+* Add the `com.paypal.android:venmo-payments` module.
 * In production, SDK app switch requires Venmo app version 26.26.0 or later on the buyer's device.
 * Construct the client from the `CoreConfig` you built in setup:
 
@@ -37,7 +37,11 @@ Complete [Install & Setup (Android)](../getting-started/android-install-and-setu
 val venmoClient = VenmoClient(context, config)
 ```
 
-* Unlike PayPal Checkout, `VenmoClient` doesn't take a `ReturnToAppUrlConfig` or any URL config from the SDK — it never reads `fallbackSchemeUrl` or App Link settings from `CoreConfig`. The URL it opens to switch to Venmo is a fixed, SDK-built checkout URL with no merchant-configurable return path. The buyer's way back to your app instead comes from the `return_url` / `cancel_url` you set per-order, server-side (see below) — as long as those sit under the same host and path prefix as the App Link you registered in Install & Setup, Android's normal App Link routing delivers the buyer back to your activity, and `venmoClient.finishStart(intent)` reads the result straight off the returned URL's query parameters. There is currently no custom-scheme fallback for Venmo — if the App Link isn't verified, there's no documented fallback path back to your app.
+* Return URLs work differently from PayPal Checkout:
+    * `VenmoClient` doesn't take a `ReturnToAppUrlConfig`, and never reads `fallbackSchemeUrl` or App Link settings from `CoreConfig`.
+    * The URL the SDK opens is fixed and SDK-built; it has no merchant-configurable return path.
+    * The buyer's way back comes from the `return_url` / `cancel_url` you set per order, server-side (see below). They can be a custom scheme or a verified HTTPS App Link, as long as your activity handles it.
+    * `venmoClient.finishStart(intent)` reads the result from the returned URL's query parameters.
 
 ## Server: create the order with the Venmo payment source
 
@@ -128,10 +132,10 @@ Follow the same physical-device approach as PayPal App Switch, with two differen
 
 ### Go live
 
-- [ ] Confirm the `com.paypal.android:venmo` module is included in your SDK dependency.
+- [ ] Confirm the `com.paypal.android:venmo-payments` module is included in your SDK dependency.
 - [ ] Show the Venmo button only when your own eligibility logic allows it (the SDK does not check or render it).
 - [ ] Switch `CoreEnvironment.SANDBOX` to `CoreEnvironment.LIVE` and use your live client ID and merchant ID.
-- [ ] Verify the App Link return works in a release build; confirm your order's `return_url`/`cancel_url` share the same host and path prefix as that App Link.
+- [ ] Verify the return works in a release build: confirm your order's `return_url`/`cancel_url` resolve to your activity (a verified App Link, or a custom scheme).
 - [ ] Confirm all `VenmoFinishStartResult` cases (Success, Canceled, Failure, NoResult) are handled.
 - [ ] Contact your PayPal account team to enable Venmo for production traffic.
 
