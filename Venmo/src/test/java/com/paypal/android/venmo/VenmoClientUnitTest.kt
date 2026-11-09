@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.corepayments.PayPalSDKErrorCode
 import com.paypal.android.corepayments.UpdateClientConfigAPI
 import com.paypal.android.corepayments.browserswitch.ChromeCustomTabOptions
 import com.paypal.android.corepayments.browserswitch.ChromeCustomTabsClient
