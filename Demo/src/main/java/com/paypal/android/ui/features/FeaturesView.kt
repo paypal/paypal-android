@@ -41,7 +41,7 @@ private val payPalFeatures = listOf(
     Feature.PAYPAL_VAULT
 )
 
-private val venmoFeatures = listOf(Feature.PAY_WITH_VENMO)
+private val venmoFeatures = listOf(Feature.PAY_WITH_VENMO, Feature.VENMO_VAULT)
 
 @ExperimentalFoundationApi
 @Composable

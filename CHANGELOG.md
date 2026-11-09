@@ -1,5 +1,19 @@
 # PayPal Android SDK Release Notes
 
+## unreleased
+
+* Venmo
+  * Add `VenmoResultCallback` with a single `onVenmoResult(result: VenmoPresentAuthChallengeResult)` method, shared by both `start()` and `vault()`
+  * Renamed `VenmoStartResult` to `VenmoPresentAuthChallengeResult`, shared by both `start()` and `vault()`
+  * Renamed `VenmoStartCallback` to `VenmoResultCallback` (callback method renamed from `onVenmoStartResult` to `onVenmoResult`)
+  * Add `VenmoClient.vault(activity: Activity, setupTokenId: String)` suspend function to vault a Venmo payment method
+  * Add `VenmoClient.vault(activity: Activity, setupTokenId: String, callback: VenmoResultCallback)` callback-based method for Java compatibility
+  * Add `VenmoClient.finishVault(intent: Intent)` to return type-safe results:
+    * `VenmoFinishVaultResult.Success(approvalTokenId: String, approvalSessionId: String?)` for a successful vault approval
+    * `VenmoFinishVaultResult.Canceled` when user cancels the vault flow
+    * `VenmoFinishVaultResult.NoResult` when intent is unrelated to the Venmo vault flow
+    * `VenmoFinishVaultResult.Failure` for errors
+
 ## 3.2.0 (2026-11-03)
 
 * Venmo
