@@ -1,4 +1,4 @@
-This guide shows you how to accept a **Venmo payment** (One-Time Checkout) in your Android app with the Venmo Payments SDK (`venmo-payments`) V3.2.0. Venmo checkout uses its own client, `VenmoClient`, and returns to your app via the same App Link you registered in Install & Setup. When the buyer taps your Venmo button, checkout opens the Venmo app if it is installed; otherwise it falls back to a Chrome Custom Tab automatically. **Venmo supports One-Time Checkout only** — vault flows are not supported for Venmo.
+This guide shows you how to accept a **Venmo payment** (One-Time Checkout) in your Android app with the Venmo Payments SDK (`venmo-payments`) V3.2.0. Venmo checkout uses its own client, `VenmoClient`, and returns to your app via the same App Link you registered in Install & Setup. When the buyer taps your Venmo button, the SDK launches the Venmo checkout URL in a Chrome Custom Tab. If the Venmo app is installed and handles the link, checkout switches to the Venmo app; otherwise it continues in the Custom Tab. **Venmo supports One-Time Checkout only** — vault flows are not supported for Venmo.
 
 > **Before you start:** complete [Install & Setup (Android)](../getting-started/android-install-and-setup.md).
 
@@ -18,12 +18,18 @@ sequenceDiagram
     App->>Server: Create order with payment_source.venmo (Orders v2)
     Server-->>App: orderId
     App->>SDK: venmoClient.start(activity, orderId, callback)
-    SDK->>Venmo: Open Venmo (app if installed, else Chrome Custom Tab)
+    SDK->>Venmo: Launch Venmo checkout URL in a Chrome Custom Tab (switches to the Venmo app if it handles the link)
     Venmo-->>App: Return to your app (App Link)
     App->>SDK: venmoClient.finishStart(intent)
     SDK->>App: VenmoFinishStartResult: Success / Canceled / Failure / NoResult
     App->>Server: Capture order (Orders v2)
 ```
+
+### How the app switch works
+
+`start()` launches the Venmo checkout URL in a Chrome Custom Tab. The SDK does not target the Venmo app directly, and it does not check whether the Venmo app is installed or whether the buyer is eligible. If the Venmo app is installed and handles the link, checkout switches to it; otherwise checkout continues in the Custom Tab. Either way the buyer returns to your app through the order's `return_url` / `cancel_url`.
+
+The URL depends on `CoreConfig`'s environment: `CoreEnvironment.LIVE` uses `account.venmo.com`, and `CoreEnvironment.SANDBOX` uses `account.ext.live.venmo.com`.
 
 ## Before you begin
 
