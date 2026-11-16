@@ -121,7 +121,7 @@ class PayPalClientUnitTest {
             val sutV3 = makeSutWithUrlScheme()
             val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
             every {
-                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any())
+                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
             } returns launchResult
 
             val successResult =
@@ -150,7 +150,7 @@ class PayPalClientUnitTest {
             val restoredClient = makeSutWithUrlScheme()
             val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
             every {
-                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any())
+                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
             } returns launchResult
 
             val successResult =
@@ -179,7 +179,7 @@ class PayPalClientUnitTest {
             val sutV3 = makeSutWithUrlScheme()
             val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
             every {
-                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any())
+                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
             } returns launchResult
 
             val error = PayPalSDKError(123, "fake-error-description")
@@ -208,7 +208,7 @@ class PayPalClientUnitTest {
             val restoredClient = makeSutWithUrlScheme()
             val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
             every {
-                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any())
+                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
             } returns launchResult
 
             val error = PayPalSDKError(123, "fake-error-description")
@@ -237,7 +237,7 @@ class PayPalClientUnitTest {
             val sutV3 = makeSutWithUrlScheme()
             val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
             every {
-                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any())
+                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
             } returns launchResult
 
             val canceledResult = PayPalFinishStartResult.Canceled("fake-order-id")
@@ -265,7 +265,7 @@ class PayPalClientUnitTest {
             val restoredClient = makeSutWithUrlScheme()
             val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
             every {
-                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any())
+                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
             } returns launchResult
 
             val canceledResult = PayPalFinishStartResult.Canceled("fake-order-id")
@@ -293,7 +293,7 @@ class PayPalClientUnitTest {
             val sutV3 = makeSutWithUrlScheme()
             val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
             every {
-                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any())
+                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
             } returns launchResult
 
             val successResult =
@@ -321,7 +321,7 @@ class PayPalClientUnitTest {
             val sutV3 = makeSutWithUrlScheme()
             val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
             every {
-                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any())
+                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
             } returns launchResult
 
             val error = PayPalSDKError(123, "fake-error-description")
@@ -349,7 +349,7 @@ class PayPalClientUnitTest {
             val sutV3 = makeSutWithUrlScheme()
             val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
             every {
-                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any())
+                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
             } returns launchResult
 
             val canceledResult = PayPalFinishStartResult.Canceled("fake-order-id")
@@ -381,7 +381,7 @@ class PayPalClientUnitTest {
             val sutV3 = makeSutWithUrlScheme()
             val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
             every {
-                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any())
+                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
             } returns launchResult
 
             val successResult =
@@ -410,7 +410,7 @@ class PayPalClientUnitTest {
             val restoredClient = makeSutWithUrlScheme()
             val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
             every {
-                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any())
+                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
             } returns launchResult
 
             val successResult =
@@ -439,7 +439,7 @@ class PayPalClientUnitTest {
             val sutV3 = makeSutWithUrlScheme()
             val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
             every {
-                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any())
+                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
             } returns launchResult
 
             val error = PayPalSDKError(123, "fake-error-description")
@@ -467,7 +467,7 @@ class PayPalClientUnitTest {
             val restoredClient = makeSutWithUrlScheme()
             val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
             every {
-                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any())
+                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
             } returns launchResult
 
             val error = PayPalSDKError(123, "fake-error-description")
@@ -495,7 +495,7 @@ class PayPalClientUnitTest {
             val sutV3 = makeSutWithUrlScheme()
             val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
             every {
-                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any())
+                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
             } returns launchResult
 
             every {
@@ -522,7 +522,7 @@ class PayPalClientUnitTest {
             val restoredClient = makeSutWithUrlScheme()
             val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
             every {
-                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any())
+                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
             } returns launchResult
 
             every {
@@ -549,7 +549,7 @@ class PayPalClientUnitTest {
             val sutV3 = makeSutWithUrlScheme()
             val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
             every {
-                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any())
+                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
             } returns launchResult
 
             val successResult =
@@ -577,7 +577,7 @@ class PayPalClientUnitTest {
             val sutV3 = makeSutWithUrlScheme()
             val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
             every {
-                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any())
+                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
             } returns launchResult
 
             val error = PayPalSDKError(123, "fake-error-description")
@@ -604,7 +604,7 @@ class PayPalClientUnitTest {
             val sutV3 = makeSutWithUrlScheme()
             val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
             every {
-                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any())
+                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
             } returns launchResult
 
             every {
@@ -709,7 +709,7 @@ class PayPalClientUnitTest {
         runTest {
             val sutV3 = makeSutWithUrlScheme()
             every {
-                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any())
+                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
             } returns PayPalPresentAuthChallengeResult.Success("auth-state")
 
             // First, complete a full, successful createPayPalSession() + start() cycle, which
@@ -756,7 +756,7 @@ class PayPalClientUnitTest {
     fun `start() with orderId launches checkout when session resolves successfully`() = runTest {
         val sutV3 = makeSutWithUrlScheme()
         val launchResult = PayPalPresentAuthChallengeResult.Success("auth-state")
-        every { payPalLauncher.launchWithUrl(any(), any(), any(), any(), any()) } returns launchResult
+        every { payPalLauncher.launchWithUrl(any(), any(), any(), any(), any(), any()) } returns launchResult
 
         val callback = mockk<PayPalResultCallback>(relaxed = true)
         sutV3.createPayPalSession(
@@ -774,7 +774,8 @@ class PayPalClientUnitTest {
                 uri = any(),
                 token = "fake-order-id",
                 tokenType = TokenType.ORDER_ID,
-                returnToAppStrategy = any()
+                returnToAppStrategy = any(),
+                cancelUrl = any()
             )
         }
         verify { callback.onPayPalResult(launchResult) }
@@ -788,7 +789,7 @@ class PayPalClientUnitTest {
                 getReturnToAppStrategyUseCase(any(), any(), any())
             } returns GetReturnToAppStrategyResult.Success(ReturnToAppStrategy.AppLink(fakeUrlConfig.returnAppUrl))
             every {
-                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any())
+                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
             } returns PayPalPresentAuthChallengeResult.Success("auth-state")
 
             val callback = mockk<PayPalResultCallback>(relaxed = true)
@@ -807,7 +808,8 @@ class PayPalClientUnitTest {
                     uri = any(),
                     token = "fake-order-id",
                     tokenType = TokenType.ORDER_ID,
-                    returnToAppStrategy = ReturnToAppStrategy.AppLink(fakeUrlConfig.returnAppUrl)
+                    returnToAppStrategy = ReturnToAppStrategy.AppLink(fakeUrlConfig.returnAppUrl),
+                    cancelUrl = any()
                 )
             }
             verify {
@@ -828,7 +830,7 @@ class PayPalClientUnitTest {
                 ReturnToAppStrategy.CustomUrlScheme(fakeUrlConfig.fallbackSchemeUrl)
             )
             every {
-                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any())
+                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
             } returns PayPalPresentAuthChallengeResult.Success("auth-state")
 
             val callback = mockk<PayPalResultCallback>(relaxed = true)
@@ -847,7 +849,8 @@ class PayPalClientUnitTest {
                     uri = any(),
                     token = "fake-order-id",
                     tokenType = TokenType.ORDER_ID,
-                    returnToAppStrategy = ReturnToAppStrategy.CustomUrlScheme(fakeUrlConfig.fallbackSchemeUrl)
+                    returnToAppStrategy = ReturnToAppStrategy.CustomUrlScheme(fakeUrlConfig.fallbackSchemeUrl),
+                    cancelUrl = any()
                 )
             }
             verify {
@@ -864,7 +867,7 @@ class PayPalClientUnitTest {
             val sutV3 = makeSutWithUrlScheme()
             val uriSlot = slot<Uri>()
             every {
-                payPalLauncher.launchWithUrl(any(), capture(uriSlot), any(), any(), any())
+                payPalLauncher.launchWithUrl(any(), capture(uriSlot), any(), any(), any(), any())
             } returns PayPalPresentAuthChallengeResult.Success("auth-state")
 
             val callback = mockk<PayPalResultCallback>(relaxed = true)
@@ -886,7 +889,7 @@ class PayPalClientUnitTest {
             val sutV3 = makeSutWithUrlScheme()
             val uriSlot = slot<Uri>()
             every {
-                payPalLauncher.launchWithUrl(any(), capture(uriSlot), any(), any(), any())
+                payPalLauncher.launchWithUrl(any(), capture(uriSlot), any(), any(), any(), any())
             } returns PayPalPresentAuthChallengeResult.Success("auth-state")
 
             val blankIdResponse = fakeSessionResponse.copy(
@@ -917,7 +920,7 @@ class PayPalClientUnitTest {
         val uriSlot = slot<Uri>()
         val beforeMillis = System.currentTimeMillis()
         every {
-            payPalLauncher.launchWithUrl(any(), capture(uriSlot), any(), any(), any())
+            payPalLauncher.launchWithUrl(any(), capture(uriSlot), any(), any(), any(), any())
         } returns PayPalPresentAuthChallengeResult.Success("auth-state")
 
         val callback = mockk<PayPalResultCallback>(relaxed = true)
@@ -993,7 +996,7 @@ class PayPalClientUnitTest {
     fun `start() with orderId clears session deferred so a second call returns SESSION_NOT_CREATED`() =
         runTest {
             val sutV3 = makeSutWithUrlScheme()
-            every { payPalLauncher.launchWithUrl(any(), any(), any(), any(), any()) } returns
+            every { payPalLauncher.launchWithUrl(any(), any(), any(), any(), any(), any()) } returns
                 PayPalPresentAuthChallengeResult.Success("auth-state")
 
             sutV3.createPayPalSession(
@@ -1065,7 +1068,7 @@ class PayPalClientUnitTest {
         runTest {
             val sutV3 = makeSutWithUrlScheme()
             every {
-                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any())
+                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
             } returns PayPalPresentAuthChallengeResult.Success("auth-state")
 
             // First, complete a full, successful createPayPalSession() + vault() cycle, which
@@ -1113,7 +1116,7 @@ class PayPalClientUnitTest {
     fun `vault() with setupTokenId launches vault when session resolves successfully`() = runTest {
         val sutV3 = makeSutWithUrlScheme()
         val launchResult = PayPalPresentAuthChallengeResult.Success("auth-state")
-        every { payPalLauncher.launchWithUrl(any(), any(), any(), any(), any()) } returns launchResult
+        every { payPalLauncher.launchWithUrl(any(), any(), any(), any(), any(), any()) } returns launchResult
 
         val callback = mockk<PayPalResultCallback>(relaxed = true)
         sutV3.createPayPalSession(
@@ -1131,7 +1134,8 @@ class PayPalClientUnitTest {
                 uri = any(),
                 token = "fake-setup-token-id",
                 tokenType = TokenType.VAULT_ID,
-                returnToAppStrategy = any()
+                returnToAppStrategy = any(),
+                cancelUrl = any()
             )
         }
         verify { callback.onPayPalResult(launchResult) }
@@ -1143,7 +1147,7 @@ class PayPalClientUnitTest {
         val uriSlot = slot<Uri>()
         val beforeMillis = System.currentTimeMillis()
         every {
-            payPalLauncher.launchWithUrl(any(), capture(uriSlot), any(), any(), any())
+            payPalLauncher.launchWithUrl(any(), capture(uriSlot), any(), any(), any(), any())
         } returns PayPalPresentAuthChallengeResult.Success("auth-state")
 
         val callback = mockk<PayPalResultCallback>(relaxed = true)
@@ -1367,7 +1371,7 @@ class PayPalClientUnitTest {
     fun `vault() with setupTokenId clears session deferred so a second call returns SESSION_NOT_CREATED`() =
         runTest {
             val sutV3 = makeSutWithUrlScheme()
-            every { payPalLauncher.launchWithUrl(any(), any(), any(), any(), any()) } returns
+            every { payPalLauncher.launchWithUrl(any(), any(), any(), any(), any(), any()) } returns
                 PayPalPresentAuthChallengeResult.Success("auth-state")
 
             sutV3.createPayPalSession(
@@ -1403,7 +1407,7 @@ class PayPalClientUnitTest {
             every { deviceInspector.canResolvePayPalAppSwitch() } returns true
             val uriSlot = slot<Uri>()
             every {
-                payPalLauncher.launchWithUrl(any(), capture(uriSlot), any(), any(), any())
+                payPalLauncher.launchWithUrl(any(), capture(uriSlot), any(), any(), any(), any())
             } returns PayPalPresentAuthChallengeResult.Success("auth-state")
 
             val appSwitchEligibleResponse = fakeSessionResponse.copy(
@@ -1439,7 +1443,7 @@ class PayPalClientUnitTest {
             every { deviceInspector.isPayPalInstalled } returns false
             val uriSlot = slot<Uri>()
             every {
-                payPalLauncher.launchWithUrl(any(), capture(uriSlot), any(), any(), any())
+                payPalLauncher.launchWithUrl(any(), capture(uriSlot), any(), any(), any(), any())
             } returns PayPalPresentAuthChallengeResult.Success("auth-state")
 
             val appSwitchEligibleButNotInstalledResponse = fakeSessionResponse.copy(
@@ -1476,7 +1480,7 @@ class PayPalClientUnitTest {
             every { deviceInspector.canResolvePayPalAppSwitch() } returns true
             val uriSlot = slot<Uri>()
             every {
-                payPalLauncher.launchWithUrl(any(), capture(uriSlot), any(), any(), any())
+                payPalLauncher.launchWithUrl(any(), capture(uriSlot), any(), any(), any(), any())
             } returns PayPalPresentAuthChallengeResult.Success("auth-state")
 
             val appSwitchEligibleResponse = fakeSessionResponse.copy(
@@ -1517,7 +1521,7 @@ class PayPalClientUnitTest {
             every { deviceInspector.canResolvePayPalAppSwitch() } returns true
             val uriSlot = slot<Uri>()
             every {
-                payPalLauncher.launchWithUrl(any(), capture(uriSlot), any(), any(), any())
+                payPalLauncher.launchWithUrl(any(), capture(uriSlot), any(), any(), any(), any())
             } returns PayPalPresentAuthChallengeResult.Success("auth-state")
 
             val appSwitchEligibleResponse = fakeSessionResponse.copy(
@@ -1556,7 +1560,7 @@ class PayPalClientUnitTest {
             val sutV3 = makeSutWithUrlScheme()
             val sdkError = PayPalSDKError(123, "fake error description")
             every {
-                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any())
+                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
             } returns PayPalPresentAuthChallengeResult.Failure(sdkError)
 
             coEvery {
@@ -1615,7 +1619,7 @@ class PayPalClientUnitTest {
             val sutV3 = makeSutWithUrlScheme()
             val sdkError = PayPalSDKError(123, "fake error description")
             every {
-                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any())
+                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
             } returns PayPalPresentAuthChallengeResult.Failure(sdkError)
 
             coEvery {
@@ -1751,7 +1755,7 @@ class PayPalClientUnitTest {
             every { deviceInspector.isPayPalInstalled } returns true
             every { deviceInspector.canResolvePayPalAppSwitch() } returns true
             every {
-                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any())
+                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
             } returns PayPalPresentAuthChallengeResult.Success("auth-state")
 
             val appSwitchEligibleResponse = fakeSessionResponse.copy(
@@ -1794,7 +1798,7 @@ class PayPalClientUnitTest {
             every { deviceInspector.isPayPalInstalled } returns true
             every { deviceInspector.canResolvePayPalAppSwitch() } returns true
             every {
-                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any())
+                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
             } returns PayPalPresentAuthChallengeResult.Success("auth-state")
 
             val appSwitchEligibleResponse = fakeSessionResponse.copy(
@@ -1832,7 +1836,7 @@ class PayPalClientUnitTest {
             val sutV3 = makeSutWithUrlScheme()
             every { deviceInspector.isPayPalInstalled } returns false
             every {
-                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any())
+                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
             } returns PayPalPresentAuthChallengeResult.Success("auth-state")
 
             val callback = mockk<PayPalResultCallback>(relaxed = true)
@@ -1914,7 +1918,7 @@ class PayPalClientUnitTest {
         runTest {
             val sutV3 = makeSutWithUrlScheme()
             every {
-                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any())
+                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
             } returns PayPalPresentAuthChallengeResult.Success("auth state")
 
             // fakeSessionResponse is not app-switch eligible -> browser presentation
@@ -1946,7 +1950,7 @@ class PayPalClientUnitTest {
             every { deviceInspector.isPayPalInstalled } returns true
             every { deviceInspector.canResolvePayPalAppSwitch() } returns true
             every {
-                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any())
+                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
             } returns PayPalPresentAuthChallengeResult.Success("auth state")
 
             val appSwitchEligibleResponse = fakeSessionResponse.copy(
@@ -1980,7 +1984,7 @@ class PayPalClientUnitTest {
             val sutV3 = makeSutWithUrlScheme()
             val sdkError = PayPalSDKError(123, "fake error description")
             every {
-                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any())
+                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
             } returns PayPalPresentAuthChallengeResult.Failure(sdkError)
 
             val callback = mockk<PayPalResultCallback>(relaxed = true)
@@ -2030,7 +2034,7 @@ class PayPalClientUnitTest {
         runTest {
             val sutV3 = makeSutWithUrlScheme()
             every {
-                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any())
+                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
             } returns PayPalPresentAuthChallengeResult.Success("auth state")
 
             val callback = mockk<PayPalResultCallback>(relaxed = true)

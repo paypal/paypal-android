@@ -3,6 +3,7 @@ package com.paypal.android.paypalpayments
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import androidx.core.net.toUri
 import com.paypal.android.corepayments.BrowserSwitchRequestCodes
 import com.paypal.android.corepayments.CaptureDeepLinkResult
 import com.paypal.android.corepayments.DeepLink
@@ -15,6 +16,8 @@ import com.paypal.android.corepayments.captureDeepLink
 import com.paypal.android.corepayments.model.TokenType
 import com.paypal.android.paypalpayments.errors.PayPalError
 import org.json.JSONObject
+
+private const val METADATA_KEY_CANCEL_URL = "cancel_url"
 
 // TODO: consider renaming PayPalLauncher to PayPalAuthChallengeLauncher
 internal class PayPalLauncher(
@@ -36,8 +39,9 @@ internal class PayPalLauncher(
         token: String,
         tokenType: TokenType,
         returnToAppStrategy: ReturnToAppStrategy,
+        cancelUrl: String?,
     ): PayPalPresentAuthChallengeResult {
-        val metadata = getMetadata(token, tokenType)
+        val metadata = getMetadata(token, tokenType, cancelUrl)
         val options = BrowserSwitchOptions(
             targetUri = uri,
             requestCode = getRequestCode(tokenType),
@@ -58,13 +62,15 @@ internal class PayPalLauncher(
 
     private fun getMetadata(
         token: String,
-        tokenType: TokenType
+        tokenType: TokenType,
+        cancelUrl: String?
     ) = JSONObject().apply {
         when (tokenType) {
             TokenType.ORDER_ID -> put(METADATA_KEY_ORDER_ID, token)
             TokenType.VAULT_ID -> put(METADATA_KEY_SETUP_TOKEN_ID, token)
             TokenType.BILLING_TOKEN -> put(METADATA_KEY_SETUP_TOKEN_ID, token)
         }
+        if (!cancelUrl.isNullOrBlank()) put(METADATA_KEY_CANCEL_URL, cancelUrl)
     }
 
     private fun launchBrowserSwitch(
@@ -121,7 +127,7 @@ internal class PayPalLauncher(
         } else {
             val orderId = metadata.optString(METADATA_KEY_ORDER_ID)
             val payerId = deepLink.uri.getQueryParameter("PayerID")
-            val isCancelUrl = deepLink.uri.path?.contains("cancel") ?: false
+            val isCancelUrl = deepLink.isCancelRedirect()
             if (isCancelUrl) {
                 PayPalFinishStartResult.Canceled(orderId)
             } else {
@@ -146,7 +152,7 @@ internal class PayPalLauncher(
         return if (requestMetadata == null) {
             PayPalFinishVaultResult.Failure(PayPalError.unknownError)
         } else {
-            val isCancelUrl = deepLink.uri.path?.contains("cancel") ?: false
+            val isCancelUrl = deepLink.isCancelRedirect()
             if (isCancelUrl) {
                 PayPalFinishVaultResult.Canceled
             } else {
@@ -160,4 +166,9 @@ internal class PayPalLauncher(
             }
         }
     }
+}
+
+private fun DeepLink.isCancelRedirect(): Boolean {
+    val cancelUri = originalOptions.metadata?.optString(METADATA_KEY_CANCEL_URL)?.toUri() ?: return false
+    return uri.buildUpon().clearQuery().build() == cancelUri
 }
