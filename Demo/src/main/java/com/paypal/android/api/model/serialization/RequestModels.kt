@@ -17,3 +17,12 @@ data class Token(
     val id: String,
     val type: String
 )
+
+fun setupTokenPaymentRequest(setupTokenId: String) = TokenRequest(
+    paymentSource = PaymentSource(
+        token = Token(
+            id = setupTokenId,
+            type = "SETUP_TOKEN"
+        )
+    )
+)

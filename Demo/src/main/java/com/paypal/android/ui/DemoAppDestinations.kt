@@ -11,6 +11,7 @@ object DemoAppDestinations {
     const val SELECT_TEST_CARD = "select_test_card"
     const val SETTINGS = "settings"
     const val PAY_WITH_VENMO = "venmo"
+    const val VENMO_VAULT = "venmo_vault"
 
     fun titleForDestination(destination: String?): String = when (destination) {
         CARD_APPROVE_ORDER -> "Card Approve Order"
@@ -23,6 +24,7 @@ object DemoAppDestinations {
         PAYPAL_VAULT -> "Paypal Vault"
         SETTINGS -> "Environment Settings"
         PAY_WITH_VENMO -> "Venmo"
+        VENMO_VAULT -> "Venmo Vault"
         else -> "Demo"
     }
 }
