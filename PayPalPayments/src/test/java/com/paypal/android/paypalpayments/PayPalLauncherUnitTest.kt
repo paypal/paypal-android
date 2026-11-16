@@ -55,7 +55,8 @@ class PayPalLauncherUnitTest {
             Uri.parse("https://www.sandbox.paypal.com/checkoutnow"),
             "fake-order-id",
             TokenType.ORDER_ID,
-            ReturnToAppStrategy.CustomUrlScheme("com.example.app")
+            ReturnToAppStrategy.CustomUrlScheme("com.example.app"),
+            null
         )
 
         val browserSwitchOptions = slot.captured
@@ -81,7 +82,8 @@ class PayPalLauncherUnitTest {
             Uri.parse("https://www.paypal.com/checkoutnow"),
             "fake-order-id",
             TokenType.ORDER_ID,
-            ReturnToAppStrategy.CustomUrlScheme("com.example.app")
+            ReturnToAppStrategy.CustomUrlScheme("com.example.app"),
+            null
         )
 
         val browserSwitchOptions = slot.captured
@@ -107,7 +109,8 @@ class PayPalLauncherUnitTest {
             Uri.parse("https://www.paypal.com/checkoutnow"),
             "fake-order-id",
             TokenType.ORDER_ID,
-            ReturnToAppStrategy.CustomUrlScheme("com.example.app")
+            ReturnToAppStrategy.CustomUrlScheme("com.example.app"),
+            null
         )
 
         val browserSwitchOptions = slot.captured
@@ -133,7 +136,8 @@ class PayPalLauncherUnitTest {
             Uri.parse("https://www.paypal.com/checkoutnow"),
             "fake-order-id",
             TokenType.ORDER_ID,
-            ReturnToAppStrategy.CustomUrlScheme("com.example.app")
+            ReturnToAppStrategy.CustomUrlScheme("com.example.app"),
+            null
         )
 
         val browserSwitchOptions = slot.captured
@@ -159,7 +163,8 @@ class PayPalLauncherUnitTest {
             Uri.parse("https://www.sandbox.paypal.com/checkoutnow"),
             "fake-order-id",
             TokenType.ORDER_ID,
-            ReturnToAppStrategy.CustomUrlScheme("com.example.app")
+            ReturnToAppStrategy.CustomUrlScheme("com.example.app"),
+            null
         )
                 as PayPalPresentAuthChallengeResult.Failure
         assertEquals("error message from browser switch", result.error.errorDescription)
@@ -179,7 +184,8 @@ class PayPalLauncherUnitTest {
             Uri.parse("https://sandbox.paypal.com/agreements/approve"),
             "fake-setup-token",
             TokenType.VAULT_ID,
-            ReturnToAppStrategy.CustomUrlScheme("com.example.app")
+            ReturnToAppStrategy.CustomUrlScheme("com.example.app"),
+            null
         )
 
         val browserSwitchOptions = slot.captured
@@ -205,7 +211,8 @@ class PayPalLauncherUnitTest {
             Uri.parse("https://paypal.com/agreements/approve"),
             "fake-setup-token",
             TokenType.VAULT_ID,
-            ReturnToAppStrategy.CustomUrlScheme("com.example.app")
+            ReturnToAppStrategy.CustomUrlScheme("com.example.app"),
+            null
         )
 
         val browserSwitchOptions = slot.captured
@@ -231,7 +238,8 @@ class PayPalLauncherUnitTest {
             Uri.parse("https://www.sandbox.paypal.com/checkoutnow"),
             "fake-order-id",
             TokenType.ORDER_ID,
-            ReturnToAppStrategy.CustomUrlScheme("com.example.app")
+            ReturnToAppStrategy.CustomUrlScheme("com.example.app"),
+            null
         )
                 as PayPalPresentAuthChallengeResult.Failure
         assertEquals("error message from browser switch", result.error.errorDescription)
@@ -315,13 +323,14 @@ class PayPalLauncherUnitTest {
     }
 
     @Test
-    fun `completeCheckoutAuthRequest() parses cancellation when deep link path contains the word cancel`() {
+    fun `completeCheckoutAuthRequest() parses cancellation when redirect matches the configured cancel url`() {
         val originalOptions = BrowserSwitchOptions(
             targetUri = "https://www.sandbox.paypal.com/checkoutnow".toUri(),
             requestCode = PAYPAL_CHECKOUT,
             returnUrlScheme = "com.example.app",
             appLinkUrl = null,
             metadata = createCheckoutMetadata("fake-order-id")
+                .put("cancel_url", "com.example.app://testurl.com/checkout/cancel")
         )
         val authState = BrowserSwitchPendingState(originalOptions).toBase64EncodedJSON()
         intent.data = "com.example.app://testurl.com/checkout/cancel?PayerID=fake-payer-id".toUri()
@@ -351,13 +360,14 @@ class PayPalLauncherUnitTest {
     }
 
     @Test
-    fun `completeVaultAuthRequest() parses cancellation vault result when deep link path contains the word cancel`() {
+    fun `completeVaultAuthRequest() parses cancellation when redirect matches the configured cancel url`() {
         val originalOptions = BrowserSwitchOptions(
             targetUri = "https://www.sandbox.paypal.com/checkoutnow".toUri(),
             requestCode = PAYPAL_VAULT,
             returnUrlScheme = "com.example.app",
             appLinkUrl = null,
             metadata = createVaultMetadata("fake-setup-token-id")
+                .put("cancel_url", "com.example.app://testurl.com/checkout/cancel")
         )
         val authState = BrowserSwitchPendingState(originalOptions).toBase64EncodedJSON()
         intent.data =
@@ -366,6 +376,42 @@ class PayPalLauncherUnitTest {
         sut = PayPalLauncher(browserSwitchClient)
         val result = sut.completeVaultAuthRequest(intent, authState)
         assertTrue(result is PayPalFinishVaultResult.Canceled)
+    }
+
+    @Test
+    fun `completeVaultAuthRequest() parses cancellation for an app link cancel url without the word cancel`() {
+        val cancelUrl = "https://example.com/paypal-void"
+        val originalOptions = BrowserSwitchOptions(
+            targetUri = "https://www.sandbox.paypal.com/checkoutnow".toUri(),
+            requestCode = PAYPAL_VAULT,
+            returnUrlScheme = null,
+            appLinkUrl = "https://example.com/paypal-return",
+            metadata = createVaultMetadata("fake-setup-token-id").put("cancel_url", cancelUrl)
+        )
+        val authState = BrowserSwitchPendingState(originalOptions).toBase64EncodedJSON()
+        intent.data = "$cancelUrl?approval_session_id=fake-approval-session-id".toUri()
+
+        sut = PayPalLauncher(browserSwitchClient)
+        val result = sut.completeVaultAuthRequest(intent, authState)
+        assertTrue(result is PayPalFinishVaultResult.Canceled)
+    }
+
+    @Test
+    fun `completeVaultAuthRequest() does not treat redirect as cancel when path differs from cancel url`() {
+        val originalOptions = BrowserSwitchOptions(
+            targetUri = "https://www.sandbox.paypal.com/checkoutnow".toUri(),
+            requestCode = PAYPAL_VAULT,
+            returnUrlScheme = null,
+            appLinkUrl = "https://example.com/paypal-return",
+            metadata = createVaultMetadata("fake-setup-token-id")
+                .put("cancel_url", "https://example.com/paypal-void")
+        )
+        val authState = BrowserSwitchPendingState(originalOptions).toBase64EncodedJSON()
+        intent.data = "https://example.com/paypal-return?approval_session_id=fake-approval-session-id".toUri()
+
+        sut = PayPalLauncher(browserSwitchClient)
+        val result = sut.completeVaultAuthRequest(intent, authState)
+        assertTrue(result is PayPalFinishVaultResult.Success)
     }
 
     @Test
@@ -416,7 +462,8 @@ class PayPalLauncherUnitTest {
             Uri.parse("https://paypal.com/app-switch"),
             "order-123",
             TokenType.ORDER_ID,
-            ReturnToAppStrategy.CustomUrlScheme("custom_url_scheme")
+            ReturnToAppStrategy.CustomUrlScheme("custom_url_scheme"),
+            null
         )
 
         val browserSwitchOptions = slot.captured
@@ -442,7 +489,8 @@ class PayPalLauncherUnitTest {
             Uri.parse("https://paypal.com/vault-switch"),
             "setup-456",
             TokenType.VAULT_ID,
-            ReturnToAppStrategy.CustomUrlScheme("custom_url_scheme")
+            ReturnToAppStrategy.CustomUrlScheme("custom_url_scheme"),
+            null
         )
 
         val browserSwitchOptions = slot.captured
@@ -469,7 +517,8 @@ class PayPalLauncherUnitTest {
                 Uri.parse("https://test.com"),
                 "token-123",
                 TokenType.ORDER_ID,
-                ReturnToAppStrategy.CustomUrlScheme("custom_url_scheme")
+                ReturnToAppStrategy.CustomUrlScheme("custom_url_scheme"),
+            null
             )
                     as PayPalPresentAuthChallengeResult.Failure
         assertEquals("error message from browser switch", result.error.errorDescription)
@@ -490,7 +539,8 @@ class PayPalLauncherUnitTest {
             Uri.parse("https://paypal.com/checkout"),
             "order-123",
             TokenType.ORDER_ID,
-            ReturnToAppStrategy.AppLink(appLinkUrl)
+            ReturnToAppStrategy.AppLink(appLinkUrl),
+            null
         )
 
         val browserSwitchOptions = slot.captured
@@ -517,7 +567,8 @@ class PayPalLauncherUnitTest {
             Uri.parse("https://paypal.com/checkout"),
             "order-123",
             TokenType.ORDER_ID,
-            ReturnToAppStrategy.CustomUrlScheme("custom_url_scheme")
+            ReturnToAppStrategy.CustomUrlScheme("custom_url_scheme"),
+            null
         )
 
         val browserSwitchOptions = slot.captured
@@ -545,7 +596,8 @@ class PayPalLauncherUnitTest {
             Uri.parse("https://paypal.com/vault"),
             "setup-456",
             TokenType.VAULT_ID,
-            ReturnToAppStrategy.AppLink(appLinkUrl)
+            ReturnToAppStrategy.AppLink(appLinkUrl),
+            null
         )
 
         val browserSwitchOptions = slot.captured
@@ -573,7 +625,8 @@ class PayPalLauncherUnitTest {
             Uri.parse("https://paypal.com/checkout"),
             "order-123",
             TokenType.ORDER_ID,
-            ReturnToAppStrategy.CustomUrlScheme("custom_url_scheme")
+            ReturnToAppStrategy.CustomUrlScheme("custom_url_scheme"),
+            null
         )
 
         val browserSwitchOptions = slot.captured

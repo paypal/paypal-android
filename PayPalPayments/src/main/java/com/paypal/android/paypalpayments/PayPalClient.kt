@@ -382,6 +382,9 @@ class PayPalClient internal constructor(
             token = token,
             tokenType = tokenType,
             returnToAppStrategy = returnToAppStrategy,
+            cancelUrl = returnToAppUrlConfig?.let {
+                getEffectiveReturnUrlConfigUseCase(it, returnToAppStrategy.linkType).cancelAppUrl
+            },
         )
         logPresentAuthChallengeResult(result, isVault, startTime, endTime)
         return result

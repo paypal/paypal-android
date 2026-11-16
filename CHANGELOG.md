@@ -1,5 +1,10 @@
 # PayPal Android SDK Release Notes
 
+## Unreleased
+
+* PayPalPayments
+  * Fixed cancel detection for PayPal checkout and vault when the merchant's cancel URL path does not contain the word "cancel"; the SDK now matches the redirect against the configured cancel URL
+
 ## 3.2.0 (2026-11-03)
 
 * Venmo
